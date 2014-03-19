@@ -109,7 +109,7 @@ static const struct {
         .testpath = "/nkutils/colour/rgb/percentage",
         .data ={
             .string = "rgb(100%, 50%, 0%)",
-            .generated_string = "rgb(100%,50%,0)",
+            .generated_string = "rgb(255,127,0)",
             .colour = {
                 .red   = 255,
                 .green = 127,
