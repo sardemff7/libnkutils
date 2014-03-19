@@ -1,0 +1,84 @@
+$(srcdir)/@nk_dir@/libnkutils.mk $(srcdir)/@nk_dir@/libnkutils.m4: $(srcdir)/@nk_dir@/libnkutils.mk.in
+	@touch $@
+
+ ifdef AM_XSLTPROCFLAGS
+AM_XSLTPROCFLAGS += \
+	$(NKUTILS_XSLTPROCFLAGS)
+ endif
+
+noinst_@LIBRARY_VARIABLE@LIBRARIES += \
+	@nk_dir@/libnkutils.@library_suffix@a
+
+check_PROGRAMS += \
+	$(_libnkutils_tests)
+
+TESTS += \
+	$(_libnkutils_tests)
+
+EXTRA_DIST += \
+	@nk_dir@/man/libnkutils-man.xml
+
+
+@nk_dir_canon@_libnkutils_@library_suffix@a_SOURCES = \
+	@config_h@
+
+@nk_dir_canon@_libnkutils_@library_suffix@a_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(@GLIB_PREFIX@_CFLAGS)
+
+NKUTILS_CFLAGS = \
+	-I$(srcdir)/@nk_dir@/src
+
+NKUTILS_LIBS = \
+	@nk_dir@/libnkutils.@library_suffix@a
+
+NKUTILS_XSLTPROCFLAGS = \
+	--path "$(srcdir)/@nk_dir@/man/"
+
+NKUTILS_MANFILES = \
+	@nk_dir@/man/libnkutils-man.xml
+
+_libnkutils_tests =
+
+if NK_ENABLE_TOKEN
+@nk_dir_canon@_libnkutils_@library_suffix@a_SOURCES += \
+	@nk_dir@/src/token.c \
+	@nk_dir@/src/nkutils-token.h
+
+_libnkutils_tests += \
+	@nk_dir@/tests/token
+endif
+
+if NK_ENABLE_COLOUR
+@nk_dir_canon@_libnkutils_@library_suffix@a_SOURCES += \
+	@nk_dir@/src/colour.c \
+	@nk_dir@/src/nkutils-colour.h
+
+_libnkutils_tests += \
+	@nk_dir@/tests/colour
+endif
+
+
+#
+# Tests
+#
+
+# token
+@nk_dir_canon@_tests_token_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(NKUTILS_CFLAGS) \
+	$(@GLIB_PREFIX@_CFLAGS)
+
+@nk_dir_canon@_tests_token_LDADD = \
+	$(NKUTILS_LIBS) \
+	$(@GLIB_PREFIX@_LIBS)
+
+# colour
+@nk_dir_canon@_tests_colour_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(NKUTILS_CFLAGS) \
+	$(@GLIB_PREFIX@_CFLAGS)
+
+@nk_dir_canon@_tests_colour_LDADD = \
+	$(NKUTILS_LIBS) \
+	$(@GLIB_PREFIX@_LIBS)
