@@ -33,8 +33,8 @@
 #include "nkutils-token.h"
 
 typedef struct {
-    const gchar *name;
     const gchar *string;
+    const gchar *name;
 } NkToken;
 
 struct _NkTokenList {
@@ -63,13 +63,14 @@ nk_token_list_parse(gchar *string)
             if ( e != NULL )
             {
                 *e = *n = '\0';
+                n += 2;
                 self->size += 2;
-                self->tokens = g_renew(NkToken, self->tokens, self->size + 1);
-                self->tokens[self->size - 2].name = NULL;
+                self->tokens = g_renew(NkToken, self->tokens, self->size);
                 self->tokens[self->size - 2].string = string;
-                self->tokens[self->size - 1].name = n + 2;
-                self->tokens[self->size - 1].string = NULL;
+                self->tokens[self->size - 2].name = NULL;
                 w = string = e + 1;
+                self->tokens[self->size - 1].string = NULL;
+                self->tokens[self->size - 1].name = n;
                 break;
             }
         case '$':
@@ -77,9 +78,9 @@ nk_token_list_parse(gchar *string)
         break;
         }
     }
-    self->tokens = g_renew(NkToken, self->tokens, ++self->size + 1);
-    self->tokens[self->size - 1].name = NULL;
+    self->tokens = g_renew(NkToken, self->tokens, ++self->size);
     self->tokens[self->size - 1].string = string;
+    self->tokens[self->size - 1].name = NULL;
 
     return self;
 }
@@ -108,15 +109,17 @@ nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callba
     gsize i;
     for ( i = 0 ; i < self->size ; ++i )
     {
-        const gchar *data = NULL;
-        gchar *data_ = NULL;
-        if ( self->tokens[i].name != NULL )
-            data = data_ = callback(self->tokens[i].name, user_data);
-        else
-            data = self->tokens[i].string;
+        if ( self->tokens[i].string != NULL )
+        {
+            g_string_append(string, self->tokens[i].string);
+            continue;
+        }
+
+        gchar *data;
+        data = callback(self->tokens[i].name, user_data);
         if ( data != NULL )
             g_string_append(string, data);
-        g_free(data_);
+        g_free(data);
     }
 
     return g_string_free(string, FALSE);
