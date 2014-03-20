@@ -30,6 +30,7 @@ AC_DEFUN([NK_INIT], [
     ])
 
     m4_ifnblank([$3], [NK_ENABLE_MODULES([$3])])
+    m4_define([_NK_DOCBOOK_CONDITIONS_VAR], [$4])
 
     m4_define([GW_INIT])
 ])
@@ -45,6 +46,7 @@ AC_DEFUN([_NK_ENABLE_MODULE], [
     m4_ifnblank(_nk_feature, m4_if(m4_index(_NK_FEATURES, _nk_feature), [-1], [AC_MSG_ERROR([libnkutils: No ]_nk_feature[ in module ]_nk_module)]))
     [_nk_module_]_nk_module[_enable=yes]
     m4_ifnblank(_nk_feature, [
+        m4_ifnblank(_NK_DOCBOOK_CONDITIONS_VAR, _NK_DOCBOOK_CONDITIONS_VAR[="${]_NK_DOCBOOK_CONDITIONS_VAR[};nk_enable_]_nk_module[_]_nk_feature["])
         AC_DEFINE([NK_ENABLE_]m4_translit(m4_toupper(_nk_module), [-], [_])[_]m4_translit(m4_toupper(_nk_feature), [-], [_]), [1], [libnkutils ]_nk_module[ module feature ]_nk_feature)
     ])
 ])

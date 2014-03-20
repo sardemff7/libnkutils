@@ -31,27 +31,27 @@
 
         <para>
             The <type>colour string</type> format is borrowed from the <ulink url="http://www.w3.org/TR/2011/REC-css3-color-20110607/#numerical">CSS3 colour values</ulink>.
-            Hexadecimal (<literal>#</literal>-prefixed) and decimal (<literal>rgb()</literal> format) RGB<phrase condition="nk-colour-alpha">(A)</phrase> notations are supported.
+            Hexadecimal (<literal>#</literal>-prefixed) and decimal (<literal>rgb()</literal> format) RGB<phrase condition="nk_enable_colour_alpha">(A)</phrase> notations are supported.
         </para>
 
         <para>Here is a quick description:</para>
         <variablelist>
             <varlistentry>
-                <term><userinput>#<replaceable>RR</replaceable><replaceable>GG</replaceable><replaceable>BB</replaceable><optional condition="nk-colour-alpha"><replaceable>AA</replaceable></optional></userinput></term>
-                <term><userinput>#<replaceable>R</replaceable><replaceable>G</replaceable><replaceable>B</replaceable><optional condition="nk-colour-alpha"><replaceable>A</replaceable></optional></userinput></term>
+                <term><userinput>#<replaceable>RR</replaceable><replaceable>GG</replaceable><replaceable>BB</replaceable><optional condition="nk_enable_colour_alpha"><replaceable>AA</replaceable></optional></userinput></term>
+                <term><userinput>#<replaceable>R</replaceable><replaceable>G</replaceable><replaceable>B</replaceable><optional condition="nk_enable_colour_alpha"><replaceable>A</replaceable></optional></userinput></term>
                 <listitem>
                     <para>Each value is an hexadecimal value in the <literal>0x00</literal>-<literal>0xff</literal> range.</para>
-                    <para condition="nk-colour-alpha">The alpha value is an extension of the CSS3 notation and is optional.</para>
+                    <para condition="nk_enable_colour_alpha">The alpha value is an extension of the CSS3 notation and is optional.</para>
                     <para>The single-letter version means <emphasis>duplicating</emphasis> the character (e.g. <literal>#123</literal> means <literal>#112233</literal>).</para>
                 </listitem>
             </varlistentry>
 
             <varlistentry>
                 <term><userinput>rgb(<replaceable>red</replaceable>, <replaceable>green</replaceable>, <replaceable>blue</replaceable>)</userinput></term>
-                <term condition="nk-colour-alpha"><userinput>rgba(<replaceable>red</replaceable>, <replaceable>green</replaceable>, <replaceable>blue</replaceable>, <replaceable>alpha</replaceable>)</userinput></term>
+                <term condition="nk_enable_colour_alpha"><userinput>rgba(<replaceable>red</replaceable>, <replaceable>green</replaceable>, <replaceable>blue</replaceable>, <replaceable>alpha</replaceable>)</userinput></term>
                 <listitem>
                     <para>Each colour value can be an integer in the <literal>0</literal>-<literal>255</literal> range or a <type>percentage</type> value.</para>
-                    <para condition="nk-colour-alpha">The alpha value is a <type>floating point</type> value.</para>
+                    <para condition="nk_enable_colour_alpha">The alpha value is a <type>floating point</type> value.</para>
                 </listitem>
             </varlistentry>
         </variablelist>
