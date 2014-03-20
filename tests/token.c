@@ -84,7 +84,7 @@ _nk_token_list_tests_func(gconstpointer user_data)
 
     g_assert_cmpstr(result, ==, data->result);
 
-    nk_token_list_free(token_list);
+    nk_token_list_unref(token_list);
 }
 
 int

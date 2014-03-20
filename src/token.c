@@ -38,6 +38,7 @@ typedef struct {
 } NkToken;
 
 struct _NkTokenList {
+    guint64 ref_count;
     gchar *string;
     gsize size;
     NkToken *tokens;
@@ -51,6 +52,7 @@ nk_token_list_parse(gchar *string)
     NkTokenList *self;
 
     self = g_new0(NkTokenList, 1);
+    self->ref_count = 1;
     self->string = string;
 
     gchar *w = string, *n, *e;
@@ -85,10 +87,20 @@ nk_token_list_parse(gchar *string)
     return self;
 }
 
+NkTokenList *
+nk_token_list_ref(NkTokenList *self)
+{
+    g_return_val_if_fail(self != NULL, NULL);
+    ++self->ref_count;
+    return self;
+}
+
 void
-nk_token_list_free(NkTokenList *self)
+nk_token_list_unref(NkTokenList *self)
 {
     g_return_if_fail(self != NULL);
+    if ( --self->ref_count > 0 )
+        return;
 
     g_free(self->tokens);
 
