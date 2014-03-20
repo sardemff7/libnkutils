@@ -35,6 +35,7 @@
 typedef struct {
     const gchar *string;
     const gchar *name;
+    guint64 value;
 } NkToken;
 
 struct _NkTokenList {
@@ -87,6 +88,45 @@ nk_token_list_parse(gchar *string)
     return self;
 }
 
+#ifdef NK_ENABLE_TOKEN_ENUM
+NkTokenList *
+nk_token_list_parse_enum(gchar *string, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens)
+{
+    g_return_val_if_fail(string != NULL, NULL);
+
+    NkTokenList *self;
+    guint64 used_tokens = 0;
+
+    self = nk_token_list_parse(string);
+
+    gsize i;
+    guint64 j;
+    for ( i = 0 ; i < self->size ; ++i )
+    {
+        if ( self->tokens[i].name == NULL )
+            continue;
+        for ( j = 0 ; j < size ; ++j )
+        {
+            if ( g_strcmp0(self->tokens[i].name, tokens[j]) == 0 )
+                break;
+        }
+        if ( j == size )
+            goto fail;
+        used_tokens |= (1 << j);
+        self->tokens[i].value = j;
+    }
+
+    if ( ret_used_tokens != NULL )
+        *ret_used_tokens = used_tokens;
+
+    return self;
+
+fail:
+    nk_token_list_unref(self);
+    return NULL;
+}
+#endif /* NK_ENABLE_TOKEN_ENUM */
+
 NkTokenList *
 nk_token_list_ref(NkTokenList *self)
 {
@@ -128,7 +168,7 @@ nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callba
         }
 
         const gchar *data;
-        data = callback(self->tokens[i].name, user_data);
+        data = callback(self->tokens[i].name, self->tokens[i].value, user_data);
         if ( data != NULL )
             g_string_append(string, data);
     }

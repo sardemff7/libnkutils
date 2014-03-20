@@ -59,7 +59,7 @@ static const struct {
 };
 
 static const gchar *
-_nk_token_list_tests_callback(const gchar *token, gconstpointer user_data)
+_nk_token_list_tests_callback(const gchar *token, guint64 value, gconstpointer user_data)
 {
     const gchar * const *data;
     for ( data = user_data ; *data != NULL ; data += 2 )
@@ -87,6 +87,66 @@ _nk_token_list_tests_func(gconstpointer user_data)
     nk_token_list_unref(token_list);
 }
 
+#ifdef NK_ENABLE_TOKEN_ENUM
+typedef enum {
+    TOKEN_FRUIT,
+    TOKEN_RECIPE,
+    _TOKEN_SIZE
+} NkTokenListEnumTokens;
+
+static const gchar const * const _nk_token_list_enum_tests_tokens[_TOKEN_SIZE] = {
+    [TOKEN_FRUIT]  = "fruit",
+    [TOKEN_RECIPE] = "recipe",
+};
+
+typedef struct {
+    const gchar *source;
+    const gchar * const data[_TOKEN_SIZE];
+    const gchar *result;
+} NkTokenListEnumTestData;
+
+static const struct {
+    const gchar *testpath;
+    NkTokenListEnumTestData data;
+} _nk_token_list_enum_tests_list[] = {
+    {
+        .testpath = "/nkutils/token/enum/basic",
+        .data = {
+            .source = "You can make ${recipe} with ${fruit}.",
+            .data = {
+                [TOKEN_FRUIT]  = "a banana",
+                [TOKEN_RECIPE] = "a banana split",
+            },
+            .result = "You can make a banana split with a banana."
+        }
+    },
+};
+
+static const gchar *
+_nk_token_list_enum_tests_callback(const gchar *token, guint64 value, gconstpointer user_data)
+{
+    const gchar * const *data = user_data;
+    return data[value];
+}
+
+static void
+_nk_token_list_enum_tests_func(gconstpointer user_data)
+{
+    const NkTokenListEnumTestData *data = user_data;
+
+    NkTokenList *token_list;
+    token_list = nk_token_list_parse_enum(g_strdup(data->source), _nk_token_list_enum_tests_tokens, _TOKEN_SIZE, NULL);
+    g_assert_nonnull(token_list);
+
+    gchar *result;
+    result = nk_token_list_replace(token_list, _nk_token_list_enum_tests_callback, data->data);
+
+    g_assert_cmpstr(result, ==, data->result);
+
+    nk_token_list_unref(token_list);
+}
+#endif /* NK_ENABLE_TOKEN_ENUM */
+
 int
 main(int argc, char *argv[])
 {
@@ -103,6 +163,11 @@ main(int argc, char *argv[])
     gsize i;
     for ( i = 0 ; i < G_N_ELEMENTS(_nk_token_list_tests_list) ; ++i )
         g_test_add_data_func(_nk_token_list_tests_list[i].testpath, &_nk_token_list_tests_list[i].data, _nk_token_list_tests_func);
+
+#ifdef NK_ENABLE_TOKEN_ENUM
+    for ( i = 0 ; i < G_N_ELEMENTS(_nk_token_list_enum_tests_list) ; ++i )
+        g_test_add_data_func(_nk_token_list_enum_tests_list[i].testpath, &_nk_token_list_enum_tests_list[i].data, _nk_token_list_enum_tests_func);
+#endif /* NK_ENABLE_TOKEN_ENUM */
 
     return g_test_run();
 }
