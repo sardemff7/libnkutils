@@ -69,12 +69,17 @@ nk_token_list_parse(gchar *string)
             {
                 *e = *n = '\0';
                 n += 2;
-                self->size += 2;
+                ++self->size;
+                if ( *string != '\0' )
+                    ++self->size;
                 self->tokens = g_renew(NkToken, self->tokens, self->size);
-                self->tokens[self->size - 2].string = string;
-                self->tokens[self->size - 2].before = NULL;
-                self->tokens[self->size - 2].name = NULL;
-                self->tokens[self->size - 2].after = NULL;
+                if ( *string != '\0' )
+                {
+                    self->tokens[self->size - 2].string = string;
+                    self->tokens[self->size - 2].before = NULL;
+                    self->tokens[self->size - 2].name = NULL;
+                    self->tokens[self->size - 2].after = NULL;
+                }
                 w = string = e + 1;
 
                 const gchar *a = NULL, *b = NULL;
