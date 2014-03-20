@@ -43,7 +43,7 @@ typedef struct {
 static const struct {
     const gchar *testpath;
     NkTokenTestData data;
-} _nk_token_tests_list[] = {
+} _nk_token_list_tests_list[] = {
     {
         .testpath = "/nkutils/token/basic",
         .data = {
@@ -59,7 +59,7 @@ static const struct {
 };
 
 static gchar *
-_nk_token_tests_callback(const gchar *token, gconstpointer user_data)
+_nk_token_list_tests_callback(const gchar *token, gconstpointer user_data)
 {
     const gchar * const *data;
     for ( data = user_data ; *data != NULL ; data += 2 )
@@ -71,7 +71,7 @@ _nk_token_tests_callback(const gchar *token, gconstpointer user_data)
 }
 
 static void
-_nk_token_tests_func(gconstpointer user_data)
+_nk_token_list_tests_func(gconstpointer user_data)
 {
     const NkTokenTestData *data = user_data;
 
@@ -80,7 +80,7 @@ _nk_token_tests_func(gconstpointer user_data)
     g_assert_nonnull(token_list);
 
     gchar *result;
-    result = nk_token_list_replace(token_list, _nk_token_tests_callback, data->data);
+    result = nk_token_list_replace(token_list, _nk_token_list_tests_callback, data->data);
 
     g_assert_cmpstr(result, ==, data->result);
 
@@ -101,8 +101,8 @@ main(int argc, char *argv[])
 #endif /* GLIB_CHECK_VERSION(2,38,0) */
 
     gsize i;
-    for ( i = 0 ; i < G_N_ELEMENTS(_nk_token_tests_list) ; ++i )
-        g_test_add_data_func(_nk_token_tests_list[i].testpath, &_nk_token_tests_list[i].data, _nk_token_tests_func);
+    for ( i = 0 ; i < G_N_ELEMENTS(_nk_token_list_tests_list) ; ++i )
+        g_test_add_data_func(_nk_token_list_tests_list[i].testpath, &_nk_token_list_tests_list[i].data, _nk_token_list_tests_func);
 
     return g_test_run();
 }
