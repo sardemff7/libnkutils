@@ -1,6 +1,3 @@
-$(srcdir)/@nk_dir@/libnkutils.mk $(srcdir)/@nk_dir@/libnkutils.m4: $(srcdir)/@nk_dir@/libnkutils.mk.in
-	@touch $@
-
  ifdef AM_XSLTPROCFLAGS
 AM_XSLTPROCFLAGS += \
 	$(NKUTILS_XSLTPROCFLAGS)
