@@ -58,14 +58,14 @@ static const struct {
     },
 };
 
-static gchar *
+static const gchar *
 _nk_token_list_tests_callback(const gchar *token, gconstpointer user_data)
 {
     const gchar * const *data;
     for ( data = user_data ; *data != NULL ; data += 2 )
     {
         if ( g_strcmp0(token, *data) == 0 )
-            return g_strdup(*++data);
+            return *++data;
     }
     return NULL;
 }

@@ -25,7 +25,7 @@
 
 typedef struct _NkTokenList NkTokenList;
 
-typedef gchar *(*NkTokenListReplaceCallback)(const gchar *token, gconstpointer user_data);
+typedef const gchar *(*NkTokenListReplaceCallback)(const gchar *token, gconstpointer user_data);
 
 NkTokenList *nk_token_list_parse(gchar *string);
 NkTokenList *nk_token_list_ref(NkTokenList *token_list);

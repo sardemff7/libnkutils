@@ -127,11 +127,10 @@ nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callba
             continue;
         }
 
-        gchar *data;
+        const gchar *data;
         data = callback(self->tokens[i].name, user_data);
         if ( data != NULL )
             g_string_append(string, data);
-        g_free(data);
     }
 
     return g_string_free(string, FALSE);
