@@ -1,5 +1,5 @@
 m4_define(_NK_MODULES, [token colour])
-m4_define(_NK_FEATURES, [colour/double colour/string])
+m4_define(_NK_FEATURES, [colour/alpha colour/double colour/string])
 
 AC_DEFUN([_NK_MODULE_INIT], [
     _nk_module_[$1]_enable=no

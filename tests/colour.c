@@ -42,6 +42,7 @@ static const struct {
     const gchar *testpath;
     NkColourTestData data;
 } _nk_colour_tests_list[] = {
+#ifdef NK_ENABLE_COLOUR_ALPHA
     {
         .testpath = "/nkutils/colour/hex/8",
         .data ={
@@ -54,6 +55,7 @@ static const struct {
             }
         }
     },
+#endif /* NK_ENABLE_COLOUR_ALPHA */
     {
         .testpath = "/nkutils/colour/hex/6",
         .data ={
@@ -66,6 +68,7 @@ static const struct {
             }
         }
     },
+#ifdef NK_ENABLE_COLOUR_ALPHA
     {
         .testpath = "/nkutils/colour/hex/4",
         .data ={
@@ -79,6 +82,7 @@ static const struct {
             }
         }
     },
+#endif /* NK_ENABLE_COLOUR_ALPHA */
     {
         .testpath = "/nkutils/colour/hex/3",
         .data ={
@@ -118,6 +122,7 @@ static const struct {
             }
         }
     },
+#ifdef NK_ENABLE_COLOUR_ALPHA
     {
         .testpath = "/nkutils/colour/rgba",
         .data ={
@@ -131,6 +136,7 @@ static const struct {
             }
         }
     },
+#endif /* NK_ENABLE_COLOUR_ALPHA */
 };
 
 static void
@@ -175,6 +181,7 @@ static const struct {
     const gchar *testpath;
     NkColourDoubleTestData data;
 } _nk_colour_double_tests_list[] = {
+#ifdef NK_ENABLE_COLOUR_ALPHA
     {
         .testpath = "/nkutils/colour/double/hex/8",
         .data ={
@@ -188,6 +195,7 @@ static const struct {
             }
         }
     },
+#endif /* NK_ENABLE_COLOUR_ALPHA */
     {
         .testpath = "/nkutils/colour/double/hex/6",
         .data ={
@@ -201,6 +209,7 @@ static const struct {
             }
         }
     },
+#ifdef NK_ENABLE_COLOUR_ALPHA
     {
         .testpath = "/nkutils/colour/double/hex/4",
         .data ={
@@ -214,6 +223,7 @@ static const struct {
             }
         }
     },
+#endif /* NK_ENABLE_COLOUR_ALPHA */
     {
         .testpath = "/nkutils/colour/double/hex/3",
         .data ={
@@ -240,6 +250,7 @@ static const struct {
             }
         }
     },
+#ifdef NK_ENABLE_COLOUR_ALPHA
     {
         .testpath = "/nkutils/colour/double/rgba",
         .data ={
@@ -253,6 +264,7 @@ static const struct {
             }
         }
     },
+#endif /* NK_ENABLE_COLOUR_ALPHA */
 };
 
 static void
