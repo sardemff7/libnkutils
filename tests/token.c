@@ -32,7 +32,7 @@
 
 #include <nkutils-token.h>
 
-#define MAX_DATA 2
+#define MAX_DATA 4
 
 typedef struct {
     const gchar *source;
@@ -51,6 +51,32 @@ static const struct {
             .data = {
                 "fruit", "a banana",
                 "recipe", "a banana split",
+                NULL
+            },
+            .result = "You can make a banana split with a banana."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/before-after/with",
+        .data = {
+            .source = "You can make a ${(<adjective>) }${recipe} with ${fruit}${ and <addition}.",
+            .data = {
+                "adjective", "creamy",
+                "fruit", "a banana",
+                "recipe", "banana split",
+                "addition", "some cream",
+                NULL
+            },
+            .result = "You can make a (creamy) banana split with a banana and some cream."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/before-after/without",
+        .data = {
+            .source = "You can make a ${(<adjective>) }${recipe} with ${fruit}${ and <addition}.",
+            .data = {
+                "fruit", "a banana",
+                "recipe", "banana split",
                 NULL
             },
             .result = "You can make a banana split with a banana."

@@ -23,7 +23,43 @@
 -->
 <refentry>
     <refsect2 id="nk-token-reference-description">
-        <para>References use a shell-like format: <userinput>${<replaceable>reference-name</replaceable>}</userinput></para>
+        <para>
+            References use a shell-like format: <userinput>${<replaceable>reference-name</replaceable>}</userinput>.
+            Each reference is resolved to a data that is substitued to the reference at the corresponding place in the string.
+        </para>
+        <para>
+            You can obtain more flexible strings by adding a context to it.
+            A context is composed by two optional strings, one is preceding the data, the other is following it.
+            The syntax is <userinput>${<replaceable>before</replaceable>&lt;<replaceable>name</replaceable>&gt;<replaceable>after</replaceable>}</userinput>.
+            <literal>&lt;</literal> delimits the preceding part, &gt; delimits the following part.
+            If the reference resloves to <literal>nothing</literal>, the context is then ignored.
+        </para>
+        <para>Examples (with data and resolved string):</para>
+        <variablelist>
+            <varlistentry>
+                <term><literal>"${name} is eating a ${fruit}."</literal></term>
+                <listitem>
+                    <para><varname>name</varname> is <literal>"Bob"</literal> and <varname>fruit</varname> is <literal>"pear"</literal>.</para>
+                    <para>Resolves to: <literal>Bob is eating a pear.</literal></para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><literal>"${name} is eating a ${meat}${ with &lt;condiment}."</literal></term>
+                <listitem>
+                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>meat</varname> is <literal>"steak"</literal> and <varname>condiment</varname> is <literal>"mustard"</literal>.</para>
+                    <para>Resolves to: <literal>Bob is eating a steak with mustard.</literal></para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><literal>"${name} is eating a ${meat}${ with &lt;condiment}."</literal></term>
+                <listitem>
+                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>meat</varname> is <literal>"steak"</literal>and <varname>condiment</varname> is <literal>nothing</literal>.</para>
+                    <para>Resolves to: <literal>Bob is eating a steak.</literal></para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
     </refsect2>
 
     <refsect2 id="nk-colour-type-description">

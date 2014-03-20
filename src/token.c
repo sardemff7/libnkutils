@@ -36,6 +36,8 @@ typedef struct {
     const gchar *string;
     const gchar *name;
     guint64 value;
+    const gchar *before;
+    const gchar *after;
 } NkToken;
 
 struct _NkTokenList {
@@ -70,10 +72,30 @@ nk_token_list_parse(gchar *string)
                 self->size += 2;
                 self->tokens = g_renew(NkToken, self->tokens, self->size);
                 self->tokens[self->size - 2].string = string;
+                self->tokens[self->size - 2].before = NULL;
                 self->tokens[self->size - 2].name = NULL;
+                self->tokens[self->size - 2].after = NULL;
                 w = string = e + 1;
+
+                const gchar *a = NULL, *b = NULL;
+                gchar *m;
+                m = g_utf8_strchr(n, -1, '<');
+                if ( m != NULL )
+                {
+                    *m = '\0';
+                    b = n;
+                    n = ++m;
+                }
+                m = g_utf8_strchr(n, -1, '>');
+                if ( m != NULL )
+                {
+                    *m = '\0';
+                    a = ++m;
+                }
                 self->tokens[self->size - 1].string = NULL;
+                self->tokens[self->size - 1].before = b;
                 self->tokens[self->size - 1].name = n;
+                self->tokens[self->size - 1].after = a;
                 break;
             }
         case '$':
@@ -83,7 +105,9 @@ nk_token_list_parse(gchar *string)
     }
     self->tokens = g_renew(NkToken, self->tokens, ++self->size);
     self->tokens[self->size - 1].string = string;
+    self->tokens[self->size - 1].before = NULL;
     self->tokens[self->size - 1].name = NULL;
+    self->tokens[self->size - 1].after = NULL;
 
     return self;
 }
@@ -170,7 +194,13 @@ nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callba
         const gchar *data;
         data = callback(self->tokens[i].name, self->tokens[i].value, user_data);
         if ( data != NULL )
+        {
+            if ( self->tokens[i].before != NULL)
+                g_string_append(string, self->tokens[i].before);
             g_string_append(string, data);
+            if ( self->tokens[i].after != NULL)
+                g_string_append(string, self->tokens[i].after);
+        }
     }
 
     return g_string_free(string, FALSE);
