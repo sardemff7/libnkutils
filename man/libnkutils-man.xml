@@ -32,7 +32,7 @@
             A context is composed by two optional strings, one is preceding the data, the other is following it.
             The syntax is <userinput>${<replaceable>before</replaceable>&lt;<replaceable>name</replaceable>&gt;<replaceable>after</replaceable>}</userinput>.
             <literal>&lt;</literal> delimits the preceding part, &gt; delimits the following part.
-            If the reference resloves to <literal>nothing</literal>, the context is then ignored.
+            If the reference resolves to <literal>nothing</literal>, the context is then ignored.
         </para>
         <para>Examples (with data and resolved string):</para>
         <variablelist>
@@ -78,7 +78,7 @@
                 <listitem>
                     <para>Each value is an hexadecimal value in the <literal>0x00</literal>-<literal>0xff</literal> range.</para>
                     <para condition="nk_enable_colour_alpha">The alpha value is an extension of the CSS3 notation and is optional.</para>
-                    <para>The single-letter version means <emphasis>duplicating</emphasis> the character (e.g. <literal>#123</literal> means <literal>#112233</literal>).</para>
+                    <para>The single-letter version means <emphasis>duplicating</emphasis> the character (e.g. <literal>"#123"</literal> means <literal>"#112233"</literal>).</para>
                 </listitem>
             </varlistentry>
 
