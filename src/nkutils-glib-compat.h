@@ -34,12 +34,13 @@
 
 #if ! GLIB_CHECK_VERSION(2, 38, 0)
 #define g_test_set_nonfatal_assertions() {}
+#define g_assert_true(expr) g_assert(expr)
 
-#define g_assert_null(expr) ((expr) == NULL)
+#define g_assert_null(expr) g_assert_true((expr) == NULL)
 #endif
 
 #if ! GLIB_CHECK_VERSION(2, 40, 0)
-#define g_assert_nonnull(expr) ((expr) != NULL)
+#define g_assert_nonnull(expr) g_assert_true((expr) != NULL)
 #endif
 
 #endif /* __NKUTILS_GLIB_COMPAT_H__ */
