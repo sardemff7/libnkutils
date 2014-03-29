@@ -44,7 +44,7 @@ if NK_ENABLE_TOKEN
 	@nk_dir@/src/nkutils-token.h
 
 _libnkutils_tests += \
-	@nk_dir@/tests/token
+	@nk_dir@/tests/token.test
 endif
 
 if NK_ENABLE_COLOUR
@@ -53,7 +53,7 @@ if NK_ENABLE_COLOUR
 	@nk_dir@/src/nkutils-colour.h
 
 _libnkutils_tests += \
-	@nk_dir@/tests/colour
+	@nk_dir@/tests/colour.test
 endif
 
 
@@ -62,21 +62,21 @@ endif
 #
 
 # token
-@nk_dir_canon@_tests_token_CFLAGS = \
+@nk_dir_canon@_tests_token_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
 	$(@GLIB_PREFIX@_CFLAGS)
 
-@nk_dir_canon@_tests_token_LDADD = \
+@nk_dir_canon@_tests_token_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(@GLIB_PREFIX@_LIBS)
 
 # colour
-@nk_dir_canon@_tests_colour_CFLAGS = \
+@nk_dir_canon@_tests_colour_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
 	$(@GLIB_PREFIX@_CFLAGS)
 
-@nk_dir_canon@_tests_colour_LDADD = \
+@nk_dir_canon@_tests_colour_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(@GLIB_PREFIX@_LIBS)
