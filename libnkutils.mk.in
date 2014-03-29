@@ -21,6 +21,7 @@ EXTRA_DIST += \
 
 @nk_dir_canon@_libnkutils_@library_suffix@a_CFLAGS = \
 	$(AM_CFLAGS) \
+	$(NKUTILS_CFLAGS) \
 	$(@GLIB_PREFIX@_CFLAGS)
 
 NKUTILS_CFLAGS = \
