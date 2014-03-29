@@ -301,15 +301,11 @@ _nk_colour_double_tests_func(gconstpointer user_data)
 int
 main(int argc, char *argv[])
 {
-#if ! GLIB_CHECK_VERSION(2,35,1)
     g_type_init();
-#endif /* ! GLIB_CHECK_VERSION(2,35,1) */
 
     g_test_init(&argc, &argv, NULL);
 
-#if GLIB_CHECK_VERSION(2,38,0)
     g_test_set_nonfatal_assertions();
-#endif /* GLIB_CHECK_VERSION(2,38,0) */
 
     gsize i;
     for ( i = 0 ; i < G_N_ELEMENTS(_nk_colour_tests_list) ; ++i )
