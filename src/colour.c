@@ -29,6 +29,7 @@
 #endif /* HAVE_STRING_H */
 
 #include <glib.h>
+#include <nkutils-glib-compat.h>
 #ifdef NK_ENABLE_COLOUR_STRING
 #include <glib/gprintf.h>
 #endif /* NK_ENABLE_COLOUR_STRING */
