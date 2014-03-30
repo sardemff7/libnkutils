@@ -109,7 +109,9 @@ nk_token_list_parse(gchar *string)
                 break;
             }
         case '$':
-            w = n + 2;
+            ++n;
+        default:
+            w = ++n;
         break;
         }
     }

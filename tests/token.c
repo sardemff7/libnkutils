@@ -58,6 +58,30 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/basic/wrong",
+        .data = {
+            .source = "You can make ${recipe} with $fruit.",
+            .data = {
+                "fruit", "a banana",
+                "recipe", "a banana split",
+                NULL
+            },
+            .result = "You can make a banana split with $fruit."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/wrong/0",
+        .data = {
+            .source = "$fruit is good.",
+            .data = {
+                "fruit", "a banana",
+                "recipe", "a banana split",
+                NULL
+            },
+            .result = "$fruit is good."
+        }
+    },
+    {
         .testpath = "/nkutils/token/basic/before-after/with",
         .data = {
             .source = "You can make a ${(<adjective>) }${recipe} with ${fruit}${ and <addition}.",
