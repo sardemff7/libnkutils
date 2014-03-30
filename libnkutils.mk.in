@@ -38,6 +38,15 @@ NKUTILS_MANFILES = \
 
 _libnkutils_tests =
 
+if NK_ENABLE_ENUM
+@nk_dir_canon@_libnkutils_@library_suffix@a_SOURCES += \
+	@nk_dir@/src/enum.c \
+	@nk_dir@/src/nkutils-enum.h
+
+_libnkutils_tests += \
+	@nk_dir@/tests/enum.test
+endif
+
 if NK_ENABLE_TOKEN
 @nk_dir_canon@_libnkutils_@library_suffix@a_SOURCES += \
 	@nk_dir@/src/token.c \
@@ -60,6 +69,16 @@ endif
 #
 # Tests
 #
+
+# enum
+@nk_dir_canon@_tests_enum_test_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(NKUTILS_CFLAGS) \
+	$(@GLIB_PREFIX@_CFLAGS)
+
+@nk_dir_canon@_tests_enum_test_LDADD = \
+	$(NKUTILS_LIBS) \
+	$(@GLIB_PREFIX@_LIBS)
 
 # token
 @nk_dir_canon@_tests_token_test_CFLAGS = \

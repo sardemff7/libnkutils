@@ -31,6 +31,10 @@
 #include <glib.h>
 #include <nkutils-glib-compat.h>
 
+#ifdef NK_ENABLE_TOKEN_ENUM
+#include "nkutils-enum.h"
+#endif /* NK_ENABLE_TOKEN_ENUM */
+
 #include "nkutils-token.h"
 
 typedef struct {
@@ -130,20 +134,13 @@ nk_token_list_parse_enum(gchar *string, const gchar * const *tokens, guint64 siz
     self = nk_token_list_parse(string);
 
     gsize i;
-    guint64 j;
     for ( i = 0 ; i < self->size ; ++i )
     {
         if ( self->tokens[i].name == NULL )
             continue;
-        for ( j = 0 ; j < size ; ++j )
-        {
-            if ( g_strcmp0(self->tokens[i].name, tokens[j]) == 0 )
-                break;
-        }
-        if ( j == size )
+        if ( ! nk_enum_parse(self->tokens[i].name, tokens, size, FALSE, &self->tokens[i].value) )
             goto fail;
-        used_tokens |= (1 << j);
-        self->tokens[i].value = j;
+        used_tokens |= (1 << self->tokens[i].value);
     }
 
     if ( ret_used_tokens != NULL )

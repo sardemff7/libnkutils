@@ -1,12 +1,17 @@
-m4_define(_NK_MODULES, [token colour])
+m4_define(_NK_MODULES, [enum token colour])
 m4_define(_NK_FEATURES, [token/enum colour/alpha colour/double colour/string])
+
+# auto-enable
+m4_define(_nk_dependent_enum, [token/enum])
 
 AC_DEFUN([_NK_MODULE_INIT], [
     _nk_module_[$1]_enable=no
 ])
 
+AC_DEFUN([_NK_MODULE_CHECK_DEPENDENT], [m4_ifdef([$1], m4_map_args_w($1, [[ -o "x$_nk_module_]m4_translit(], [, [/-], [__])[_enable]" = xyes]))])
+
 AC_DEFUN([_NK_MODULE_CHECK], [
-    AM_CONDITIONAL([NK_ENABLE_]m4_toupper([$1]), [test "x$_nk_module_[$1]_enable" = xyes])
+    AM_CONDITIONAL([NK_ENABLE_]m4_toupper([$1]), [test "x$_nk_module_[$1]_enable" = xyes]_NK_MODULE_CHECK_DEPENDENT([_nk_dependent_][$1]))
 ])
 
 AC_DEFUN([NK_INIT], [
@@ -46,8 +51,9 @@ AC_DEFUN([_NK_ENABLE_MODULE], [
     m4_ifnblank(_nk_feature, m4_if(m4_index(_NK_FEATURES, _nk_feature), [-1], [AC_MSG_ERROR([libnkutils: No ]_nk_feature[ in module ]_nk_module)]))
     [_nk_module_]_nk_module[_enable=yes]
     m4_ifnblank(_nk_feature, [
+        [_nk_module_]_nk_module[_]m4_translit(_nk_feature, [-], [_])[_enable=yes]
         m4_ifnblank(_NK_DOCBOOK_CONDITIONS_VAR, _NK_DOCBOOK_CONDITIONS_VAR[="${]_NK_DOCBOOK_CONDITIONS_VAR[};nk_enable_]_nk_module[_]_nk_feature["])
-        AC_DEFINE([NK_ENABLE_]m4_translit(m4_toupper(_nk_module), [-], [_])[_]m4_translit(m4_toupper(_nk_feature), [-], [_]), [1], [libnkutils ]_nk_module[ module feature ]_nk_feature)
+        AC_DEFINE([NK_ENABLE_]m4_toupper(_nk_module)[_]m4_translit(m4_toupper(_nk_feature), [-], [_]), [1], [libnkutils ]_nk_module[ module feature ]_nk_feature)
     ])
 ])
 
