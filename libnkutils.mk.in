@@ -21,14 +21,15 @@ EXTRA_DIST += \
 
 @nk_dir_canon@_libnkutils_@library_suffix@a_CFLAGS = \
 	$(AM_CFLAGS) \
-	$(NKUTILS_CFLAGS) \
-	$(@GLIB_PREFIX@_CFLAGS)
+	$(NKUTILS_CFLAGS)
 
 NKUTILS_CFLAGS = \
-	-I$(srcdir)/@nk_dir@/src
+	-I$(srcdir)/@nk_dir@/src \
+	$(_NKUTILS_INTERNAL_GLIB_CFLAGS)
 
 NKUTILS_LIBS = \
-	@nk_dir@/libnkutils.@library_suffix@a
+	@nk_dir@/libnkutils.@library_suffix@a \
+	$(_NKUTILS_INTERNAL_GLIB_LIBS)
 
 NKUTILS_XSLTPROCFLAGS = \
 	--path "$(srcdir)/@nk_dir@/man/"
@@ -74,28 +75,28 @@ endif
 @nk_dir_canon@_tests_enum_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
-	$(@GLIB_PREFIX@_CFLAGS)
+	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
 
 @nk_dir_canon@_tests_enum_test_LDADD = \
 	$(NKUTILS_LIBS) \
-	$(@GLIB_PREFIX@_LIBS)
+	$(_NKUTILS_INTERNAL_TEST_LIBS)
 
 # token
 @nk_dir_canon@_tests_token_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
-	$(@GLIB_PREFIX@_CFLAGS)
+	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
 
 @nk_dir_canon@_tests_token_test_LDADD = \
 	$(NKUTILS_LIBS) \
-	$(@GLIB_PREFIX@_LIBS)
+	$(_NKUTILS_INTERNAL_TEST_LIBS)
 
 # colour
 @nk_dir_canon@_tests_colour_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
-	$(@GLIB_PREFIX@_CFLAGS)
+	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
 
 @nk_dir_canon@_tests_colour_test_LDADD = \
 	$(NKUTILS_LIBS) \
-	$(@GLIB_PREFIX@_LIBS)
+	$(_NKUTILS_INTERNAL_TEST_LIBS)
