@@ -29,7 +29,6 @@
 #endif /* HAVE_STRING_H */
 
 #include <glib.h>
-#include <nkutils-glib-compat.h>
 
 #ifdef NK_ENABLE_TOKEN_ENUM
 #include "nkutils-enum.h"

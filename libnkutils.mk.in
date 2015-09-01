@@ -17,7 +17,6 @@ EXTRA_DIST += \
 
 
 @nk_dir_canon@_libnkutils_@library_suffix@a_SOURCES = \
-	@nk_dir@/src/nkutils-glib-compat.h \
 	@config_h@
 
 @nk_dir_canon@_libnkutils_@library_suffix@a_CFLAGS = \
@@ -74,7 +73,6 @@ endif
 
 # enum
 @nk_dir_canon@_tests_enum_test_SOURCES = \
-	@nk_dir@/src/nkutils-glib-compat.h \
 	@nk_dir@/tests/enum.c
 
 @nk_dir_canon@_tests_enum_test_CFLAGS = \
@@ -88,7 +86,6 @@ endif
 
 # token
 @nk_dir_canon@_tests_token_test_SOURCES = \
-	@nk_dir@/src/nkutils-glib-compat.h \
 	@nk_dir@/tests/token.c
 
 @nk_dir_canon@_tests_token_test_CFLAGS = \
@@ -102,7 +99,6 @@ endif
 
 # colour
 @nk_dir_canon@_tests_colour_test_SOURCES = \
-	@nk_dir@/src/nkutils-glib-compat.h \
 	@nk_dir@/tests/colour.c
 
 @nk_dir_canon@_tests_colour_test_CFLAGS = \

@@ -1,6 +1,8 @@
 m4_define(_NK_MODULES, [enum token colour])
 m4_define(_NK_FEATURES, [token/enum colour/alpha colour/double colour/string])
 
+m4_define(_nk_glib_min_version, [2.40])
+
 # auto-enable
 m4_define(_nk_dependent_enum, [token/enum])
 
@@ -31,7 +33,7 @@ AC_DEFUN([NK_INIT], [
 
     m4_map_args_w(_NK_MODULES, [_NK_MODULE_INIT(], [)])
     AC_CONFIG_COMMANDS_PRE([
-        PKG_CHECK_MODULES([_NKUTILS_INTERNAL_GLIB], [glib-2.0])
+        PKG_CHECK_MODULES([_NKUTILS_INTERNAL_GLIB], [glib-2.0 >= _nk_glib_min_version])
         PKG_CHECK_MODULES([_NKUTILS_INTERNAL_TEST], [gobject-2.0])
         m4_map_args_w(_NK_MODULES, [_NK_MODULE_CHECK(], [)])
     ])

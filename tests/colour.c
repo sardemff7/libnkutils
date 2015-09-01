@@ -29,7 +29,6 @@
 #endif /* HAVE_STRING_H */
 
 #include <glib.h>
-#include <nkutils-glib-compat.h>
 
 #include <nkutils-colour.h>
 
@@ -302,8 +301,6 @@ _nk_colour_double_tests_func(gconstpointer user_data)
 int
 main(int argc, char *argv[])
 {
-    g_type_init();
-
     g_test_init(&argc, &argv, NULL);
 
     g_test_set_nonfatal_assertions();

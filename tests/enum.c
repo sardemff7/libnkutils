@@ -25,7 +25,6 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <glib.h>
-#include <nkutils-glib-compat.h>
 
 #include <nkutils-enum.h>
 
@@ -98,8 +97,6 @@ _nk_enum_tests_func(gconstpointer user_data)
 int
 main(int argc, char *argv[])
 {
-    g_type_init();
-
     g_test_init(&argc, &argv, NULL);
 
     g_test_set_nonfatal_assertions();

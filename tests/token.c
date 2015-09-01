@@ -29,7 +29,6 @@
 #endif /* HAVE_STRING_H */
 
 #include <glib.h>
-#include <nkutils-glib-compat.h>
 
 #include <nkutils-token.h>
 
@@ -201,8 +200,6 @@ _nk_token_list_enum_tests_func(gconstpointer user_data)
 int
 main(int argc, char *argv[])
 {
-    g_type_init();
-
     g_test_init(&argc, &argv, NULL);
 
     g_test_set_nonfatal_assertions();
