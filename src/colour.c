@@ -172,35 +172,37 @@ nk_colour_double_parse(const gchar *string, NkColourDouble *colour)
 
 #ifdef NK_ENABLE_COLOUR_STRING
 
+#define HEX_COLOUR_MAXLEN 10 /* strlen("#rrggbbaa") + 1 */
 const gchar *
 nk_colour_to_hex(const NkColour *colour)
 {
-    static gchar string[10]; /* strlen("#rrggbbaa") + 1 */
+    static gchar string[HEX_COLOUR_MAXLEN];
 #ifdef NK_ENABLE_COLOUR_ALPHA
     if ( colour->alpha != 0xff )
-        g_sprintf(string, "#%02x%02x%02x%02x", colour->red, colour->green, colour->blue, colour->alpha);
+        g_snprintf(string, HEX_COLOUR_MAXLEN, "#%02x%02x%02x%02x", colour->red, colour->green, colour->blue, colour->alpha);
     else
 #endif /* NK_ENABLE_COLOUR_ALPHA */
-        g_sprintf(string, "#%02x%02x%02x", colour->red, colour->green, colour->blue);
+        g_snprintf(string, HEX_COLOUR_MAXLEN, "#%02x%02x%02x", colour->red, colour->green, colour->blue);
     return string;
 }
 
 static inline void
-_nk_colour_to_rgba_internal(gchar *string, guint8 red, guint8 green, guint8 blue, gint alpha_precision, gdouble alpha)
+_nk_colour_to_rgba_internal(gchar *string, gulong n, guint8 red, guint8 green, guint8 blue, gint alpha_precision, gdouble alpha)
 {
 #ifdef NK_ENABLE_COLOUR_ALPHA
     if ( alpha != 1.0 )
-        g_sprintf(string, "rgba(%u,%u,%u,%.*lf)", red, green, blue, alpha_precision, alpha);
+        g_snprintf(string, n, "rgba(%u,%u,%u,%.*lf)", red, green, blue, alpha_precision, alpha);
     else
 #endif /* NK_ENABLE_COLOUR_ALPHA */
-        g_sprintf(string, "rgb(%u,%u,%u)", red, green, blue);
+        g_snprintf(string, n, "rgb(%u,%u,%u)", red, green, blue);
 }
 
+#define COLOUR_RGBA_MAXLEN 24 /* strlen("rgba(255,255,255,0.000)") + 1 */
 const gchar *
 nk_colour_to_rgba(const NkColour *colour)
 {
-    static gchar string[24]; /* strlen("rgba(255,255,255,0.000)") + 1 */
-    _nk_colour_to_rgba_internal(string, colour->red, colour->green, colour->blue, 3, (gdouble)colour->alpha / 255.);
+    static gchar string[COLOUR_RGBA_MAXLEN]; /* strlen("rgba(255,255,255,0.000)") + 1 */
+    _nk_colour_to_rgba_internal(string, COLOUR_RGBA_MAXLEN, colour->red, colour->green, colour->blue, 3, (gdouble)colour->alpha / 255.);
     return string;
 }
 
@@ -217,11 +219,12 @@ nk_colour_double_to_hex(const NkColourDouble *colour)
     return nk_colour_to_hex(&colour_);
 }
 
+#define COLOUR_DOUBLE_RGBA_MAXLEN 31 /* strlen("rgba(255,255,255,0.0000000000)") + 1 */
 const gchar *
 nk_colour_double_to_rgba(const NkColourDouble *colour)
 {
-    static gchar string[31]; /* strlen("rgba(255,255,255,0.0000000000)") + 1 */
-    _nk_colour_to_rgba_internal(string, colour->red * 255, colour->green * 255, colour->blue * 255, 10, colour->alpha);
+    static gchar string[COLOUR_DOUBLE_RGBA_MAXLEN]; /* strlen("rgba(255,255,255,0.0000000000)") + 1 */
+    _nk_colour_to_rgba_internal(string, COLOUR_DOUBLE_RGBA_MAXLEN, colour->red * 255, colour->green * 255, colour->blue * 255, 10, colour->alpha);
     return string;
 }
 #endif /* NK_ENABLE_COLOUR_DOUBLE */
