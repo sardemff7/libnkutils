@@ -27,8 +27,11 @@ AM_XSLTPROCFLAGS += \
 	$(NKUTILS_XSLTPROCFLAGS)
  endif
 
-noinst_@LIBRARY_VARIABLE@LIBRARIES += \
+_libnkutils_library = \
 	@nk_dir@/libnkutils.@library_suffix@a
+
+noinst_@LIBRARY_VARIABLE@LIBRARIES += \
+	$(_libnkutils_library)
 
 check_PROGRAMS += \
 	$(_libnkutils_tests)
@@ -52,7 +55,7 @@ NKUTILS_CFLAGS = \
 	$(_NKUTILS_INTERNAL_GLIB_CFLAGS)
 
 NKUTILS_LIBS = \
-	@nk_dir@/libnkutils.@library_suffix@a \
+	$(_libnkutils_library)
 	$(_NKUTILS_INTERNAL_GLIB_LIBS)
 
 NKUTILS_XSLTPROCFLAGS = \
