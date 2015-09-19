@@ -41,7 +41,8 @@ EXTRA_DIST += \
 
 
 @nk_dir_canon@_libnkutils_@library_suffix@a_SOURCES = \
-	@config_h@
+	@config_h@ \
+	$(_libnkutils_sources)
 
 @nk_dir_canon@_libnkutils_@library_suffix@a_CFLAGS = \
 	$(AM_CFLAGS) \
@@ -61,10 +62,11 @@ NKUTILS_XSLTPROCFLAGS = \
 NKUTILS_MANFILES = \
 	@nk_dir@/man/libnkutils-man.xml
 
+_libnkutils_sources =
 _libnkutils_tests =
 
 if NK_ENABLE_ENUM
-@nk_dir_canon@_libnkutils_@library_suffix@a_SOURCES += \
+_libnkutils_sources += \
 	@nk_dir@/src/enum.c \
 	@nk_dir@/src/nkutils-enum.h
 
@@ -73,7 +75,7 @@ _libnkutils_tests += \
 endif
 
 if NK_ENABLE_TOKEN
-@nk_dir_canon@_libnkutils_@library_suffix@a_SOURCES += \
+_libnkutils_sources += \
 	@nk_dir@/src/token.c \
 	@nk_dir@/src/nkutils-token.h
 
@@ -82,7 +84,7 @@ _libnkutils_tests += \
 endif
 
 if NK_ENABLE_COLOUR
-@nk_dir_canon@_libnkutils_@library_suffix@a_SOURCES += \
+_libnkutils_sources += \
 	@nk_dir@/src/colour.c \
 	@nk_dir@/src/nkutils-colour.h
 
