@@ -41,7 +41,6 @@ EXTRA_DIST += \
 
 
 @nk_dir_canon@_libnkutils_@library_suffix@a_SOURCES = \
-	@config_h@ \
 	$(_libnkutils_sources)
 
 @nk_dir_canon@_libnkutils_@library_suffix@a_CFLAGS = \

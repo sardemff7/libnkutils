@@ -63,7 +63,6 @@ AC_DEFUN([_NK_INIT_INTERNAL], [
         [-e 's:@nk_dir_canon@:][$2][:g']dnl
         [-e 's:@library_suffix@:][$3][:g']dnl
         [-e 's:@LIBRARY_VARIABLE@:][$4][:g']dnl
-        [-e 's:@config_h@:]m4_default(AH_HEADER, [$(null)])[:g']dnl
         [$1][/libnkutils.mk.in > ][$1][/libnkutils.mk]
     )
 
