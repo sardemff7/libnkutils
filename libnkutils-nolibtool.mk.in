@@ -23,10 +23,10 @@
 #
 
 _libnkutils_library = \
-	@nk_dir@/libnkutils.la
+	@nk_dir@/libnkutils.a
 
-noinst_LTLIBRARIES += \
+noinst_LIBRARIES += \
 	$(_libnkutils_library)
 
-@nk_dir_canon@_libnkutils_la_SOURCES = \
+@nk_dir_canon@_libnkutils_a_SOURCES = \
 	$(_libnkutils_sources)

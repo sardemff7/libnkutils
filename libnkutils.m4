@@ -54,16 +54,14 @@ m4_define([_nk_dependent_enum], [token/enum])
 
 
 AC_DEFUN([_NK_INIT], [
-    _NK_INIT_INTERNAL([$1], m4_translit([$1], [/+-], [___]), m4_ifdef([LT_INIT], [l]), m4_ifdef([LT_INIT], [LT]))
+    _NK_INIT_INTERNAL([$1], m4_translit([$1], [/+-], [___]), m4_ifndef([LT_INIT], [-nonlibtool]))
 ])
 
 AC_DEFUN([_NK_INIT_INTERNAL], [
     m4_syscmd([sed ]dnl
         [-e 's:@nk_dir@:][$1][:g']dnl
         [-e 's:@nk_dir_canon@:][$2][:g']dnl
-        [-e 's:@library_suffix@:][$3][:g']dnl
-        [-e 's:@LIBRARY_VARIABLE@:][$4][:g']dnl
-        [$1][/libnkutils.mk.in > ][$1][/libnkutils.mk]
+        [$1][/libnkutils][$3][.mk.in ][$1][/libnkutils-common.mk.in > ][$1][/libnkutils.mk]
     )
 
     nk_glib_min_version="2.40"
