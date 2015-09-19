@@ -42,9 +42,15 @@ EXTRA_DIST += \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS)
 
+%C%_libnkutils_la_LIBADD = \
+	$(_NKUTILS_INTERNAL_GLIB_LIBS)
+
 %C%_libnkutils_a_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS)
+
+%C%_libnkutils_a_LIBADD = \
+	$(_NKUTILS_INTERNAL_GLIB_LIBS)
 
 
 NKUTILS_CFLAGS = \
