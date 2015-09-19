@@ -23,18 +23,25 @@ dnl THE SOFTWARE.
 dnl
 
 
-# NK_INIT([directory], [modules], [docbook-conditions-variable])
-#     directory                     Where to find libnkutils (defaults to 'libnkutils')
+# NK_INIT([modules], [docbook-conditions-variable])
 #     modules                       A list of modules to enable (shorthand for NK_ENABLE_MODULES)
 #     docbook-conditions-variable   Variable to append to for DocBook conditions
 AC_DEFUN([NK_INIT], [
     AC_REQUIRE([AC_HEADER_STDC])
     AC_REQUIRE([PKG_PROG_PKG_CONFIG])
 
-    _NK_INIT(m4_default([$1], [libnkutils]))
+    nk_glib_min_version="2.40"
 
-    m4_define([_NK_DOCBOOK_CONDITIONS_VAR], [$3])
-    m4_ifnblank([$2], [NK_ENABLE_MODULES([$2])])
+    m4_map_args_w(_NK_MODULES, [_NK_MODULE_INIT(], [)])
+    AC_CONFIG_COMMANDS_PRE([
+        AS_IF([test x${ac_cv_header_string_h} != xyes], [AC_MSG_ERROR([libnkutils: string.h is required])])
+        PKG_CHECK_MODULES([_NKUTILS_INTERNAL_GLIB], [glib-2.0 >= ${nk_glib_min_version}])
+        PKG_CHECK_MODULES([_NKUTILS_INTERNAL_TEST], [gobject-2.0])
+        m4_map_args_w(_NK_MODULES, [_NK_MODULE_CHECK(], [)])
+    ])
+
+    m4_define([_NK_DOCBOOK_CONDITIONS_VAR], [$2])
+    m4_ifnblank([$1], [NK_ENABLE_MODULES([$1])])
 
     m4_define([NK_INIT])
 ])
@@ -53,27 +60,6 @@ m4_define([_NK_FEATURES], [token/enum colour/alpha colour/double colour/string])
 m4_define([_nk_dependent_enum], [token/enum])
 
 
-AC_DEFUN([_NK_INIT], [
-    _NK_INIT_INTERNAL([$1], m4_translit([$1], [/+-], [___]), m4_ifndef([LT_INIT], [-nonlibtool]))
-])
-
-AC_DEFUN([_NK_INIT_INTERNAL], [
-    m4_syscmd([sed ]dnl
-        [-e 's:@nk_dir@:][$1][:g']dnl
-        [-e 's:@nk_dir_canon@:][$2][:g']dnl
-        [$1][/libnkutils][$3][.mk.in ][$1][/libnkutils-common.mk.in > ][$1][/libnkutils.mk]
-    )
-
-    nk_glib_min_version="2.40"
-
-    m4_map_args_w(_NK_MODULES, [_NK_MODULE_INIT(], [)])
-    AC_CONFIG_COMMANDS_PRE([
-        AS_IF([test x${ac_cv_header_string_h} != xyes], [AC_MSG_ERROR([libnkutils: string.h is required])])
-        PKG_CHECK_MODULES([_NKUTILS_INTERNAL_GLIB], [glib-2.0 >= ${nk_glib_min_version}])
-        PKG_CHECK_MODULES([_NKUTILS_INTERNAL_TEST], [gobject-2.0])
-        m4_map_args_w(_NK_MODULES, [_NK_MODULE_CHECK(], [)])
-    ])
-])
 
 AC_DEFUN([_NK_MODULE_INIT], [
     nk_module_[$1]_enable=no

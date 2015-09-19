@@ -35,20 +35,20 @@ TESTS += \
 	$(_libnkutils_tests)
 
 EXTRA_DIST += \
-	@nk_dir@/man/libnkutils-man.xml
+	%D%/man/libnkutils-man.xml
 
 
-@nk_dir_canon@_libnkutils_la_CFLAGS = \
+%C%_libnkutils_la_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS)
 
-@nk_dir_canon@_libnkutils_a_CFLAGS = \
+%C%_libnkutils_a_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS)
 
 
 NKUTILS_CFLAGS = \
-	-I$(srcdir)/@nk_dir@/src \
+	-I$(srcdir)/%D%/src \
 	$(_NKUTILS_INTERNAL_GLIB_CFLAGS)
 
 NKUTILS_LIBS = \
@@ -56,10 +56,10 @@ NKUTILS_LIBS = \
 	$(_NKUTILS_INTERNAL_GLIB_LIBS)
 
 NKUTILS_XSLTPROCFLAGS = \
-	--path "$(srcdir)/@nk_dir@/man/"
+	--path "$(srcdir)/%D%/man/"
 
 NKUTILS_MANFILES = \
-	@nk_dir@/man/libnkutils-man.xml
+	%D%/man/libnkutils-man.xml
 
 
 _libnkutils_sources =
@@ -67,29 +67,29 @@ _libnkutils_tests =
 
 if NK_ENABLE_ENUM
 _libnkutils_sources += \
-	@nk_dir@/src/enum.c \
-	@nk_dir@/src/nkutils-enum.h
+	%D%/src/enum.c \
+	%D%/src/nkutils-enum.h
 
 _libnkutils_tests += \
-	@nk_dir@/tests/enum.test
+	%D%/tests/enum.test
 endif
 
 if NK_ENABLE_TOKEN
 _libnkutils_sources += \
-	@nk_dir@/src/token.c \
-	@nk_dir@/src/nkutils-token.h
+	%D%/src/token.c \
+	%D%/src/nkutils-token.h
 
 _libnkutils_tests += \
-	@nk_dir@/tests/token.test
+	%D%/tests/token.test
 endif
 
 if NK_ENABLE_COLOUR
 _libnkutils_sources += \
-	@nk_dir@/src/colour.c \
-	@nk_dir@/src/nkutils-colour.h
+	%D%/src/colour.c \
+	%D%/src/nkutils-colour.h
 
 _libnkutils_tests += \
-	@nk_dir@/tests/colour.test
+	%D%/tests/colour.test
 endif
 
 
@@ -98,40 +98,40 @@ endif
 #
 
 # enum
-@nk_dir_canon@_tests_enum_test_SOURCES = \
-	@nk_dir@/tests/enum.c
+%C%_tests_enum_test_SOURCES = \
+	%D%/tests/enum.c
 
-@nk_dir_canon@_tests_enum_test_CFLAGS = \
+%C%_tests_enum_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
 	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
 
-@nk_dir_canon@_tests_enum_test_LDADD = \
+%C%_tests_enum_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)
 
 # token
-@nk_dir_canon@_tests_token_test_SOURCES = \
-	@nk_dir@/tests/token.c
+%C%_tests_token_test_SOURCES = \
+	%D%/tests/token.c
 
-@nk_dir_canon@_tests_token_test_CFLAGS = \
+%C%_tests_token_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
 	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
 
-@nk_dir_canon@_tests_token_test_LDADD = \
+%C%_tests_token_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)
 
 # colour
-@nk_dir_canon@_tests_colour_test_SOURCES = \
-	@nk_dir@/tests/colour.c
+%C%_tests_colour_test_SOURCES = \
+	%D%/tests/colour.c
 
-@nk_dir_canon@_tests_colour_test_CFLAGS = \
+%C%_tests_colour_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
 	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
 
-@nk_dir_canon@_tests_colour_test_LDADD = \
+%C%_tests_colour_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)

@@ -23,10 +23,12 @@
 #
 
 _libnkutils_library = \
-	@nk_dir@/libnkutils.la
+	%D%/libnkutils.la
 
 noinst_LTLIBRARIES += \
 	$(_libnkutils_library)
 
-@nk_dir_canon@_libnkutils_la_SOURCES = \
+%C%_libnkutils_la_SOURCES = \
 	$(_libnkutils_sources)
+
+include %D%/libnkutils-common.mk
