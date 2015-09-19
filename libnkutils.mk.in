@@ -33,6 +33,10 @@ _libnkutils_library = \
 noinst_@LIBRARY_VARIABLE@LIBRARIES += \
 	$(_libnkutils_library)
 
+@nk_dir_canon@_libnkutils_@library_suffix@a_SOURCES = \
+	$(_libnkutils_sources)
+
+
 check_PROGRAMS += \
 	$(_libnkutils_tests)
 
@@ -43,12 +47,14 @@ EXTRA_DIST += \
 	@nk_dir@/man/libnkutils-man.xml
 
 
-@nk_dir_canon@_libnkutils_@library_suffix@a_SOURCES = \
-	$(_libnkutils_sources)
-
-@nk_dir_canon@_libnkutils_@library_suffix@a_CFLAGS = \
+@nk_dir_canon@_libnkutils_la_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS)
+
+@nk_dir_canon@_libnkutils_a_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(NKUTILS_CFLAGS)
+
 
 NKUTILS_CFLAGS = \
 	-I$(srcdir)/@nk_dir@/src \
@@ -63,6 +69,7 @@ NKUTILS_XSLTPROCFLAGS = \
 
 NKUTILS_MANFILES = \
 	@nk_dir@/man/libnkutils-man.xml
+
 
 _libnkutils_sources =
 _libnkutils_tests =
