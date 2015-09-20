@@ -22,12 +22,6 @@
 # THE SOFTWARE.
 #
 
- ifdef AM_XSLTPROCFLAGS
-AM_XSLTPROCFLAGS += \
-	$(NKUTILS_XSLTPROCFLAGS)
- endif
-
-
 check_PROGRAMS += \
 	$(_libnkutils_tests)
 
