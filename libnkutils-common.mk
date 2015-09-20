@@ -38,21 +38,6 @@ EXTRA_DIST += \
 	%D%/man/libnkutils-man.xml
 
 
-%C%_libnkutils_la_CFLAGS = \
-	$(AM_CFLAGS) \
-	$(NKUTILS_CFLAGS)
-
-%C%_libnkutils_la_LIBADD = \
-	$(_NKUTILS_INTERNAL_GLIB_LIBS)
-
-%C%_libnkutils_a_CFLAGS = \
-	$(AM_CFLAGS) \
-	$(NKUTILS_CFLAGS)
-
-%C%_libnkutils_a_LIBADD = \
-	$(_NKUTILS_INTERNAL_GLIB_LIBS)
-
-
 NKUTILS_CFLAGS = \
 	-I$(srcdir)/%D%/src \
 	$(_NKUTILS_INTERNAL_GLIB_CFLAGS)

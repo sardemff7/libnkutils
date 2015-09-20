@@ -31,4 +31,11 @@ noinst_LTLIBRARIES += \
 %C%_libnkutils_la_SOURCES = \
 	$(_libnkutils_sources)
 
+%C%_libnkutils_la_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(NKUTILS_CFLAGS)
+
+%C%_libnkutils_la_LIBADD = \
+	$(_NKUTILS_INTERNAL_GLIB_LIBS)
+
 include %D%/libnkutils-common.mk
