@@ -23,9 +23,8 @@ dnl THE SOFTWARE.
 dnl
 
 
-# NK_INIT([modules], [docbook-conditions-variable])
+# NK_INIT([modules])
 #     modules                       A list of modules to enable (shorthand for NK_ENABLE_MODULES)
-#     docbook-conditions-variable   Variable to append to for DocBook conditions
 AC_DEFUN([NK_INIT], [
     AC_REQUIRE([AC_HEADER_STDC])
     AC_REQUIRE([PKG_PROG_PKG_CONFIG])
@@ -40,7 +39,6 @@ AC_DEFUN([NK_INIT], [
         m4_map_args_w(_NK_MODULES, [_NK_MODULE_CHECK(], [)])
     ])
 
-    m4_define([_NK_DOCBOOK_CONDITIONS_VAR], [$2])
     m4_ifnblank([$1], [NK_ENABLE_MODULES([$1])])
 
     m4_define([NK_INIT])
@@ -53,7 +51,7 @@ AC_DEFUN([NK_ENABLE_MODULES], [
 ])
 
 m4_define([_NK_MODULES], [enum token colour])
-m4_define([_NK_FEATURES], [token/enum colour/alpha colour/double colour/string])
+m4_define([_NK_FEATURES], [token/enum colour/double colour/string])
 
 
 # auto-enable
@@ -87,7 +85,6 @@ AC_DEFUN([_NK_ENABLE_MODULE_INTERNAL], [
     m4_ifnblank([$2], [
         m4_if(m4_index(_NK_FEATURES, [$3]), [-1], [AC_MSG_ERROR([libnkutils: No ][$2][ in module ][$1])])
         [_nk_module_][$4][_enable=yes]
-        m4_ifnblank(_NK_DOCBOOK_CONDITIONS_VAR, _NK_DOCBOOK_CONDITIONS_VAR[="${]_NK_DOCBOOK_CONDITIONS_VAR[};nk_enable_][$4]["])
         AC_DEFINE([NK_ENABLE_]m4_toupper([$4]), [1], [libnkutils ][$1][ module feature ][$2])
     ])
 ])
