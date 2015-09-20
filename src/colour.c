@@ -35,9 +35,7 @@
 #include <string.h>
 
 #include <glib.h>
-#ifdef NK_ENABLE_COLOUR_STRING
 #include <glib/gprintf.h>
-#endif /* NK_ENABLE_COLOUR_STRING */
 
 #include "nkutils-colour.h"
 
@@ -150,7 +148,6 @@ nk_colour_parse(const gchar *string, NkColour *colour)
     return _nk_colour_parse(string, colour, NULL);
 }
 
-#ifdef NK_ENABLE_COLOUR_DOUBLE
 gboolean
 nk_colour_double_parse(const gchar *string, NkColourDouble *colour)
 {
@@ -169,9 +166,7 @@ nk_colour_double_parse(const gchar *string, NkColourDouble *colour)
 
     return FALSE;
 }
-#endif /* NK_ENABLE_COLOUR_DOUBLE */
 
-#ifdef NK_ENABLE_COLOUR_STRING
 
 #define HEX_COLOUR_MAXLEN 10 /* strlen("#rrggbbaa") + 1 */
 const gchar *
@@ -203,7 +198,6 @@ nk_colour_to_rgba(const NkColour *colour)
     return string;
 }
 
-#ifdef NK_ENABLE_COLOUR_DOUBLE
 const gchar *
 nk_colour_double_to_hex(const NkColourDouble *colour)
 {
@@ -224,6 +218,3 @@ nk_colour_double_to_rgba(const NkColourDouble *colour)
     _nk_colour_to_rgba_internal(string, COLOUR_DOUBLE_RGBA_MAXLEN, colour->red * 255, colour->green * 255, colour->blue * 255, 10, colour->alpha);
     return string;
 }
-#endif /* NK_ENABLE_COLOUR_DOUBLE */
-
-#endif /* NK_ENABLE_COLOUR_STRING */
