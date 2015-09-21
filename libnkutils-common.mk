@@ -47,20 +47,35 @@ NKUTILS_MANFILES = \
 	%D%/man/libnkutils-man.xml
 
 
-_libnkutils_sources = \
-	%D%/src/nkutils-enum.h \
-	%D%/src/enum.c \
-	%D%/src/nkutils-token.h \
-	%D%/src/token.c \
-	%D%/src/nkutils-colour.h \
-	%D%/src/colour.c \
-	$(null)
+_libnkutils_sources =
+_libnkutils_tests =
 
-_libnkutils_tests = \
-	%D%/tests/enum.test \
-	%D%/tests/token.test \
-	%D%/tests/colour.test \
-	$(null)
+if NK_ENABLE_ENUM
+_libnkutils_sources += \
+	%D%/src/enum.c \
+	%D%/src/nkutils-enum.h
+
+_libnkutils_tests += \
+	%D%/tests/enum.test
+endif
+
+if NK_ENABLE_TOKEN
+_libnkutils_sources += \
+	%D%/src/token.c \
+	%D%/src/nkutils-token.h
+
+_libnkutils_tests += \
+	%D%/tests/token.test
+endif
+
+if NK_ENABLE_COLOUR
+_libnkutils_sources += \
+	%D%/src/colour.c \
+	%D%/src/nkutils-colour.h
+
+_libnkutils_tests += \
+	%D%/tests/colour.test
+endif
 
 
 #
