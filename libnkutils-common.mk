@@ -37,7 +37,7 @@ NKUTILS_CFLAGS = \
 	$(_NKUTILS_INTERNAL_GLIB_CFLAGS)
 
 NKUTILS_LIBS = \
-	$(_libnkutils_library)
+	$(_libnkutils_library) \
 	$(_NKUTILS_INTERNAL_GLIB_LIBS)
 
 NKUTILS_XSLTPROCFLAGS = \
