@@ -68,14 +68,14 @@ AC_DEFUN([_NK_MODULE_CHECK], [
     AM_CONDITIONAL([NK_ENABLE_]m4_toupper([$1]), [test x${nk_module_[$1]_enable} = xyes]_NK_MODULE_CHECK_DEPENDENT([_nk_dependent_][$1]))
 ])
 
-AC_DEFUN([_NK_MODULE_CHECK_DEPENDENT], [m4_ifdef([$1], m4_map_args_w($1, [[ -o x${nk_module_]m4_translit(], [, [/], [_])[_enable} = xyes]]))])
+AC_DEFUN([_NK_MODULE_CHECK_DEPENDENT], [m4_ifdef([$1], m4_map_args_w($1, [[ -o x${nk_module_]AS_TR_SH(], [)[_enable} = xyes]]))])
 
 
 AC_DEFUN([_NK_ENABLE_MODULE], [
     m4_if(m4_index([$1], [/]), [-1], [
         _NK_ENABLE_MODULE_INTERNAL([$1])
     ], [
-        _NK_ENABLE_MODULE_INTERNAL(m4_substr([$1], 0, m4_index([$1], [/])), m4_substr([$1], m4_incr(m4_index([$1], [/]))), [$1], m4_translit([$1], [/], [_]))
+        _NK_ENABLE_MODULE_INTERNAL(m4_substr([$1], 0, m4_index([$1], [/])), m4_substr([$1], m4_incr(m4_index([$1], [/]))), [$1], AS_TR_SH([$1]))
     ])
 ])
 
