@@ -51,7 +51,7 @@ AC_DEFUN([NK_ENABLE_MODULES], [
     m4_map_args_w([$1], [_NK_ENABLE_MODULE(], [)])
 ])
 
-m4_define([_NK_MODULES], [enum token colour])
+m4_define([_NK_MODULES], [uuid enum token colour])
 m4_define([_NK_FEATURES], [token/enum colour/alpha colour/double colour/string])
 
 
@@ -81,6 +81,7 @@ AC_DEFUN([_NK_ENABLE_MODULE], [
 
 AC_DEFUN([_NK_ENABLE_MODULE_INTERNAL], [
     m4_if(m4_index(_NK_MODULES, [$1]), [-1], [AC_MSG_ERROR([libnkutils: No ][$1][ module])])
+    m4_ifdef([_NK_]m4_toupper([$1])[_CHECK], [_NK_]m4_toupper([$1])[_CHECK])
     [nk_module_][$1][_enable=yes]
 
     m4_ifnblank([$2], [
@@ -89,4 +90,11 @@ AC_DEFUN([_NK_ENABLE_MODULE_INTERNAL], [
         m4_ifnblank(_NK_DOCBOOK_CONDITIONS_VAR, [AM_DOCBOOK_CONDITIONS="${AM_DOCBOOK_CONDITIONS};nk_enable_][$4]["])
         AC_DEFINE([NK_ENABLE_]m4_toupper([$4]), [1], [libnkutils ][$1][ module feature ][$2])
     ])
+])
+
+# Special dependencies
+AC_DEFUN([_NK_UUID_CHECK], [
+    PKG_CHECK_MODULES([_NKUTILS_INTERNAL_UUID_LIBUUID], [uuid], [nk_uuid_libuuid=yes], [nk_uuid_libuuid=no])
+    AS_IF([test x${nk_uuid_libuuid} != xyes], [AC_MSG_ERROR([libnkutils: A UUID library is required])])
+    AM_CONDITIONAL([NK_ENABLE_UUID_LIBUUID], [test x${nk_uuid_libuuid} = xyes])
 ])

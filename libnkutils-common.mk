@@ -34,10 +34,12 @@ EXTRA_DIST += \
 
 NKUTILS_CFLAGS = \
 	-I$(srcdir)/%D%/src \
+	$(_NKUTILS_INTERNAL_UUID_CFLAGS) \
 	$(_NKUTILS_INTERNAL_GLIB_CFLAGS)
 
 NKUTILS_LIBS = \
 	$(_libnkutils_library) \
+	$(_NKUTILS_INTERNAL_UUID_LIBS) \
 	$(_NKUTILS_INTERNAL_GLIB_LIBS)
 
 NKUTILS_XSLTPROCFLAGS = \
@@ -49,6 +51,18 @@ NKUTILS_MANFILES = \
 
 _libnkutils_sources =
 _libnkutils_tests =
+
+if NK_ENABLE_UUID_LIBUUID
+_libnkutils_sources += \
+	%D%/src/uuid-libuuid.c \
+	%D%/src/nkutils-uuid.h
+
+_NKUTILS_INTERNAL_UUID_CFLAGS = \
+	$(_NKUTILS_INTERNAL_UUID_LIBUUID_CFLAGS)
+
+_NKUTILS_INTERNAL_UUID_LIBS = \
+	$(_NKUTILS_INTERNAL_UUID_LIBUUID_LIBS)
+endif
 
 if NK_ENABLE_ENUM
 _libnkutils_sources += \

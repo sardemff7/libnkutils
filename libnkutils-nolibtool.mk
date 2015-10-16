@@ -36,6 +36,7 @@ noinst_LIBRARIES += \
 	$(NKUTILS_CFLAGS)
 
 %C%_libnkutils_a_LIBADD = \
+	$(_NKUTILS_INTERNAL_UUID_LIBS)\
 	$(_NKUTILS_INTERNAL_GLIB_LIBS)
 
 include %D%/libnkutils-common.mk
