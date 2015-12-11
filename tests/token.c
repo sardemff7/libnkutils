@@ -82,6 +82,27 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/basic/fallback/with",
+        .data = {
+            .source = "I want to eat ${fruit:an apple}.",
+            .data = {
+                "fruit", "a banana",
+                NULL
+            },
+            .result = "I want to eat a banana."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/fallback/without",
+        .data = {
+            .source = "I want to eat ${fruit:an apple}.",
+            .data = {
+                NULL
+            },
+            .result = "I want to eat an apple."
+        }
+    },
+    {
         .testpath = "/nkutils/token/basic/before-after/with",
         .data = {
             .source = "You can make a ${(<adjective>) }${recipe} with ${fruit}${ and <addition}.",

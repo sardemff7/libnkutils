@@ -28,6 +28,10 @@
             Each reference is resolved to a data that is substitued to the reference at the corresponding place in the string.
         </para>
         <para>
+            You can use a fallback value if the data resolves to <literal>nothing</literal>.
+            The syntax is : <userinput>${<replaceable>reference-name</replaceable>:<replaceable>fallback-value</replaceable>}</userinput>.
+        </para>
+        <para>
             You can obtain more flexible strings by adding a context to it.
             A context is composed by two optional strings, one is preceding the data, the other is following it.
             The syntax is <userinput>${<replaceable>before</replaceable>&lt;<replaceable>name</replaceable>&gt;<replaceable>after</replaceable>}</userinput>.
@@ -41,6 +45,22 @@
                 <listitem>
                     <para><varname>name</varname> is <literal>"Bob"</literal> and <varname>fruit</varname> is <literal>"pear"</literal>.</para>
                     <para>Resolves to: <literal>Bob is eating a pear.</literal></para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><literal>"${name} is eating a ${fruit:banana}."</literal></term>
+                <listitem>
+                    <para><varname>name</varname> is <literal>"Bob"</literal> and <varname>fruit</varname> is <literal>"pear"</literal>.</para>
+                    <para>Resolves to: <literal>Bob is eating a pear.</literal></para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><literal>"${name} is eating a ${fruit:banana}."</literal></term>
+                <listitem>
+                    <para><varname>name</varname> is <literal>"Bob"</literal> and <varname>fruit</varname> is <literal>nothing</literal>.</para>
+                    <para>Resolves to: <literal>Bob is eating a banana.</literal></para>
                 </listitem>
             </varlistentry>
 
