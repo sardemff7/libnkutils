@@ -102,32 +102,6 @@ static const struct {
             .result = "I want to eat an apple."
         }
     },
-    {
-        .testpath = "/nkutils/token/basic/before-after/with",
-        .data = {
-            .source = "You can make a ${(<adjective>) }${recipe} with ${fruit}${ and <addition}.",
-            .data = {
-                "adjective", "creamy",
-                "fruit", "a banana",
-                "recipe", "banana split",
-                "addition", "some cream",
-                NULL
-            },
-            .result = "You can make a (creamy) banana split with a banana and some cream."
-        }
-    },
-    {
-        .testpath = "/nkutils/token/basic/before-after/without",
-        .data = {
-            .source = "You can make a ${(<adjective>) }${recipe} with ${fruit}${ and <addition}.",
-            .data = {
-                "fruit", "a banana",
-                "recipe", "banana split",
-                NULL
-            },
-            .result = "You can make a banana split with a banana."
-        }
-    },
 };
 
 static const gchar *

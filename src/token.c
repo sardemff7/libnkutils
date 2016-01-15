@@ -47,8 +47,6 @@ typedef struct {
     const gchar *name;
     guint64 value;
     const gchar *fallback;
-    const gchar *before;
-    const gchar *after;
 } NkToken;
 
 struct _NkTokenList {
@@ -91,22 +89,6 @@ nk_token_list_parse(gchar *string)
                 {
                     *m = '\0';
                     token.fallback = ++m;
-                }
-                else
-                {
-                    m = g_utf8_strchr(n, e - n, '<');
-                    if ( m != NULL )
-                    {
-                        *m = '\0';
-                        token.before = n;
-                        token.name = n = ++m;
-                    }
-                    m = g_utf8_strchr(n, e - n, '>');
-                    if ( m != NULL )
-                    {
-                        *m = '\0';
-                        token.after = ++m;
-                    }
                 }
 
                 ++self->size;
@@ -219,11 +201,7 @@ nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callba
         data = callback(self->tokens[i].name, self->tokens[i].value, user_data);
         if ( data != NULL )
         {
-            if ( self->tokens[i].before != NULL)
-                g_string_append(string, self->tokens[i].before);
             g_string_append(string, data);
-            if ( self->tokens[i].after != NULL)
-                g_string_append(string, self->tokens[i].after);
         }
         else if ( self->tokens[i].fallback != NULL )
             g_string_append(string, self->tokens[i].fallback);
