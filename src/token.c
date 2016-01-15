@@ -80,18 +80,6 @@ nk_token_list_parse(gchar *string)
             {
                 *e = *n = '\0';
                 n += 2;
-                ++self->size;
-                if ( *string != '\0' )
-                    ++self->size;
-                self->tokens = g_renew(NkToken, self->tokens, self->size);
-                if ( *string != '\0' )
-                {
-                    NkToken token = {
-                        .string = string
-                    };
-                    self->tokens[self->size - 2] = token;
-                }
-                w = string = e + 1;
 
                 NkToken token = {
                     .name = n
@@ -120,13 +108,26 @@ nk_token_list_parse(gchar *string)
                     }
                 }
 
+                ++self->size;
+                if ( *string != '\0' )
+                    ++self->size;
+                self->tokens = g_renew(NkToken, self->tokens, self->size);
+                if ( *string != '\0' )
+                {
+                    NkToken stoken = {
+                        .string = string
+                    };
+                    self->tokens[self->size - 2] = stoken;
+                }
                 self->tokens[self->size - 1] = token;
+
+                w = string = e + 1;
                 break;
             }
         case '$':
             ++n;
         default:
-            w = ++n;
+            w = n + 1;
         break;
         }
     }
