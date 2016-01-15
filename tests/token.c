@@ -134,6 +134,7 @@ static const gchar *
 _nk_token_list_tests_callback(const gchar *token, guint64 value, gconstpointer user_data)
 {
     const gchar * const *data;
+    g_assert_cmpuint(value, ==, 0);
     for ( data = user_data ; *data != NULL ; data += 2 )
     {
         if ( g_strcmp0(token, *data) == 0 )
@@ -198,6 +199,7 @@ static const gchar *
 _nk_token_list_enum_tests_callback(const gchar *token, guint64 value, gconstpointer user_data)
 {
     const gchar * const *data = user_data;
+    g_assert_cmpstr(token, ==, _nk_token_list_enum_tests_tokens[value]);
     return data[value];
 }
 
