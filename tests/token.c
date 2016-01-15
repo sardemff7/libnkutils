@@ -114,6 +114,32 @@ static const struct {
             .result = "I want to eat an apple."
         }
     },
+    {
+        .testpath = "/nkutils/token/basic/substitute/with",
+        .data = {
+            .source = "You can make a ${adjective:+(}${adjective}${adjective:+) }${recipe} with ${fruit}${addition:+ and }${addition}.",
+            .data = {
+                "adjective", "creamy",
+                "fruit", "a banana",
+                "recipe", "banana split",
+                "addition", "some cream",
+                NULL
+            },
+            .result = "You can make a (creamy) banana split with a banana and some cream."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/substitute/without",
+        .data = {
+            .source = "You can make a ${adjective:+(}${adjective}${adjective:+) }${recipe} with ${fruit}${addition:+ and }${addition}.",
+            .data = {
+                "fruit", "a banana",
+                "recipe", "banana split",
+                NULL
+            },
+            .result = "You can make a banana split with a banana."
+        }
+    },
 };
 
 static const gchar *

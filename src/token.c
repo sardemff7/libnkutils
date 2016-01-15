@@ -47,6 +47,7 @@ typedef struct {
     const gchar *name;
     guint64 value;
     const gchar *fallback;
+    const gchar *substitute;
 } NkToken;
 
 struct _NkTokenList {
@@ -91,6 +92,9 @@ nk_token_list_parse(gchar *string)
                     {
                     case '-':
                         token.fallback = m + 2;
+                    break;
+                    case '+':
+                        token.substitute = m + 2;
                     break;
                     default:
                         /* We will treat the malformed reference as a string */
@@ -209,7 +213,10 @@ nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callba
         data = callback(self->tokens[i].name, self->tokens[i].value, user_data);
         if ( data != NULL )
         {
-            g_string_append(string, data);
+            if ( self->tokens[i].substitute != NULL)
+                g_string_append(string, self->tokens[i].substitute);
+            else
+                g_string_append(string, data);
         }
         else if ( self->tokens[i].fallback != NULL )
             g_string_append(string, self->tokens[i].fallback);

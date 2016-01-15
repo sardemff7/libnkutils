@@ -31,6 +31,10 @@
             You can use a fallback value if the data resolves to <literal>nothing</literal>.
             The syntax is: <userinput>${<replaceable>reference-name</replaceable>:-<replaceable>fallback-value</replaceable>}</userinput>.
         </para>
+        <para>
+            You can use a substitute value if the data resolves to <literal>something</literal>.
+            The syntax is: <userinput>${<replaceable>reference-name</replaceable>:+<replaceable>substitute-value</replaceable>}</userinput>.
+        </para>
         <para>Examples (with data and resolved string):</para>
         <variablelist>
             <varlistentry>
@@ -58,7 +62,7 @@
             </varlistentry>
 
             <varlistentry>
-                <term><literal>"${name} is eating a ${meat}${ with &lt;condiment}."</literal></term>
+                <term><literal>"${name} is eating a ${meat}${condiment:+ with }${condiment}."</literal></term>
                 <listitem>
                     <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>meat</varname> is <literal>"steak"</literal> and <varname>condiment</varname> is <literal>"mustard"</literal>.</para>
                     <para>Resolves to: <literal>Bob is eating a steak with mustard.</literal></para>
@@ -66,7 +70,7 @@
             </varlistentry>
 
             <varlistentry>
-                <term><literal>"${name} is eating a ${meat}${ with &lt;condiment}."</literal></term>
+                <term><literal>"${name} is eating a ${meat}${condiment:+ with }${condiment}."</literal></term>
                 <listitem>
                     <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>meat</varname> is <literal>"steak"</literal>and <varname>condiment</varname> is <literal>nothing</literal>.</para>
                     <para>Resolves to: <literal>Bob is eating a steak.</literal></para>
