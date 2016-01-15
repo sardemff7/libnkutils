@@ -86,21 +86,22 @@ nk_token_list_parse(gchar *string)
                 self->tokens = g_renew(NkToken, self->tokens, self->size);
                 if ( *string != '\0' )
                 {
-                    self->tokens[self->size - 2].string = string;
-                    self->tokens[self->size - 2].name = NULL;
-                    self->tokens[self->size - 2].fallback = NULL;
-                    self->tokens[self->size - 2].before = NULL;
-                    self->tokens[self->size - 2].after = NULL;
+                    NkToken token = {
+                        .string = string
+                    };
+                    self->tokens[self->size - 2] = token;
                 }
                 w = string = e + 1;
 
-                const gchar *a = NULL, *b = NULL, *d = NULL;
+                NkToken token = {
+                    .name = n
+                };
+
                 gchar *m;
-                m = g_utf8_strchr(n, -1, ':');
-                if ( m != NULL )
+                if ( ( m = g_utf8_strchr(n, -1, ':') ) != NULL )
                 {
                     *m = '\0';
-                    d = ++m;
+                    token.fallback = ++m;
                 }
                 else
                 {
@@ -108,21 +109,18 @@ nk_token_list_parse(gchar *string)
                     if ( m != NULL )
                     {
                         *m = '\0';
-                        b = n;
-                        n = ++m;
+                        token.before = n;
+                        token.name = n = ++m;
                     }
                     m = g_utf8_strchr(n, -1, '>');
                     if ( m != NULL )
                     {
                         *m = '\0';
-                        a = ++m;
+                        token.after = ++m;
                     }
                 }
-                self->tokens[self->size - 1].string = NULL;
-                self->tokens[self->size - 1].name = n;
-                self->tokens[self->size - 1].fallback = d;
-                self->tokens[self->size - 1].before = b;
-                self->tokens[self->size - 1].after = a;
+
+                self->tokens[self->size - 1] = token;
                 break;
             }
         case '$':
@@ -133,11 +131,10 @@ nk_token_list_parse(gchar *string)
         }
     }
     self->tokens = g_renew(NkToken, self->tokens, ++self->size);
-    self->tokens[self->size - 1].string = string;
-    self->tokens[self->size - 1].name = NULL;
-    self->tokens[self->size - 1].fallback = NULL;
-    self->tokens[self->size - 1].before = NULL;
-    self->tokens[self->size - 1].after = NULL;
+    NkToken token = {
+        .string = string
+    };
+    self->tokens[self->size - 1] = token;
 
     return self;
 }
