@@ -69,38 +69,39 @@ nk_token_list_parse(gchar *string)
     self->ref_count = 1;
     self->string = string;
 
-    gchar *w = string, *n, *e;
-    while ( ( n = g_utf8_strchr(w, -1, '$') ) != NULL )
+    gchar *w = string;
+    while ( ( w = g_utf8_strchr(w, -1, '$') ) != NULL )
     {
-        switch ( n[1] )
+        switch ( w[1] )
         {
         case '{':
-            e = g_utf8_strchr(n + 2, -2, '}');
+        {
+            gchar *b = w, *n = w + 2, *e;
+            e = g_utf8_strchr(n, -2, '}');
             if ( e != NULL )
             {
-                *e = *n = '\0';
-                n += 2;
+                w = e + 1;
 
                 NkToken token = {
                     .name = n
                 };
 
                 gchar *m;
-                if ( ( m = g_utf8_strchr(n, -1, ':') ) != NULL )
+                if ( ( m = g_utf8_strchr(n, e - n, ':') ) != NULL )
                 {
                     *m = '\0';
                     token.fallback = ++m;
                 }
                 else
                 {
-                    m = g_utf8_strchr(n, -1, '<');
+                    m = g_utf8_strchr(n, e - n, '<');
                     if ( m != NULL )
                     {
                         *m = '\0';
                         token.before = n;
                         token.name = n = ++m;
                     }
-                    m = g_utf8_strchr(n, -1, '>');
+                    m = g_utf8_strchr(n, e - n, '>');
                     if ( m != NULL )
                     {
                         *m = '\0';
@@ -121,13 +122,15 @@ nk_token_list_parse(gchar *string)
                 }
                 self->tokens[self->size - 1] = token;
 
-                w = string = e + 1;
+                *e = *b = '\0';
+                string = w;
                 break;
             }
+        }
         case '$':
-            ++n;
+            ++w;
         default:
-            w = n + 1;
+            ++w;
         break;
         }
     }
