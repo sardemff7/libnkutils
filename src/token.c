@@ -87,8 +87,16 @@ nk_token_list_parse(gchar *string)
                 gchar *m;
                 if ( ( m = g_utf8_strchr(n, e - n, ':') ) != NULL )
                 {
+                    switch ( m[1] )
+                    {
+                    case '-':
+                        token.fallback = m + 2;
+                    break;
+                    default:
+                        /* We will treat the malformed reference as a string */
+                        continue;
+                    }
                     *m = '\0';
-                    token.fallback = ++m;
                 }
 
                 ++self->size;

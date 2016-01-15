@@ -29,7 +29,7 @@
         </para>
         <para>
             You can use a fallback value if the data resolves to <literal>nothing</literal>.
-            The syntax is : <userinput>${<replaceable>reference-name</replaceable>:<replaceable>fallback-value</replaceable>}</userinput>.
+            The syntax is: <userinput>${<replaceable>reference-name</replaceable>:-<replaceable>fallback-value</replaceable>}</userinput>.
         </para>
         <para>Examples (with data and resolved string):</para>
         <variablelist>
@@ -42,7 +42,7 @@
             </varlistentry>
 
             <varlistentry>
-                <term><literal>"${name} is eating a ${fruit:banana}."</literal></term>
+                <term><literal>"${name} is eating a ${fruit:-banana}."</literal></term>
                 <listitem>
                     <para><varname>name</varname> is <literal>"Bob"</literal> and <varname>fruit</varname> is <literal>"pear"</literal>.</para>
                     <para>Resolves to: <literal>Bob is eating a pear.</literal></para>
@@ -50,7 +50,7 @@
             </varlistentry>
 
             <varlistentry>
-                <term><literal>"${name} is eating a ${fruit:banana}."</literal></term>
+                <term><literal>"${name} is eating a ${fruit:-banana}."</literal></term>
                 <listitem>
                     <para><varname>name</varname> is <literal>"Bob"</literal> and <varname>fruit</varname> is <literal>nothing</literal>.</para>
                     <para>Resolves to: <literal>Bob is eating a banana.</literal></para>

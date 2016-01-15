@@ -82,9 +82,21 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/basic/wrong/modifier",
+        .data = {
+            .source = "You can make a ${recipe} with a ${fruit::}.",
+            .data = {
+                "fruit", "a banana",
+                "recipe", "banana split",
+                NULL
+            },
+            .result = "You can make a banana split with a ${fruit::}."
+        }
+    },
+    {
         .testpath = "/nkutils/token/basic/fallback/with",
         .data = {
-            .source = "I want to eat ${fruit:an apple}.",
+            .source = "I want to eat ${fruit:-an apple}.",
             .data = {
                 "fruit", "a banana",
                 NULL
@@ -95,7 +107,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/basic/fallback/without",
         .data = {
-            .source = "I want to eat ${fruit:an apple}.",
+            .source = "I want to eat ${fruit:-an apple}.",
             .data = {
                 NULL
             },
