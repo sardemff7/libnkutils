@@ -140,6 +140,42 @@ static const struct {
             .result = "You can make a banana split with a banana."
         }
     },
+    {
+        .testpath = "/nkutils/token/basic/replace/full",
+        .data = {
+            .source = "You can make a ${recipe/split/cream} with ${fruit}.",
+            .data = {
+                "fruit", "a banana",
+                "recipe", "banana split",
+                NULL
+            },
+            .result = "You can make a banana cream with a banana."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/replace/capture",
+        .data = {
+            .source = "You can make a ${adjective/(.+)/(\\1)}${recipe} with ${fruit}${addition/^/ and }.",
+            .data = {
+                "fruit", "a banana",
+                "recipe", "banana split",
+                NULL
+            },
+            .result = "You can make a banana split with a banana."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/replace/remove",
+        .data = {
+            .source = "You can make a ${recipe/ split} with ${fruit}.",
+            .data = {
+                "fruit", "a banana",
+                "recipe", "banana split",
+                NULL
+            },
+            .result = "You can make a banana with a banana."
+        }
+    },
 };
 
 static const gchar *

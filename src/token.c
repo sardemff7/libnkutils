@@ -48,6 +48,10 @@ typedef struct {
     guint64 value;
     const gchar *fallback;
     const gchar *substitute;
+    struct {
+        GRegex *regex;
+        const gchar *replacement;
+    } replace;
 } NkToken;
 
 struct _NkTokenList {
@@ -100,6 +104,28 @@ nk_token_list_parse(gchar *string)
                         /* We will treat the malformed reference as a string */
                         continue;
                     }
+                    *m = '\0';
+                }
+                else if ( ( m = g_utf8_strchr(n, e - n, '/') ) != NULL )
+                {
+                    gchar *s = m + 1;
+
+                    while ( ( s = g_utf8_strchr(s, s - n, '/') ) != NULL )
+                    {
+                        if ( *(s - 1) != '\\' )
+                            break;
+                    }
+
+                    gsize l = ( ( s != NULL ) ? s : e ) - m;
+                    gchar r[l];
+                    strncpy(r, m + 1, l);
+                    r[l-1] = 0;
+
+                    token.replace.regex = g_regex_new(r, G_REGEX_OPTIMIZE, 0, NULL);
+                    token.replace.replacement = ( s != NULL ) ? ( s + 1 ) : "";
+                    if ( token.replace.regex == NULL )
+                        /* We will treat the malformed reference as a string */
+                        continue;
                     *m = '\0';
                 }
 
@@ -184,6 +210,13 @@ nk_token_list_unref(NkTokenList *self)
     if ( --self->ref_count > 0 )
         return;
 
+    gsize i;
+    for ( i = 0 ; i < self->size ; ++i )
+    {
+        if ( self->tokens[i].replace.regex != NULL )
+            g_regex_unref(self->tokens[i].replace.regex);
+    }
+
     g_free(self->tokens);
 
     g_free(self->string);
@@ -215,6 +248,14 @@ nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callba
         {
             if ( self->tokens[i].substitute != NULL)
                 g_string_append(string, self->tokens[i].substitute);
+            else if ( self->tokens[i].replace.regex != NULL )
+            {
+                gchar *n;
+                n = g_regex_replace(self->tokens[i].replace.regex, data, -1, 0, self->tokens[i].replace.replacement, 0, NULL);
+                if ( n != NULL )
+                    g_string_append(string, n);
+                g_free(n);
+            }
             else
                 g_string_append(string, data);
         }
