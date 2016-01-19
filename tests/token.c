@@ -176,6 +176,18 @@ static const struct {
             .result = "You can make a banana with a banana."
         }
     },
+    {
+        .testpath = "/nkutils/token/basic/replace/multiple",
+        .data = {
+            .source = "You can make ${recipe/a banana/an apple pie/ split} with ${fruit/.+/apples}.",
+            .data = {
+                "fruit", "a banana",
+                "recipe", "a banana split",
+                NULL
+            },
+            .result = "You can make an apple pie with apples."
+        }
+    },
 };
 
 static const gchar *

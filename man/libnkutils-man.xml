@@ -39,6 +39,8 @@
             You can replace parts of the data using the regex mechanism.
             The syntax is: <userinput>${<replaceable>reference-name</replaceable>/<replaceable>regex</replaceable>/<replaceable>replacement</replaceable>}</userinput>.
             The <replaceable>replacement</replaceable> part is optional (including the preceding forward slash). If it is omitted, matching parts of the data will simply be removed.
+            You can repeat the <userinput>/<replaceable>regex</replaceable>/<replaceable>replacement</replaceable></userinput> part to replace as many patterns as you like.
+            Each pattern is matched against the previous replacement so be careful in your order.
         </para>
         <para>Examples (with data and resolved string):</para>
         <variablelist>
@@ -95,6 +97,14 @@
                 <listitem>
                     <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>meat</varname> is <literal>"steak"</literal>and <varname>condiment</varname> is <literal>nothing</literal>.</para>
                     <para>Resolves to: <literal>Bob is eating a steak.</literal></para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><literal>"${name} is eating a ${meat}${condiment/^/ with /$/ from France}."</literal></term>
+                <listitem>
+                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>meat</varname> is <literal>"steak"</literal> and <varname>condiment</varname> is <literal>"mustard"</literal>.</para>
+                    <para>Resolves to: <literal>Bob is eating a steak with mustard from France.</literal></para>
                 </listitem>
             </varlistentry>
         </variablelist>

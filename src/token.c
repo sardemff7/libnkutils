@@ -43,15 +43,17 @@
 #include "nkutils-token.h"
 
 typedef struct {
+    GRegex *regex;
+    const gchar *replacement;
+} NkTokenRegex;
+
+typedef struct {
     const gchar *string;
     const gchar *name;
     guint64 value;
     const gchar *fallback;
     const gchar *substitute;
-    struct {
-        GRegex *regex;
-        const gchar *replacement;
-    } replace;
+    NkTokenRegex *replace;
 } NkToken;
 
 struct _NkTokenList {
@@ -166,26 +168,39 @@ nk_token_list_parse(gchar *string)
                 gchar *m = w;
                 *e = '\0';
 
-                m = _nk_token_strchr_escape(w, e - w, '/', '\0');
-                if ( m != NULL )
+                gsize c = 0;
+                do
                 {
+                    ++c;
                     *m = '\0';
-                    token.replace.replacement = ++s;
-                }
-                else
-                    token.replace.replacement = "";
+                } while ( ( m = _nk_token_strchr_escape(m, e - m, '/', '\0') ) != NULL );
+                c = ( c + 1 ) / 2 + 1;
 
-                token.replace.regex = g_regex_new(w, G_REGEX_OPTIMIZE, 0, NULL);
-                if ( token.replace.regex == NULL )
+                token.replace = g_new(NkTokenRegex, c);
+                c = 0;
+                do
                 {
-                    *b = '$';
-                    *e = '}';
-                    for ( m = b ; m < e ; ++m )
+                    token.replace[c].regex = g_regex_new(++w, G_REGEX_OPTIMIZE, 0, NULL);
+                    if ( token.replace[c].regex == NULL )
                     {
-                        if ( *m == '\0' )
-                            *m = '/';
+                        /* Malformed regex, we revert all changes made to the string */
+                        *b = '$';
+                        *e = '}';
+                        for ( m = b ; m < e ; ++m )
+                        {
+                            if ( *m == '\0' )
+                                *m = '/';
+                        }
+                        w = e;
+                        continue;
                     }
-                }
+
+                    w = w + strlen(w) + 1;
+                    token.replace[c].replacement = ( w > e ) ? "" : w;
+                    w += strlen(w);
+                    ++c;
+                } while ( w < e );
+                token.replace[c].regex = NULL;
             }
             break;
             default:
@@ -275,8 +290,16 @@ nk_token_list_unref(NkTokenList *self)
     gsize i;
     for ( i = 0 ; i < self->size ; ++i )
     {
-        if ( self->tokens[i].replace.regex != NULL )
-            g_regex_unref(self->tokens[i].replace.regex);
+        if ( self->tokens[i].replace != NULL )
+        {
+            NkTokenRegex *regex;
+            for ( regex = self->tokens[i].replace ; regex->regex != NULL ; ++regex )
+            {
+                if ( regex->regex != NULL )
+                    g_regex_unref(regex->regex);
+            }
+            g_free(self->tokens[i].replace);
+        }
     }
 
     g_free(self->tokens);
@@ -310,10 +333,19 @@ nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callba
         {
             if ( self->tokens[i].substitute != NULL)
                 g_string_append(string, self->tokens[i].substitute);
-            else if ( self->tokens[i].replace.regex != NULL )
+            else if ( self->tokens[i].replace != NULL )
             {
-                gchar *n;
-                n = g_regex_replace(self->tokens[i].replace.regex, data, -1, 0, self->tokens[i].replace.replacement, 0, NULL);
+                NkTokenRegex *regex;
+                gchar *n = NULL;
+                for ( regex = self->tokens[i].replace ; regex->regex != NULL ; ++regex )
+                {
+                    gchar *tmp = n;
+                    n = g_regex_replace(regex->regex, data, -1, 0, regex->replacement, 0, NULL);
+                    g_free(tmp);
+                    if ( n == NULL )
+                        break;
+                    data = n;
+                }
                 if ( n != NULL )
                     g_string_append(string, n);
                 g_free(n);
