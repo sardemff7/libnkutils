@@ -61,6 +61,49 @@ struct _NkTokenList {
     NkToken *tokens;
 };
 
+static gchar *
+_nk_token_strchr_escape(gchar *s, gssize l, gunichar c, gunichar pair_c)
+{
+    if ( l < 0 )
+        l = strlen(s);
+    gchar *e = s + l;
+
+    gsize pair_count = 0;
+    gchar *w;
+    gunichar wc = g_utf8_get_char(s), pc;
+    if ( wc == c )
+        return s;
+
+    for ( w = g_utf8_next_char(s) ; w < e ; w = g_utf8_next_char(w) )
+    {
+        pc = wc;
+        wc = g_utf8_get_char(w);
+
+        /* Maybe do we open a paired character */
+        if ( ( pair_c != '\0' ) && ( wc == pair_c ) )
+            ++pair_count;
+
+        if ( wc != c )
+            continue;
+
+        /* We found our character, check if it is the right occurence */
+
+        if ( pc == '\\' )
+            /* Escaped, search for next one */
+            continue;
+
+        if ( ( pair_c != '\0' ) && ( pair_count > 0 ) )
+        {
+            /* We had an opened pair, close it */
+            --pair_count;
+            continue;
+        }
+
+        return w;
+    }
+    return NULL;
+}
+
 NkTokenList *
 nk_token_list_parse(gchar *string)
 {
@@ -75,82 +118,101 @@ nk_token_list_parse(gchar *string)
     gchar *w = string;
     while ( ( w = g_utf8_strchr(w, -1, '$') ) != NULL )
     {
-        switch ( w[1] )
+        gchar *b = w;
+        w = g_utf8_next_char(w);
+        switch ( g_utf8_get_char(w) )
         {
         case '{':
         {
-            gchar *b = w, *n = w + 2, *e;
-            e = g_utf8_strchr(n, -2, '}');
-            if ( e != NULL )
+            w = g_utf8_next_char(w);
+            gchar *e;
+            NkToken token = {
+                .name = w
+            };
+
+            /* References are ASCII only */
+            while ( g_ascii_isalpha(*w) || ( *w == '-' ) )
+                w = g_utf8_next_char(w);
+
+
+            e = _nk_token_strchr_escape(w, -1, '}', '{');
+            if ( e == NULL )
+                continue;
+
+
+            if ( w != e )
+            switch ( g_utf8_get_char(w) )
             {
-                w = e + 1;
-
-                NkToken token = {
-                    .name = n
-                };
-
-                gchar *m;
-                if ( ( m = g_utf8_strchr(n, e - n, ':') ) != NULL )
+            case ':':
+            {
+                gchar *m = w++;
+                switch ( g_utf8_get_char(w) )
                 {
-                    switch ( m[1] )
-                    {
-                    case '-':
-                        token.fallback = m + 2;
-                    break;
-                    case '+':
-                        token.substitute = m + 2;
-                    break;
-                    default:
-                        /* We will treat the malformed reference as a string */
-                        continue;
-                    }
-                    *m = '\0';
-                }
-                else if ( ( m = g_utf8_strchr(n, e - n, '/') ) != NULL )
-                {
-                    gchar *s = m + 1;
-
-                    while ( ( s = g_utf8_strchr(s, s - n, '/') ) != NULL )
-                    {
-                        if ( *(s - 1) != '\\' )
-                            break;
-                    }
-
-                    gsize l = ( ( s != NULL ) ? s : e ) - m;
-                    gchar r[l];
-                    strncpy(r, m + 1, l);
-                    r[l-1] = 0;
-
-                    token.replace.regex = g_regex_new(r, G_REGEX_OPTIMIZE, 0, NULL);
-                    token.replace.replacement = ( s != NULL ) ? ( s + 1 ) : "";
-                    if ( token.replace.regex == NULL )
-                        /* We will treat the malformed reference as a string */
-                        continue;
-                    *m = '\0';
-                }
-
-                ++self->size;
-                if ( *string != '\0' )
-                    ++self->size;
-                self->tokens = g_renew(NkToken, self->tokens, self->size);
-                if ( *string != '\0' )
-                {
-                    NkToken stoken = {
-                        .string = string
-                    };
-                    self->tokens[self->size - 2] = stoken;
-                }
-                self->tokens[self->size - 1] = token;
-
-                *e = *b = '\0';
-                string = w;
+                case '-':
+                    token.fallback = ++w;
                 break;
+                case '+':
+                    token.substitute = ++w;
+                break;
+                default:
+                    /* Just fail on malformed string */
+                    continue;
+                }
+                *m = '\0';
             }
+            break;
+            case '/':
+            {
+                gchar *m = w;
+                *e = '\0';
+
+                m = _nk_token_strchr_escape(w, e - w, '/', '\0');
+                if ( m != NULL )
+                {
+                    *m = '\0';
+                    token.replace.replacement = ++s;
+                }
+                else
+                    token.replace.replacement = "";
+
+                token.replace.regex = g_regex_new(w, G_REGEX_OPTIMIZE, 0, NULL);
+                if ( token.replace.regex == NULL )
+                {
+                    *b = '$';
+                    *e = '}';
+                    for ( m = b ; m < e ; ++m )
+                    {
+                        if ( *m == '\0' )
+                            *m = '/';
+                    }
+                }
+            }
+            break;
+            default:
+                continue;
+            }
+
+            *e = *b = '\0';
+
+            ++self->size;
+            if ( *string != '\0' )
+                ++self->size;
+            self->tokens = g_renew(NkToken, self->tokens, self->size);
+            if ( *string != '\0' )
+            {
+                NkToken stoken = {
+                    .string = string
+                };
+                self->tokens[self->size - 2] = stoken;
+            }
+            self->tokens[self->size - 1] = token;
+
+            string = w = e + 1;
+            break;
         }
         case '$':
             ++w;
         default:
-            ++w;
         break;
         }
     }
