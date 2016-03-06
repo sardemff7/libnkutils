@@ -42,6 +42,9 @@ AC_DEFUN([NK_INIT], [
     m4_ifnblank([$1], [NK_ENABLE_MODULES([$1])])
     AM_XSLTPROCFLAGS="${AM_XSLTPROCFLAGS} "'${NKUTILS_XSLTPROCFLAGS}'
 
+    AM_CONDITIONAL([NK_ENABLE_UUID_LIBUUID], [test x${nk_uuid_libuuid} = xyes])
+    AM_CONDITIONAL([NK_ENABLE_UUID_APR_UTIL], [test x${nk_uuid_apr_util} = xyes])
+
     m4_define([NK_INIT])
 ])
 
@@ -97,6 +100,4 @@ AC_DEFUN([_NK_UUID_CHECK], [
     PKG_CHECK_MODULES([_NKUTILS_INTERNAL_UUID_LIBUUID], [uuid], [nk_uuid_libuuid=yes], [nk_uuid_libuuid=no])
     PKG_CHECK_MODULES([_NKUTILS_INTERNAL_UUID_APR_UTIL], [apr-util-1], [nk_uuid_apr_util=yes], [nk_uuid_apr_util=no])
     AS_IF([test x${nk_uuid_libuuid} != xyes -a x${nk_uuid_apr_util} != xyes], [AC_MSG_ERROR([libnkutils: A UUID library is required])])
-    AM_CONDITIONAL([NK_ENABLE_UUID_LIBUUID], [test x${nk_uuid_libuuid} = xyes])
-    AM_CONDITIONAL([NK_ENABLE_UUID_APR_UTIL], [test x${nk_uuid_apr_util} = xyes])
 ])
