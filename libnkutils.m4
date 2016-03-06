@@ -87,7 +87,7 @@ AC_DEFUN([_NK_ENABLE_MODULE_INTERNAL], [
     m4_ifnblank([$2], [
         m4_if(m4_index(_NK_FEATURES, [$3]), [-1], [AC_MSG_ERROR([libnkutils: No ][$2][ in module ][$1])])
         [_nk_module_][$4][_enable=yes]
-        m4_ifnblank(_NK_DOCBOOK_CONDITIONS_VAR, [AM_DOCBOOK_CONDITIONS="${AM_DOCBOOK_CONDITIONS};nk_enable_][$4]["])
+        [AM_DOCBOOK_CONDITIONS="${AM_DOCBOOK_CONDITIONS};nk_enable_][$4]["]
         AC_DEFINE([NK_ENABLE_]m4_toupper([$4]), [1], [libnkutils ][$1][ module feature ][$2])
     ])
 ])
