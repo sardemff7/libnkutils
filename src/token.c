@@ -71,12 +71,10 @@ _nk_token_strchr_escape(gchar *s, gssize l, gunichar c, gunichar pair_c)
     gchar *e = s + l;
 
     gsize pair_count = 0;
-    gchar *w;
-    gunichar wc = g_utf8_get_char(s), pc;
-    if ( wc == c )
-        return s;
+    gchar *w = s;
+    gunichar wc = '\0', pc;
 
-    for ( w = g_utf8_next_char(s) ; w < e ; w = g_utf8_next_char(w) )
+    for ( ; w < e ; w = g_utf8_next_char(w) )
     {
         pc = wc;
         wc = g_utf8_get_char(w);
