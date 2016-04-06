@@ -167,6 +167,32 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/basic/replace/before-after/with",
+        .data = {
+            .source = "You can make a ${adjective/^/(/$/) }${recipe} with ${fruit}${addition/^/ and }.",
+            .data = {
+                "adjective", "creamy",
+                "fruit", "a banana",
+                "recipe", "banana split",
+                "addition", "some cream",
+                NULL
+            },
+            .result = "You can make a (creamy) banana split with a banana and some cream."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/replace/before-after/without",
+        .data = {
+            .source = "You can make a ${adjective/^/(/$/) }${recipe} with ${fruit}${addition/^/ and }.",
+            .data = {
+                "fruit", "a banana",
+                "recipe", "banana split",
+                NULL
+            },
+            .result = "You can make a banana split with a banana."
+        }
+    },
+    {
         .testpath = "/nkutils/token/basic/replace/remove",
         .data = {
             .source = "You can make a ${recipe/ split} with ${fruit}.",
