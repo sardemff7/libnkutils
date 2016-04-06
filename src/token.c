@@ -79,6 +79,10 @@ _nk_token_strchr_escape(gchar *s, gssize l, gunichar c, gunichar pair_c)
         pc = wc;
         wc = g_utf8_get_char(w);
 
+        if ( pc == '\\' )
+            /* Escaped, search for next one */
+            continue;
+
         /* Maybe do we open a paired character */
         if ( ( pair_c != '\0' ) && ( wc == pair_c ) )
             ++pair_count;
@@ -87,10 +91,6 @@ _nk_token_strchr_escape(gchar *s, gssize l, gunichar c, gunichar pair_c)
             continue;
 
         /* We found our character, check if it is the right occurence */
-
-        if ( pc == '\\' )
-            /* Escaped, search for next one */
-            continue;
 
         if ( ( pair_c != '\0' ) && ( pair_count > 0 ) )
         {
