@@ -190,6 +190,18 @@ static const struct {
             .result = "You can make an apple pie with apples."
         }
     },
+    {
+        .testpath = "/nkutils/token/basic/old/before-after",
+        .data = {
+            .source = "You can make a ${(<adjective>) }${recipe} with ${fruit}${ and <addition}.",
+            .data = {
+                "fruit", "a banana",
+                "recipe", "banana split",
+                NULL
+            },
+            .result = "You can make a ${(<adjective>) }banana split with a banana${ and <addition}."
+        }
+    },
 };
 
 static const gchar *
