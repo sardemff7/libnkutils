@@ -136,7 +136,7 @@ nk_token_list_parse(gchar *string)
             };
 
             /* References are ASCII only */
-            while ( g_ascii_isalpha(*w) || ( *w == '-' ) )
+            while ( g_ascii_isalpha(*w) || ( *w == '-' ) || ( *w == '_' ) )
                 w = g_utf8_next_char(w);
 
 

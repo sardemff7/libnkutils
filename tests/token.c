@@ -58,6 +58,18 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/basic/dash-underscore",
+        .data = {
+            .source = "You can make ${recipe_name} with ${fruit-name}.",
+            .data = {
+                "fruit-name", "a banana",
+                "recipe_name", "a banana split",
+                NULL
+            },
+            .result = "You can make a banana split with a banana."
+        }
+    },
+    {
         .testpath = "/nkutils/token/basic/wrong",
         .data = {
             .source = "You can make ${recipe} with $fruit.",

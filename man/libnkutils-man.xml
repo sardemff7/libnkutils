@@ -26,6 +26,7 @@
         <para>
             References use a shell-like format: <userinput>${<replaceable>reference-name</replaceable>}</userinput>.
             Each reference is resolved to a data that is substitued to the reference at the corresponding place in the string.
+            The <replaceable>reference-name</replaceable> can be composed of alphabetic characters, dashes (<literal>'-'</literal>) and underscores (<literal>'_'</literal>).
         </para>
         <para>
             You can use a fallback value if the data resolves to <literal>nothing</literal>.
