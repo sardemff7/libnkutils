@@ -217,6 +217,48 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/basic/replace/braces/paired",
+        .data = {
+            .source = "You can make a ${adjective/.{2}$/y/^/(/$/) }${recipe} with ${fruit}${addition/\\{//\\}//^/ and }.",
+            .data = {
+                "adjective", "creamed",
+                "fruit", "a banana",
+                "recipe", "banana split",
+                "addition", "some cream{}",
+                NULL
+            },
+            .result = "You can make a (creamy) banana split with a banana and some cream."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/replace/braces/opening",
+        .data = {
+            .source = "You can make a ${adjective/.{2}$/y/^/(/$/) }${recipe} with ${fruit}${addition/\\{//^/ and }.",
+            .data = {
+                "adjective", "creamed",
+                "fruit", "a banana",
+                "recipe", "banana split",
+                "addition", "some cream{",
+                NULL
+            },
+            .result = "You can make a (creamy) banana split with a banana and some cream."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/replace/braces/closing",
+        .data = {
+            .source = "You can make a ${adjective/.{2}$/y/^/(/$/) }${recipe} with ${fruit}${addition/\\}//^/ and }.",
+            .data = {
+                "adjective", "creamed",
+                "fruit", "a banana",
+                "recipe", "banana split",
+                "addition", "some cream}",
+                NULL
+            },
+            .result = "You can make a (creamy) banana split with a banana and some cream."
+        }
+    },
+    {
         .testpath = "/nkutils/token/basic/old/before-after",
         .data = {
             .source = "You can make a ${(<adjective>) }${recipe} with ${fruit}${ and <addition}.",
