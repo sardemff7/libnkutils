@@ -155,13 +155,15 @@ static const struct {
     {
         .testpath = "/nkutils/token/basic/replace/capture",
         .data = {
-            .source = "You can make a ${adjective/(.+)/(\\1)}${recipe} with ${fruit}${addition/^/ and }.",
+            .source = "You can make a ${adjective/(.+)/(\\1) }${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
+                "adjective", "creamy",
                 "fruit", "a banana",
                 "recipe", "banana split",
+                "addition", "some cream",
                 NULL
             },
-            .result = "You can make a banana split with a banana."
+            .result = "You can make a (creamy) banana split with a banana and some cream."
         }
     },
     {
