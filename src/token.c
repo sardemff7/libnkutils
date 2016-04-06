@@ -80,8 +80,13 @@ _nk_token_strchr_escape(gchar *s, gssize l, gunichar c, gunichar pair_c)
         wc = g_utf8_get_char(w);
 
         if ( pc == '\\' )
+        {
             /* Escaped, search for next one */
+            if ( wc == '\\' )
+                /* Escaping a backslash, avoid escaping the next char */
+                wc = '\0';
             continue;
+        }
 
         /* Maybe do we open a paired character */
         if ( ( pair_c != '\0' ) && ( wc == pair_c ) )
