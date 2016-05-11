@@ -98,6 +98,8 @@ AC_DEFUN([_NK_ENABLE_MODULE_INTERNAL], [
 # Special dependencies
 AC_DEFUN([_NK_UUID_CHECK], [
     PKG_CHECK_MODULES([_NKUTILS_INTERNAL_UUID_LIBUUID], [uuid], [nk_uuid_libuuid=yes], [nk_uuid_libuuid=no])
-    PKG_CHECK_MODULES([_NKUTILS_INTERNAL_UUID_APR_UTIL], [apr-util-1], [nk_uuid_apr_util=yes], [nk_uuid_apr_util=no])
+    PKG_CHECK_MODULES([_NKUTILS_INTERNAL_UUID_APR_UTIL], [apr-util-1], [nk_uuid_apr_util=yes], [
+        PKG_CHECK_MODULES([_NKUTILS_INTERNAL_UUID_APR_UTIL], [apr-util], [nk_uuid_apr_util=yes], [nk_uuid_apr_util=no])
+    ])
     AS_IF([test x${nk_uuid_libuuid} != xyes -a x${nk_uuid_apr_util} != xyes], [AC_MSG_ERROR([libnkutils: A UUID library is required])])
 ])
