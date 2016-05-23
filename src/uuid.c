@@ -35,30 +35,36 @@
 #include <string.h>
 
 #include <glib.h>
-#include <apr_uuid.h>
 
 #include "nkutils-uuid.h"
 #include "uuid-internal.h"
 
-void
-nk_uuid_update_string(NkUuid *self)
-{
-    apr_uuid_format(self->string, (apr_uuid_t *) self);
-}
+#define SHA1_SIZE 20
 
 void
-nk_uuid_generate(NkUuid *self)
+nk_uuid_from_name(NkUuid *self, const gchar *name, gssize length)
 {
-    apr_uuid_get((apr_uuid_t *) self);
-    nk_uuid_update_string(self);
-}
+    if ( length < 0 )
+        length = strlen(name);
 
-gboolean
-nk_uuid_parse(NkUuid *self, const gchar *string)
-{
-    if ( apr_uuid_parse((apr_uuid_t *) self, string) < 0 )
-        return FALSE;
+    GChecksum *c;
+    c = g_checksum_new(G_CHECKSUM_SHA1);
+    g_checksum_update(c, self->data, NK_UUID_LENGTH);
+    g_checksum_update(c, (const guchar *) name, length);
+
+    guchar sum[SHA1_SIZE];
+    gsize l = SHA1_SIZE;
+    g_checksum_get_digest(c, sum, &l);
+    g_checksum_free(c);
+
+    memcpy(self->data, sum, NK_UUID_LENGTH);
+    /* Set variant as RFC 4122 */
+    self->data[8] &= 0x3F;
+    self->data[8] |= 0x80;
+
+    /* Set version as 5, SHA-1 hash-based */
+    self->data[6] &= 0x0F;
+    self->data[6] |= (5 << 4);
 
     nk_uuid_update_string(self);
-    return TRUE;
 }

@@ -55,6 +55,8 @@ _libnkutils_tests =
 if NK_ENABLE_UUID_LIBUUID
 _libnkutils_sources += \
 	%D%/src/uuid-libuuid.c \
+	%D%/src/uuid-internal.h \
+	%D%/src/uuid.c \
 	%D%/src/nkutils-uuid.h
 
 _NKUTILS_INTERNAL_UUID_CFLAGS = \
@@ -62,10 +64,15 @@ _NKUTILS_INTERNAL_UUID_CFLAGS = \
 
 _NKUTILS_INTERNAL_UUID_LIBS = \
 	$(_NKUTILS_INTERNAL_UUID_LIBUUID_LIBS)
+
+_libnkutils_tests += \
+	%D%/tests/uuid.test
 else
 if NK_ENABLE_UUID_APR_UTIL
 _libnkutils_sources += \
 	%D%/src/uuid-apr-util.c \
+	%D%/src/uuid-internal.h \
+	%D%/src/uuid.c \
 	%D%/src/nkutils-uuid.h
 
 _NKUTILS_INTERNAL_UUID_CFLAGS = \
@@ -73,6 +80,9 @@ _NKUTILS_INTERNAL_UUID_CFLAGS = \
 
 _NKUTILS_INTERNAL_UUID_LIBS = \
 	$(_NKUTILS_INTERNAL_UUID_APR_UTIL_LIBS)
+
+_libnkutils_tests += \
+	%D%/tests/uuid.test
 endif
 endif
 
@@ -144,5 +154,18 @@ endif
 	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
 
 %C%_tests_colour_test_LDADD = \
+	$(NKUTILS_LIBS) \
+	$(_NKUTILS_INTERNAL_TEST_LIBS)
+
+# uuid
+%C%_tests_uuid_test_SOURCES = \
+	%D%/tests/uuid.c
+
+%C%_tests_uuid_test_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(NKUTILS_CFLAGS) \
+	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
+
+%C%_tests_uuid_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)

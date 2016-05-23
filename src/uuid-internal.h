@@ -23,42 +23,9 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
+#ifndef __NK_UTILS_UUID_INTERNAL_H__
+#define __NK_UTILS_UUID_INTERNAL_H__
 
-#ifdef G_LOG_DOMAIN
-#undef G_LOG_DOMAIN
-#endif /* G_LOG_DOMAIN */
-#define G_LOG_DOMAIN "libnkutils-uuid"
+void nk_uuid_update_string(NkUuid *uuid);
 
-#include <string.h>
-
-#include <glib.h>
-#include <apr_uuid.h>
-
-#include "nkutils-uuid.h"
-#include "uuid-internal.h"
-
-void
-nk_uuid_update_string(NkUuid *self)
-{
-    apr_uuid_format(self->string, (apr_uuid_t *) self);
-}
-
-void
-nk_uuid_generate(NkUuid *self)
-{
-    apr_uuid_get((apr_uuid_t *) self);
-    nk_uuid_update_string(self);
-}
-
-gboolean
-nk_uuid_parse(NkUuid *self, const gchar *string)
-{
-    if ( apr_uuid_parse((apr_uuid_t *) self, string) < 0 )
-        return FALSE;
-
-    nk_uuid_update_string(self);
-    return TRUE;
-}
+#endif /* __NK_UTILS_UUID_INTERNAL_H__ */

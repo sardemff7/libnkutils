@@ -37,4 +37,8 @@ typedef struct {
 void nk_uuid_generate(NkUuid *uuid);
 gboolean nk_uuid_parse(NkUuid *uuid, const gchar *string);
 
+/* Uses SHA-1 checksum */
+/* uuid must contain the namespace UUID */
+void nk_uuid_from_name(NkUuid *uuid, const gchar *name, gssize length);
+
 #endif /* __NK_UTILS_UUID_H__ */
