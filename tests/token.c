@@ -311,7 +311,7 @@ static const struct {
 };
 
 static const gchar *
-_nk_token_list_tests_callback(const gchar *token, guint64 value, gconstpointer user_data)
+_nk_token_list_tests_callback(const gchar *token, guint64 value, gpointer user_data)
 {
     const gchar * const *data;
     g_assert_cmpuint(value, ==, 0);
@@ -326,7 +326,7 @@ _nk_token_list_tests_callback(const gchar *token, guint64 value, gconstpointer u
 static void
 _nk_token_list_tests_func(gconstpointer user_data)
 {
-    const NkTokenTestData *data = user_data;
+    NkTokenTestData *data = (NkTokenTestData *) user_data;
 
     NkTokenList *token_list;
     token_list = nk_token_list_parse(g_strdup(data->source));
@@ -354,7 +354,7 @@ static const gchar const * const _nk_token_list_enum_tests_tokens[_TOKEN_SIZE] =
 
 typedef struct {
     const gchar *source;
-    const gchar * const data[_TOKEN_SIZE];
+    gchar *data[_TOKEN_SIZE];
     const gchar *result;
 } NkTokenListEnumTestData;
 
@@ -376,7 +376,7 @@ static const struct {
 };
 
 static const gchar *
-_nk_token_list_enum_tests_callback(const gchar *token, guint64 value, gconstpointer user_data)
+_nk_token_list_enum_tests_callback(const gchar *token, guint64 value, gpointer user_data)
 {
     const gchar * const *data = user_data;
     g_assert_cmpstr(token, ==, _nk_token_list_enum_tests_tokens[value]);
@@ -386,7 +386,7 @@ _nk_token_list_enum_tests_callback(const gchar *token, guint64 value, gconstpoin
 static void
 _nk_token_list_enum_tests_func(gconstpointer user_data)
 {
-    const NkTokenListEnumTestData *data = user_data;
+    NkTokenListEnumTestData *data = (NkTokenListEnumTestData *) user_data;
 
     NkTokenList *token_list;
     token_list = nk_token_list_parse_enum(g_strdup(data->source), _nk_token_list_enum_tests_tokens, _TOKEN_SIZE, NULL);

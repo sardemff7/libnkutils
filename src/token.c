@@ -313,7 +313,7 @@ nk_token_list_unref(NkTokenList *self)
 }
 
 gchar *
-nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callback, gconstpointer user_data)
+nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callback, gpointer user_data)
 {
     g_return_val_if_fail(self != NULL, NULL);
     g_return_val_if_fail(callback != NULL, NULL);
