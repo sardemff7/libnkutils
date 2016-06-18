@@ -33,10 +33,11 @@ noinst_LIBRARIES += \
 
 %C%_libnkutils_a_CFLAGS = \
 	$(AM_CFLAGS) \
-	$(NKUTILS_CFLAGS)
+	$(NKUTILS_CFLAGS) \
+	$(_NKUTILS_INTERNAL_CFLAGS)
 
 %C%_libnkutils_a_LIBADD = \
-	$(_NKUTILS_INTERNAL_UUID_LIBS)\
+	$(_NKUTILS_INTERNAL_UUID_LIBS) \
 	$(_NKUTILS_INTERNAL_GLIB_LIBS)
 
 include %D%/libnkutils-common.mk

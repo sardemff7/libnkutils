@@ -37,6 +37,8 @@ NKUTILS_CFLAGS = \
 	$(_NKUTILS_INTERNAL_UUID_CFLAGS) \
 	$(_NKUTILS_INTERNAL_GLIB_CFLAGS)
 
+_NKUTILS_INTERNAL_CFLAGS =
+
 NKUTILS_LIBS = \
 	$(_libnkutils_library) \
 	$(_NKUTILS_INTERNAL_UUID_LIBS) \
@@ -113,6 +115,18 @@ _libnkutils_tests += \
 	%D%/tests/colour.test
 endif
 
+if NK_ENABLE_XDG_THEME
+_libnkutils_sources += \
+	%D%/src/xdg-theme.c \
+	%D%/src/nkutils-xdg-theme.h
+
+_NKUTILS_INTERNAL_CFLAGS += \
+	-DDATADIR=\"$(datadir)\"
+
+_libnkutils_tests += \
+	%D%/tests/xdg-theme.test
+endif
+
 
 #
 # Tests
@@ -167,5 +181,18 @@ endif
 	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
 
 %C%_tests_uuid_test_LDADD = \
+	$(NKUTILS_LIBS) \
+	$(_NKUTILS_INTERNAL_TEST_LIBS)
+
+# xdg-theme
+%C%_tests_xdg_theme_test_SOURCES = \
+	%D%/tests/xdg-theme.c
+
+%C%_tests_xdg_theme_test_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(NKUTILS_CFLAGS) \
+	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
+
+%C%_tests_xdg_theme_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)

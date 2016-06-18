@@ -33,6 +33,7 @@ AC_DEFUN([NK_INIT], [
 
     m4_map_args_w(_NK_MODULES, [_NK_MODULE_INIT(AS_TR_SH(], [))])
     AC_CONFIG_COMMANDS_PRE([
+        AC_CHECK_HEADERS([locale.h])
         AS_IF([test x${ac_cv_header_string_h} != xyes], [AC_MSG_ERROR([libnkutils: string.h is required])])
         PKG_CHECK_MODULES([_NKUTILS_INTERNAL_GLIB], [glib-2.0 >= ${nk_glib_min_version}])
         PKG_CHECK_MODULES([_NKUTILS_INTERNAL_TEST], [gobject-2.0])
@@ -54,12 +55,12 @@ AC_DEFUN([NK_ENABLE_MODULES], [
     m4_map_args_w([$1], [_NK_ENABLE_MODULE(], [)])
 ])
 
-m4_define([_NK_MODULES], [uuid enum token colour])
+m4_define([_NK_MODULES], [uuid enum token colour xdg-theme])
 m4_define([_NK_FEATURES], [token/enum colour/alpha colour/double colour/string])
 
 
 # auto-enable
-m4_define([_nk_dependent_enum], [token/enum])
+m4_define([_nk_dependent_enum], [token/enum xdg-theme])
 
 
 
