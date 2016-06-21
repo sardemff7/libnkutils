@@ -651,8 +651,15 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *self, const gchar *theme_name, const g
     const gchar *c;
     gsize l;
 
+#ifdef G_OS_WIN32
+    gchar *locale_ = NULL;
+#endif /* G_OS_WIN32 */
     if ( locale == NULL )
+#ifdef G_OS_WIN32
+        locale = locale_ = g_win32_getlocale();
+#else /* ! G_OS_WIN32 */
         locale = setlocale(LC_MESSAGES, NULL);
+#endif /* ! G_OS_WIN32 */
     gchar *locales[5];
     gsize locales_count = 0;
 
@@ -677,6 +684,10 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *self, const gchar *theme_name, const g
     }
     locales[locales_count++] = "C/";
     locales[locales_count++] = "";
+
+#ifdef G_OS_WIN32
+    g_free(locale_);
+#endif /* G_OS_WIN32 */
 
     gsize variants_count = 1;
     l = strlen(name);
