@@ -423,7 +423,6 @@ _nk_xdg_theme_theme_free(gpointer data)
     g_list_free_full(self->subdirs, subdir_free);
     g_list_free(self->inherits);
     g_strfreev(self->dirs);
-    g_free(self->name);
     g_free(self);
 }
 
