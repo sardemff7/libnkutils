@@ -640,9 +640,6 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *self, const gchar *theme_name, const g
     if ( theme == NULL )
         theme = _nk_xdg_theme_get_theme(self, TYPE_SOUND, "freedesktop");
 
-    if ( theme == NULL )
-        return NULL;
-
     NkXdgThemeSoundFindData data = {
         .profile = profile,
     };
@@ -713,7 +710,7 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *self, const gchar *theme_name, const g
         }
     }
 
-    if ( _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_sound_find_file, &data, &file) )
+    if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_sound_find_file, &data, &file) )
         return file;
 
     gchar **subname;
