@@ -8,6 +8,8 @@ compiler:
 
 addons:
     apt:
+        sources:
+            - debian-sid
         packages:
             - autoconf
             - automake
@@ -15,13 +17,16 @@ addons:
             - xsltproc
             - uuid-dev
             - libglib2.0-dev
+            - gnome-icon-theme-extras
+            - gnome-icon-theme-symbolic
+            - sound-theme-freedesktop
+            - pidgin-data
 before_script:
     - mkdir -p m4
     - autoreconf -fiv
     - ./configure --disable-silent-rules
 script:
-    - make check 
-    # For now we cannot run tests as Travis Trusty env lacks IPv6 support
+    - make check
 after_failure:
     - cat test-suite.log
 
