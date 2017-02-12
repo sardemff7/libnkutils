@@ -33,9 +33,7 @@
 #define G_LOG_DOMAIN "libnkutils-xdg-theme"
 
 #include <string.h>
-#ifdef HAVE_LOCALE_H
 #include <locale.h>
-#endif /* HAVE_LOCALE_H */
 
 #include <glib.h>
 #include <glib/gprintf.h>
