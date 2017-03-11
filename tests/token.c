@@ -36,8 +36,13 @@
 #define MAX_DATA 4
 
 typedef struct {
+    const gchar *token;
+    const gchar *content;
+} NkTokenTestDataData;
+
+typedef struct {
     const gchar *source;
-    const gchar *data[MAX_DATA * 2 + 1];
+    NkTokenTestDataData data[MAX_DATA + 1];
     const gchar *result;
 } NkTokenTestData;
 
@@ -50,9 +55,9 @@ static const struct {
         .data = {
             .source = "You can make ${recipe} with ${fruit}.",
             .data = {
-                "fruit", "a banana",
-                "recipe", "a banana split",
-                NULL
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "a banana split" },
+                { .token = NULL }
             },
             .result = "You can make a banana split with a banana."
         }
@@ -62,9 +67,9 @@ static const struct {
         .data = {
             .source = "You can make ${recipe_name} with ${fruit-name}.",
             .data = {
-                "fruit-name", "a banana",
-                "recipe_name", "a banana split",
-                NULL
+                { .token = "fruit-name", .content = "a banana" },
+                { .token = "recipe_name", .content = "a banana split" },
+                { .token = NULL }
             },
             .result = "You can make a banana split with a banana."
         }
@@ -74,9 +79,9 @@ static const struct {
         .data = {
             .source = "You can make ${recipe} with $fruit.",
             .data = {
-                "fruit", "a banana",
-                "recipe", "a banana split",
-                NULL
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "a banana split" },
+                { .token = NULL }
             },
             .result = "You can make a banana split with $fruit."
         }
@@ -86,9 +91,9 @@ static const struct {
         .data = {
             .source = "$fruit is good.",
             .data = {
-                "fruit", "a banana",
-                "recipe", "a banana split",
-                NULL
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "a banana split" },
+                { .token = NULL }
             },
             .result = "$fruit is good."
         }
@@ -96,13 +101,13 @@ static const struct {
     {
         .testpath = "/nkutils/token/basic/wrong/modifier",
         .data = {
-            .source = "You can make a ${recipe} with a ${fruit::}.",
+            .source = "You can make a ${recipe} with ${fruit::}.",
             .data = {
-                "fruit", "a banana",
-                "recipe", "banana split",
-                NULL
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "banana split" },
+                { .token = NULL }
             },
-            .result = "You can make a banana split with a ${fruit::}."
+            .result = "You can make a banana split with ${fruit::}."
         }
     },
     {
@@ -110,8 +115,8 @@ static const struct {
         .data = {
             .source = "I want to eat ${fruit:-an apple}.",
             .data = {
-                "fruit", "a banana",
-                NULL
+                { .token = "fruit", .content = "a banana" },
+                { .token = NULL }
             },
             .result = "I want to eat a banana."
         }
@@ -121,7 +126,7 @@ static const struct {
         .data = {
             .source = "I want to eat ${fruit:-an apple}.",
             .data = {
-                NULL
+                { .token = NULL }
             },
             .result = "I want to eat an apple."
         }
@@ -131,11 +136,11 @@ static const struct {
         .data = {
             .source = "You can make a ${adjective:+(}${adjective}${adjective:+) }${recipe} with ${fruit}${addition:+ and }${addition}.",
             .data = {
-                "adjective", "creamy",
-                "fruit", "a banana",
-                "recipe", "banana split",
-                "addition", "some cream",
-                NULL
+                { .token = "adjective", .content = "creamy" },
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "banana split" },
+                { .token = "addition", .content = "some cream" },
+                { .token = NULL }
             },
             .result = "You can make a (creamy) banana split with a banana and some cream."
         }
@@ -145,9 +150,9 @@ static const struct {
         .data = {
             .source = "You can make a ${adjective:+(}${adjective}${adjective:+) }${recipe} with ${fruit}${addition:+ and }${addition}.",
             .data = {
-                "fruit", "a banana",
-                "recipe", "banana split",
-                NULL
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "banana split" },
+                { .token = NULL }
             },
             .result = "You can make a banana split with a banana."
         }
@@ -157,9 +162,9 @@ static const struct {
         .data = {
             .source = "You can make a ${recipe/split/cream} with ${fruit}.",
             .data = {
-                "fruit", "a banana",
-                "recipe", "banana split",
-                NULL
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "banana split" },
+                { .token = NULL }
             },
             .result = "You can make a banana cream with a banana."
         }
@@ -169,9 +174,9 @@ static const struct {
         .data = {
             .source = "You can make a ${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
-                "fruit", "a banana",
-                "recipe", "banana split",
-                NULL
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "banana split" },
+                { .token = NULL }
             },
             .result = "You can make a banana split with a banana."
         }
@@ -181,11 +186,11 @@ static const struct {
         .data = {
             .source = "You can make a ${adjective/(.+)/(\\1) }${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
-                "adjective", "creamy",
-                "fruit", "a banana",
-                "recipe", "banana split",
-                "addition", "some cream",
-                NULL
+                { .token = "adjective", .content = "creamy" },
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "banana split" },
+                { .token = "addition", .content = "some cream" },
+                { .token = NULL }
             },
             .result = "You can make a (creamy) banana split with a banana and some cream."
         }
@@ -195,11 +200,11 @@ static const struct {
         .data = {
             .source = "You can make a ${adjective/^/(/$/) }${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
-                "adjective", "creamy",
-                "fruit", "a banana",
-                "recipe", "banana split",
-                "addition", "some cream",
-                NULL
+                { .token = "adjective", .content = "creamy" },
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "banana split" },
+                { .token = "addition", .content = "some cream" },
+                { .token = NULL }
             },
             .result = "You can make a (creamy) banana split with a banana and some cream."
         }
@@ -209,9 +214,9 @@ static const struct {
         .data = {
             .source = "You can make a ${adjective/^/(/$/) }${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
-                "fruit", "a banana",
-                "recipe", "banana split",
-                NULL
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "banana split" },
+                { .token = NULL }
             },
             .result = "You can make a banana split with a banana."
         }
@@ -221,9 +226,9 @@ static const struct {
         .data = {
             .source = "You can make a ${recipe/ split} with ${fruit}.",
             .data = {
-                "fruit", "a banana",
-                "recipe", "banana split",
-                NULL
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "banana split" },
+                { .token = NULL }
             },
             .result = "You can make a banana with a banana."
         }
@@ -233,9 +238,9 @@ static const struct {
         .data = {
             .source = "You can make ${recipe/a banana/an apple pie/ split} with ${fruit/.+/apples}.",
             .data = {
-                "fruit", "a banana",
-                "recipe", "a banana split",
-                NULL
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "a banana split" },
+                { .token = NULL }
             },
             .result = "You can make an apple pie with apples."
         }
@@ -245,11 +250,11 @@ static const struct {
         .data = {
             .source = "You can make a ${adjective/.{2}$/y/^/(/$/) }${recipe} with ${fruit}${addition/\\{//\\}//^/ and }.",
             .data = {
-                "adjective", "creamed",
-                "fruit", "a banana",
-                "recipe", "banana split",
-                "addition", "some cream{}",
-                NULL
+                { .token = "adjective", .content = "creamed" },
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "banana split" },
+                { .token = "addition", .content = "some cream{}" },
+                { .token = NULL }
             },
             .result = "You can make a (creamy) banana split with a banana and some cream."
         }
@@ -259,11 +264,11 @@ static const struct {
         .data = {
             .source = "You can make a ${adjective/.{2}$/y/^/(/$/) }${recipe} with ${fruit}${addition/\\{//^/ and }.",
             .data = {
-                "adjective", "creamed",
-                "fruit", "a banana",
-                "recipe", "banana split",
-                "addition", "some cream{",
-                NULL
+                { .token = "adjective", .content = "creamed" },
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "banana split" },
+                { .token = "addition", .content = "some cream{" },
+                { .token = NULL }
             },
             .result = "You can make a (creamy) banana split with a banana and some cream."
         }
@@ -273,11 +278,11 @@ static const struct {
         .data = {
             .source = "You can make a ${adjective/.{2}$/y/^/(/$/) }${recipe} with ${fruit}${addition/\\}//^/ and }.",
             .data = {
-                "adjective", "creamed",
-                "fruit", "a banana",
-                "recipe", "banana split",
-                "addition", "some cream}",
-                NULL
+                { .token = "adjective", .content = "creamed" },
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "banana split" },
+                { .token = "addition", .content = "some cream}" },
+                { .token = NULL }
             },
             .result = "You can make a (creamy) banana split with a banana and some cream."
         }
@@ -287,11 +292,11 @@ static const struct {
         .data = {
             .source = "You can make a ${adjective/^/(/$/) /\\\\}${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
-                "adjective", "creamy\\",
-                "fruit", "a banana",
-                "recipe", "banana split",
-                "addition", "some cream",
-                NULL
+                { .token = "adjective", .content = "creamy\\" },
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "banana split" },
+                { .token = "addition", .content = "some cream" },
+                { .token = NULL }
             },
             .result = "You can make a (creamy) banana split with a banana and some cream."
         }
@@ -301,9 +306,9 @@ static const struct {
         .data = {
             .source = "You can make a ${(<adjective>) }${recipe} with ${fruit}${ and <addition}.",
             .data = {
-                "fruit", "a banana",
-                "recipe", "banana split",
-                NULL
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "banana split" },
+                { .token = NULL }
             },
             .result = "You can make a ${(<adjective>) }banana split with a banana${ and <addition}."
         }
@@ -313,12 +318,13 @@ static const struct {
 static const gchar *
 _nk_token_list_tests_callback(const gchar *token, guint64 value, gpointer user_data)
 {
-    const gchar * const *data;
+    NkTokenTestData *test_data = user_data;
+    NkTokenTestDataData *data;
     g_assert_cmpuint(value, ==, 0);
-    for ( data = user_data ; *data != NULL ; data += 2 )
+    for ( data = test_data->data ; data->token != NULL ; ++data )
     {
-        if ( g_strcmp0(token, *data) == 0 )
-            return *++data;
+        if ( g_strcmp0(token, data->token) == 0 )
+            return data->content;
     }
     return NULL;
 }
@@ -333,7 +339,7 @@ _nk_token_list_tests_func(gconstpointer user_data)
     g_assert_nonnull(token_list);
 
     gchar *result;
-    result = nk_token_list_replace(token_list, _nk_token_list_tests_callback, data->data);
+    result = nk_token_list_replace(token_list, _nk_token_list_tests_callback, data);
 
     g_assert_cmpstr(result, ==, data->result);
 
