@@ -135,8 +135,8 @@ nk_token_list_parse(gchar *string)
                 .name = w
             };
 
-            /* References are ASCII only */
-            while ( g_ascii_isalpha(*w) || ( *w == '-' ) || ( *w == '_' ) )
+            /* References are alpha/-/_ only */
+            while ( g_unichar_isalpha(g_utf8_get_char(w)) || ( g_utf8_get_char(w) == '-' ) || ( g_utf8_get_char(w) == '_' ) )
                 w = g_utf8_next_char(w);
 
 

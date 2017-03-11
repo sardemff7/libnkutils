@@ -75,6 +75,18 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/basic/unicode",
+        .data = {
+            .source = "You can make ${recette} with ${ingrédient}.",
+            .data = {
+                { .token = "ingrédient", .content = "a banana" },
+                { .token = "recette", .content = "a banana split" },
+                { .token = NULL }
+            },
+            .result = "You can make a banana split with a banana."
+        }
+    },
+    {
         .testpath = "/nkutils/token/basic/wrong",
         .data = {
             .source = "You can make ${recipe} with $fruit.",
