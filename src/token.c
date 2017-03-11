@@ -33,6 +33,7 @@
 #define G_LOG_DOMAIN "libnkutils-token"
 
 #include <string.h>
+#include <errno.h>
 
 #include <glib.h>
 
@@ -50,6 +51,8 @@ typedef struct {
 typedef struct {
     const gchar *string;
     const gchar *name;
+    const gchar *key;
+    gint64 index;
     guint64 value;
     const gchar *fallback;
     const gchar *substitute;
@@ -144,6 +147,43 @@ nk_token_list_parse(gchar *string)
             if ( e == NULL )
                 continue;
 
+            if ( ( w != e ) && ( g_utf8_get_char(w) == '[' ) )
+            {
+                gchar *ss = w;
+                const gchar *key = ++w;
+                gint64 index = 0;
+                if ( g_unichar_isdigit(g_utf8_get_char(w)) )
+                {
+                    gchar *ie;
+                    errno = 0;
+                    key = "";
+                    index = g_ascii_strtoll(w, &ie, 10);
+                    if ( ( errno != 0 ) || ( w == ie ) )
+                        continue;
+                    w = ie;
+                }
+                else if ( g_unichar_isalpha(g_utf8_get_char(w)) )
+                {
+                    while ( g_unichar_isalpha(g_utf8_get_char(w)) || ( g_utf8_get_char(w) == '-' ) || ( g_utf8_get_char(w) == '_' ) )
+                        w = g_utf8_next_char(w);
+                }
+                else if ( g_utf8_get_char(w) == '@' )
+                {
+                    /* We consider the rest as a join token */
+                    while ( g_utf8_get_char(w) != ']' )
+                        w = g_utf8_next_char(w);
+                }
+                else
+                    continue;
+
+                if ( g_utf8_get_char(w) != ']' )
+                    continue;
+
+                *ss = '\0';
+                *w++ = '\0';
+                token.key = key;
+                token.index = index;
+            }
 
             if ( w != e )
             switch ( g_utf8_get_char(w) )
@@ -331,7 +371,7 @@ nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callba
         }
 
         const gchar *data;
-        data = callback(self->tokens[i].name, self->tokens[i].value, user_data);
+        data = callback(self->tokens[i].name, self->tokens[i].value, self->tokens[i].key, self->tokens[i].index, user_data);
         if ( data != NULL )
         {
             if ( self->tokens[i].substitute != NULL)

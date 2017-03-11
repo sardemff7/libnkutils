@@ -29,6 +29,11 @@
             The <replaceable>reference-name</replaceable> can be composed of alphabetic characters, dashes (<literal>'-'</literal>) and underscores (<literal>'_'</literal>).
         </para>
         <para>
+            You can use an array-like syntax for some values: <userinput>${<replaceable>reference-name</replaceable>[<replaceable>key</replaceable>]}</userinput>.
+            The <replaceable>key</replaceable> can be a name or a number depending on the data pointed by <replaceable>reference-name</replaceable>.
+            You can use fallback values, substitute values or regexes on array members.
+        </para>
+        <para>
             You can use a fallback value if the data resolves to <literal>nothing</literal>.
             The syntax is: <userinput>${<replaceable>reference-name</replaceable>:-<replaceable>fallback-value</replaceable>}</userinput>.
         </para>

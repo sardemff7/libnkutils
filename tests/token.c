@@ -37,6 +37,8 @@
 
 typedef struct {
     const gchar *token;
+    const gchar *key;
+    gint64 index;
     const gchar *content;
 } NkTokenTestDataData;
 
@@ -108,6 +110,54 @@ static const struct {
                 { .token = NULL }
             },
             .result = "$fruit is good."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/subscript/index",
+        .data = {
+            .source = "You can make a ${recipe[0]} with ${fruit}.",
+            .data = {
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .key = "", .index = 0, .content = "banana split" },
+                { .token = NULL }
+            },
+            .result = "You can make a banana split with a banana."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/subscript/key",
+        .data = {
+            .source = "You can make a ${recipe[icecream]} with ${fruit}.",
+            .data = {
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .key = "icecream", .content = "banana split" },
+                { .token = NULL }
+            },
+            .result = "You can make a banana split with a banana."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/subscript/key/modifier",
+        .data = {
+            .source = "You can make a ${recipe[cake]:-banana cake} with ${fruit}.",
+            .data = {
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .key = "cream", .content = "banana split" },
+                { .token = NULL }
+            },
+            .result = "You can make a banana cake with a banana."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/subscript/join/replace",
+        .data = {
+            .source = "You can make [${recipes[@@]/@/], [}] with ${fruit}.",
+            .data = {
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipes", .key = "@@", .content = "banana pie@banana split" },
+                { .token = NULL }
+            },
+            .result = "You can make [banana pie], [banana split] with a banana."
         }
     },
     {
@@ -328,14 +378,14 @@ static const struct {
 };
 
 static const gchar *
-_nk_token_list_tests_callback(const gchar *token, guint64 value, gpointer user_data)
+_nk_token_list_tests_callback(const gchar *token, guint64 value, const gchar *key, gint64 index, gpointer user_data)
 {
     NkTokenTestData *test_data = user_data;
     NkTokenTestDataData *data;
     g_assert_cmpuint(value, ==, 0);
     for ( data = test_data->data ; data->token != NULL ; ++data )
     {
-        if ( g_strcmp0(token, data->token) == 0 )
+        if ( ( g_strcmp0(token, data->token) == 0 ) && ( g_strcmp0(key, data->key) == 0 ) && ( index == data->index ) )
             return data->content;
     }
     return NULL;
@@ -394,7 +444,7 @@ static const struct {
 };
 
 static const gchar *
-_nk_token_list_enum_tests_callback(const gchar *token, guint64 value, gpointer user_data)
+_nk_token_list_enum_tests_callback(const gchar *token, guint64 value, const gchar *key, gint64 index, gpointer user_data)
 {
     const gchar * const *data = user_data;
     g_assert_cmpstr(token, ==, _nk_token_list_enum_tests_tokens[value]);
