@@ -676,7 +676,7 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *self, const gchar *theme_name, const g
             g_snprintf(locales[locales_count++], l + 2, "%.*s" G_DIR_SEPARATOR_S, (gint) l, locale);
         }
     }
-    locales[locales_count++] = "C/";
+    locales[locales_count++] = "C" G_DIR_SEPARATOR_S;
     locales[locales_count++] = "";
 
 #ifdef G_OS_WIN32
