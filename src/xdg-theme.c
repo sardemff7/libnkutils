@@ -513,7 +513,7 @@ _nk_xdg_theme_try_fallback(gchar **dirs, const gchar *extra_dir, const gchar *th
     if ( theme_name != NULL )
     {
         l = strlen(theme_name) + strlen(G_DIR_SEPARATOR_S) + strlen(name) + 1;
-        themed_name = g_alloca(l);
+        themed_name = g_newa(gchar, l);
         g_snprintf(themed_name, l, "%s%c%s", theme_name, G_DIR_SEPARATOR, name);
     }
 
@@ -585,7 +585,7 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gc
         gchar *no_symbolic_name;
         gsize l;
         l = strlen(name) - strlen("-symbolic") + 1;
-        no_symbolic_name = g_alloca(l);
+        no_symbolic_name = g_newa(gchar, l);
         g_snprintf(no_symbolic_name, l, "%s", name);
         return nk_xdg_theme_get_icon(self, theme_name, no_symbolic_name, size, scalable);
     }
@@ -660,19 +660,19 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *self, const gchar *theme_name, const g
     if ( ( *locale != '\0' ) && ( g_strcmp0(locale, "C") != 0 ) )
     {
         l = strlen(locale);
-        locales[locales_count] = g_alloca(l + 2);
+        locales[locales_count] = g_newa(gchar, l + 2);
         g_snprintf(locales[locales_count++], l + 2, "%s" G_DIR_SEPARATOR_S, locale);
         if ( ( c = g_utf8_strchr(locale, -1, '@') ) != NULL )
         {
             l = (c - locale);
 
-            locales[locales_count] = g_alloca(l + 2);
+            locales[locales_count] = g_newa(gchar, l + 2);
             g_snprintf(locales[locales_count++], l + 2, "%.*s" G_DIR_SEPARATOR_S, (gint) l, locale);
         }
         if ( ( c = g_utf8_strchr(locale, -1, '_') ) != NULL )
         {
             l = (c - locale);
-            locales[locales_count] = g_alloca(l + 1);
+            locales[locales_count] = g_newa(gchar, l + 1);
             g_snprintf(locales[locales_count++], l + 2, "%.*s" G_DIR_SEPARATOR_S, (gint) l, locale);
         }
     }
@@ -688,7 +688,7 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *self, const gchar *theme_name, const g
     for ( c = name ; ( c = g_utf8_strchr(c, l - (c - name), '-') ) != NULL ; ++c )
         ++variants_count;
 
-    data.names = g_alloca(sizeof(gchar *) * ( ( locales_count * variants_count ) + 1 ));
+    data.names = g_newa(gchar *, ( locales_count * variants_count ) + 1);
     data.names[locales_count * variants_count] = NULL;
 
     gsize i, j;
@@ -697,13 +697,13 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *self, const gchar *theme_name, const g
         gsize ll;
         ll = strlen(locales[i]);
 
-        data.names[i * variants_count] = g_alloca(ll + l + 1);
+        data.names[i * variants_count] = g_newa(gchar, ll + l + 1);
         g_snprintf(data.names[i * variants_count], ll + l + 1, "%s%s", locales[i], name);
 
         for ( c = name, j = 1 ; ( c = g_utf8_strrchr(c, l - (c - name), '-') ) != NULL ; ++c, ++j )
         {
             gsize sl = ll + (c - name) + 1;
-            data.names[i * variants_count + j] = g_alloca(sl);
+            data.names[i * variants_count + j] = g_newa(gchar, sl);
             g_snprintf(data.names[i * variants_count + j], sl, "%s%s", locales[i], name);
         }
     }
