@@ -697,12 +697,8 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *self, const gchar *theme_name, const g
         gsize ll;
         ll = strlen(locales[i]);
 
-        data.names[i * variants_count] = g_newa(gchar, ll + l + 1);
-        g_snprintf(data.names[i * variants_count], ll + l + 1, "%s%s", locales[i], name);
-
-        for ( c = name, j = 0 ; j < variants_count ; ++c, ++j )
+        for ( c = name + l, j = 0 ; j < variants_count ; c = g_utf8_strrchr(name, c - name, '-'), ++j )
         {
-            c = g_utf8_strrchr(c, l - (c - name), '-');
             g_assert_nonnull(c);
 
             gsize sl = ll + (c - name) + 1;

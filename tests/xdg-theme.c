@@ -113,6 +113,26 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/xdg-theme/sound/found/variant",
+        .data = {
+            .type = TYPE_SOUND,
+            .theme = "freedesktop",
+            .name = "network-connectivity-established",
+            .profile = "stereo",
+            .result = "/usr/share/sounds/freedesktop/stereo/network-connectivity-established.oga"
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/sound/fallback/variant",
+        .data = {
+            .type = TYPE_SOUND,
+            .theme = "freedesktop",
+            .name = "bell-too-specific",
+            .profile = "stereo",
+            .result = "/usr/share/sounds/freedesktop/stereo/bell.oga"
+        }
+    },
+    {
         .testpath = "/nkutils/xdg-theme/sound/fallback/freedesktop",
         .data = {
             .type = TYPE_SOUND,
