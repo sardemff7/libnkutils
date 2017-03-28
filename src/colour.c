@@ -41,6 +41,7 @@
 
 #include "nkutils-colour.h"
 
+#define NK_COMMA ,
 
 #define _nk_colour_parse_hex(r, c1, c2) G_STMT_START { \
     gchar s__[3] = { c1, c2, '\0' }; \
@@ -53,18 +54,18 @@
     } G_STMT_END
 
 #define _nk_colour_walk_white(s) G_STMT_START { while ( g_ascii_isspace(*s) ) ++s; } G_STMT_END
-#define _nk_colour_check_number_full(s, r, t, f, v1, v2, ...) G_STMT_START { \
+#define _nk_colour_check_number_full(s, r, t, f, fargs, v1, v2) G_STMT_START { \
     _nk_colour_walk_white(s); \
     gchar *e__; \
     t v__; \
-    v__ = f(s, &e__, ## __VA_ARGS__); \
+    v__ = f(s, &e__ fargs); \
     if ( s == e__ ) return FALSE; \
     s = e__; \
     r = CLAMP(v__, v1, v2); \
     _nk_colour_walk_white(s); \
     } G_STMT_END
 #define _nk_colour_check_number(s, r) G_STMT_START { \
-    _nk_colour_check_number_full(s, r, gint64, g_ascii_strtoll, 0, 255, 10); \
+    _nk_colour_check_number_full(s, r, gint64, g_ascii_strtoll,NK_COMMA 10, 0, 255); \
     if ( *s == '%' ) { r = ( MIN(r, 100) * 255 ) / 100; ++s; } \
     _nk_colour_walk_white(s); \
     } G_STMT_END
@@ -129,7 +130,7 @@ _nk_colour_parse(const gchar *s, NkColour *colour, gdouble *ra)
         if ( alpha )
         {
             _nk_colour_check_comma(s);
-            _nk_colour_check_number_full(s, da, gdouble, g_ascii_strtod, 0., 1.);
+            _nk_colour_check_number_full(s, da, gdouble, g_ascii_strtod,, 0., 1.);
             a = da * 255;
         }
 #endif /* NK_ENABLE_COLOUR_ALPHA */
