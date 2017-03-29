@@ -90,6 +90,7 @@ _nk_colour_parse(const gchar *s, NkColour *colour, gdouble *ra)
         case 8: /* rrggbbaa */
             _nk_colour_parse_hex(a, s[6], s[7]);
             da = _nk_colour_uint8_to_double(a);
+            /* fallthrough */
         case 6: /* rrggbb */
             _nk_colour_parse_hex(r, s[0], s[1]);
             _nk_colour_parse_hex(g, s[2], s[3]);
@@ -98,6 +99,7 @@ _nk_colour_parse(const gchar *s, NkColour *colour, gdouble *ra)
         case 4: /* rgba */
             _nk_colour_parse_hex(a, s[3], s[3]);
             da = _nk_colour_uint8_to_double(a);
+            /* fallthrough */
         case 3: /* rgb */
             _nk_colour_parse_hex(r, s[0], s[0]);
             _nk_colour_parse_hex(g, s[1], s[1]);
