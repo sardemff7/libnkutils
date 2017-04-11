@@ -41,23 +41,22 @@
 #include "nkutils-enum.h"
 #include "nkutils-xdg-theme.h"
 
-struct _NkXdgThemeContext {
-    gchar **icon_dirs;
-    GHashTable *icon_themes;
-    gchar **sound_dirs;
-    GHashTable *sound_themes;
-};
-
 typedef enum {
     TYPE_ICON,
     TYPE_SOUND,
 } NkXdgThemeThemeType;
 
+struct _NkXdgThemeContext {
+    gchar **dirs[2];
+    gsize dirs_length[2];
+    GHashTable *icon_themes;
+    GHashTable *sound_themes;
+};
+
 typedef struct {
     NkXdgThemeContext *context;
     NkXdgThemeThemeType type;
     gchar *name;
-    gchar **dirs;
     GList *subdirs;
     GList *inherits;
 } NkXdgThemeTheme;
@@ -166,9 +165,10 @@ static const gchar *_nk_xdg_theme_sound_extensions[] = {
     NULL
 };
 
-static gchar **
-_nk_xdg_theme_find_dirs(const gchar *subdir, const gchar *name)
+static void
+_nk_xdg_theme_find_dirs(NkXdgThemeContext *self, NkXdgThemeThemeType type)
 {
+    const gchar *subdir = _nk_xdg_theme_subdirs[type];
     gchar **dirs;
     gsize length = 0, current = 0;
     const gchar * const *system_dirs;
@@ -180,11 +180,11 @@ _nk_xdg_theme_find_dirs(const gchar *subdir, const gchar *name)
     dirs = g_new0(gchar *, length);
 
 #define try_dir(dir) G_STMT_START { \
-        gchar *_tmp_dir = g_build_filename(dir, subdir, name, NULL); \
+        gchar *_tmp_dir = g_build_filename(dir, subdir, NULL); \
         if ( g_file_test(_tmp_dir, G_FILE_TEST_IS_DIR) ) \
-            dirs[current++] = _tmp_dir; \
+            dirs[current++] = _tmp_dir;\
         else \
-            g_free(_tmp_dir); \
+            g_free(_tmp_dir);\
     } G_STMT_END
 
     try_dir(g_get_user_data_dir());
@@ -198,9 +198,10 @@ _nk_xdg_theme_find_dirs(const gchar *subdir, const gchar *name)
     if ( current == 0 )
     {
         g_free(dirs);
-        return NULL;
+        return;
     }
-    return dirs;
+    self->dirs[type] = dirs;
+    self->dirs_length[type] = current;
 }
 
 static gpointer
@@ -335,10 +336,6 @@ static gpointer _nk_xdg_theme_get_theme(NkXdgThemeContext *self, NkXdgThemeTheme
 static gboolean
 _nk_xdg_theme_find(NkXdgThemeTheme *self)
 {
-    self->dirs = _nk_xdg_theme_find_dirs(_nk_xdg_theme_subdirs[self->type], self->name);
-    if ( self->dirs == NULL )
-        return FALSE;
-
     const gchar *section = _nk_xdg_theme_sections[self->type];
     GKeyFile *file;
 
@@ -347,10 +344,10 @@ _nk_xdg_theme_find(NkXdgThemeTheme *self)
 
     gboolean found = FALSE;
     gchar **dir;
-    for ( dir = self->dirs ; ( ! found ) && ( *dir != NULL ) ; ++dir )
+    for ( dir = self->context->dirs[self->type] ; ( ! found ) && ( *dir != NULL ) ; ++dir )
     {
         gchar *filename;
-        filename = g_build_filename(*dir, "index.theme", NULL);
+        filename = g_build_filename(*dir, self->name, "index.theme", NULL);
         if ( g_key_file_load_from_file(file, filename, G_KEY_FILE_NONE, NULL)
              && g_key_file_has_group(file, section) )
             found = TRUE;
@@ -390,20 +387,20 @@ _nk_xdg_theme_find(NkXdgThemeTheme *self)
             if ( subdir == NULL )
                 continue;
 
-            gsize l, i;
-            l = g_strv_length(self->dirs);
-            subdir->paths = g_new0(gchar *, l);
+            gsize i;
+            subdir->paths = g_new(gchar *, self->context->dirs_length[self->type] + 1);
 
             gchar **dir_;
-            for ( dir_ = self->dirs, i = 0 ; *dir_ != NULL ; ++dir_ )
+            for ( dir_ = self->context->dirs[self->type], i = 0 ; *dir_ != NULL ; ++dir_ )
             {
                 gchar *path;
-                path = g_build_filename(*dir_, *subdir_path, NULL);
+                path = g_build_filename(*dir_, self->name, *subdir_path, NULL);
                 if ( g_file_test(path, G_FILE_TEST_IS_DIR) )
                     subdir->paths[i++] = path;
                 else
                     g_free(path);
             }
+            subdir->paths[i] = NULL;
 
             if ( i == 0 )
                 subdir_free(subdir);
@@ -477,7 +474,6 @@ _nk_xdg_theme_theme_free(gpointer data)
 
     g_list_free_full(self->subdirs, subdir_free);
     g_list_free(self->inherits);
-    g_strfreev(self->dirs);
     g_free(self);
 }
 
@@ -511,9 +507,9 @@ nk_xdg_theme_context_new(void)
     NkXdgThemeContext *self;
     self = g_new0(NkXdgThemeContext, 1);
 
-    self->icon_dirs = _nk_xdg_theme_find_dirs("icons", NULL);
+    _nk_xdg_theme_find_dirs(self, TYPE_ICON);
     self->icon_themes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, _nk_xdg_theme_theme_free);
-    self->sound_dirs = _nk_xdg_theme_find_dirs("sounds", NULL);
+    _nk_xdg_theme_find_dirs(self, TYPE_SOUND);
     self->sound_themes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, _nk_xdg_theme_theme_free);
 
     return self;
@@ -523,9 +519,9 @@ void
 nk_xdg_theme_context_free(NkXdgThemeContext *self)
 {
     g_hash_table_unref(self->sound_themes);
-    g_strfreev(self->sound_dirs);
+    g_strfreev(self->dirs[TYPE_SOUND]);
     g_hash_table_unref(self->icon_themes);
-    g_strfreev(self->icon_dirs);
+    g_strfreev(self->dirs[TYPE_ICON]);
     g_free(self);
 }
 
@@ -648,7 +644,7 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gc
     if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
         return file;
 
-    if ( _nk_xdg_theme_try_fallback(self->icon_dirs, DATADIR G_DIR_SEPARATOR_S "pixmaps", theme_name, name, scalable ? _nk_xdg_theme_icon_extensions : _nk_xdg_theme_icon_extensions + 1, &file) )
+    if ( _nk_xdg_theme_try_fallback(self->dirs[TYPE_ICON], DATADIR G_DIR_SEPARATOR_S "pixmaps", theme_name, name, scalable ? _nk_xdg_theme_icon_extensions : _nk_xdg_theme_icon_extensions + 1, &file) )
         return file;
 
     if ( g_str_has_suffix(name, "-symbolic") )
@@ -784,7 +780,7 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *self, const gchar *theme_name, const g
     gchar **subname;
     for ( subname = data.names ; *subname != NULL ; ++subname )
     {
-        if ( _nk_xdg_theme_try_fallback(self->sound_dirs, NULL, theme_name, *subname, _nk_xdg_theme_sound_extensions, &file) )
+        if ( _nk_xdg_theme_try_fallback(self->dirs[TYPE_SOUND], NULL, theme_name, *subname, _nk_xdg_theme_sound_extensions, &file) )
             return file;
     }
 
