@@ -38,18 +38,23 @@
 
 #include "nkutils-enum.h"
 
+static inline gint
+nk_strcmp0(gboolean ignore_case, const gchar *s1, const gchar *s2)
+{
+    if ( s1 == NULL )
+        return -( s1 != s2 );
+    if ( s2 == NULL )
+        return ( s1 != s2 );
+    return ignore_case ? g_ascii_strcasecmp(s1,  s2) : g_strcmp0(s1, s2);
+}
+
 gboolean
 nk_enum_parse(const gchar *string, const gchar * const *values, guint64 size, gboolean ignore_case, guint64 *value)
 {
-    gint (*string_compare)(const gchar *, const gchar *);
-    if ( ignore_case )
-        string_compare = g_ascii_strcasecmp;
-    else
-        string_compare = g_strcmp0;
     guint64 i;
     for ( i = 0 ; i < size ; ++i )
     {
-        if ( string_compare(string, values[i]) == 0 )
+        if ( nk_strcmp0(ignore_case, string, values[i]) == 0 )
         {
             *value = i;
             return TRUE;
