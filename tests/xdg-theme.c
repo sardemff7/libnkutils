@@ -45,6 +45,7 @@ typedef struct {
     NkXdgThemeTestType type;
     const gchar *theme;
     const gchar *name;
+    const gchar *context;
     gint size;
     gboolean scalable;
     const gchar *profile;
@@ -86,6 +87,44 @@ static const struct {
             .size = 48,
             .scalable = TRUE,
             .result = "/usr/share/icons/gnome/48x48/status/trophy-gold.png"
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/context/exist-match",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "gnome",
+            .name = "network-wireless-signal-ok-symbolic",
+            .context = "Status",
+            .size = 48,
+            .scalable = TRUE,
+            .result = "/usr/share/icons/gnome/scalable/status/network-wireless-signal-ok-symbolic.svg"
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/context/exist-no-match",
+        .data = {
+            .no_skip = TRUE,
+            .type = TYPE_ICON,
+            .theme = "gnome",
+            .name = "network-wireless-signal-ok-symbolic",
+            .context = "Applications",
+            .size = 48,
+            .scalable = TRUE,
+            .result = NULL
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/context/exist-match-2",
+        .data = {
+            .no_skip = TRUE,
+            .type = TYPE_ICON,
+            .theme = "gnome",
+            .name = "emblem-favorite-symbolic",
+            .context = "Emblems",
+            .size = 48,
+            .scalable = TRUE,
+            .result = "/usr/share/icons/gnome/scalable/emblems/emblem-favorite-symbolic.svg"
         }
     },
     {
@@ -169,7 +208,7 @@ _nk_uuid_tests_func(gconstpointer user_data)
     switch ( data->type )
     {
     case TYPE_ICON:
-        file = nk_xdg_theme_get_icon(context, data->theme, data->name, data->size, data->scalable);
+        file = nk_xdg_theme_get_icon(context, data->theme, data->context, data->name, data->size, data->scalable);
     break;
     case TYPE_SOUND:
         file = nk_xdg_theme_get_sound(context, data->theme, data->name, data->profile, NULL);

@@ -68,13 +68,50 @@ typedef enum {
     ICONDIR_TYPE_SCALABLE,
 } NkXdgThemeIconDirType;
 
+typedef enum {
+    ICONDIR_CONTEXT_CUSTOM = -1,
+    ICONDIR_CONTEXT_UNKNOWN = 0,
+    ICONDIR_CONTEXT_ACTIONS,
+    ICONDIR_CONTEXT_ANIMATIONS,
+    ICONDIR_CONTEXT_APPLICATIONS,
+    ICONDIR_CONTEXT_CATEGORIES,
+    ICONDIR_CONTEXT_DEVICES,
+    ICONDIR_CONTEXT_EMBLEMS,
+    ICONDIR_CONTEXT_EMOTES,
+    ICONDIR_CONTEXT_FILESYSTEMS,
+    ICONDIR_CONTEXT_INTERNATIONAL,
+    ICONDIR_CONTEXT_MIMETYPES,
+    ICONDIR_CONTEXT_PLACES,
+    ICONDIR_CONTEXT_STATUS,
+    ICONDIR_CONTEXT_STOCK,
+} NkXdgThemeIconDirContext;
+
 static const gchar * const _nk_xdg_theme_icon_dir_type_names[] = {
     [ICONDIR_TYPE_THRESHOLD] = "Threshold",
     [ICONDIR_TYPE_FIXED]     = "Fixed",
     [ICONDIR_TYPE_SCALABLE]  = "Scalable",
 };
 
+static const gchar * const _nk_xdg_theme_icon_dir_context_names[] = {
+    [ICONDIR_CONTEXT_UNKNOWN] = NULL,
+    [ICONDIR_CONTEXT_ACTIONS]       = "Actions",
+    [ICONDIR_CONTEXT_ANIMATIONS]    = "Animations",
+    [ICONDIR_CONTEXT_APPLICATIONS]  = "Applications",
+    [ICONDIR_CONTEXT_CATEGORIES]    = "Categories",
+    [ICONDIR_CONTEXT_DEVICES]       = "Devices",
+    [ICONDIR_CONTEXT_EMBLEMS]       = "Emblems",
+    [ICONDIR_CONTEXT_EMOTES]        = "Emotes",
+    [ICONDIR_CONTEXT_FILESYSTEMS]   = "FileSystems",
+    [ICONDIR_CONTEXT_INTERNATIONAL] = "International",
+    [ICONDIR_CONTEXT_MIMETYPES]     = "MimeTypes",
+    [ICONDIR_CONTEXT_PLACES]        = "Places",
+    [ICONDIR_CONTEXT_STATUS]        = "Status",
+    [ICONDIR_CONTEXT_STOCK]         = "Stock",
+};
+
 typedef struct {
+    NkXdgThemeIconDirContext context;
+    const gchar *context_custom;
     gint size;
     gboolean scalable;
 } NkXdgThemeIconFindData;
@@ -95,6 +132,8 @@ typedef struct {
     gint size;
     gint min;
     gint max;
+    NkXdgThemeIconDirContext context;
+    gchar *context_custom;
 } NkXdgThemeIconDir;
 
 typedef struct {
@@ -233,6 +272,23 @@ _nk_xdg_theme_icon_subdir_new(GKeyFile *file, const gchar *subdir)
         g_return_val_if_reached(NULL);
     }
 
+    gchar *context;
+    context = g_key_file_get_string(file, subdir, "Context", NULL);
+    if ( context != NULL )
+    {
+        guint64 value;
+        if ( nk_enum_parse(context, _nk_xdg_theme_icon_dir_context_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_context_names), TRUE, &value) )
+        {
+            self->context = value;
+            g_free(context);
+        }
+        else
+        {
+            self->context = ICONDIR_CONTEXT_CUSTOM;
+            self->context_custom = context;
+        }
+    }
+
     return self;
 }
 
@@ -240,6 +296,7 @@ static void
 _nk_xdg_theme_icon_subdir_free(gpointer data)
 {
     NkXdgThemeIconDir *self = data;
+    g_free(self->context_custom);
     g_strfreev(self->base.paths);
     g_slice_free(NkXdgThemeIconDir, self);
 }
@@ -548,6 +605,14 @@ _nk_xdg_theme_icon_find_file(NkXdgThemeTheme *self, const gchar *name, gpointer 
         if ( ( subdir->type == ICONDIR_TYPE_SCALABLE ) && ( ! data->scalable ) )
             continue;
 
+        if ( ( data->context != ICONDIR_CONTEXT_UNKNOWN ) && ( subdir->context != ICONDIR_CONTEXT_UNKNOWN ) )
+        {
+            if ( data->context != subdir->context )
+                continue;
+            if ( ( data->context == ICONDIR_CONTEXT_CUSTOM ) && ( g_ascii_strcasecmp(data->context_custom, subdir->context_custom) != 0 ) )
+                continue;
+        }
+
         if ( ( data->size < subdir->min ) || ( data->size > subdir->max ) )
             continue;
 
@@ -562,7 +627,7 @@ _nk_xdg_theme_icon_find_file(NkXdgThemeTheme *self, const gchar *name, gpointer 
 }
 
 gchar *
-nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gchar *name, gint size, gboolean scalable)
+nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gchar *context_name, const gchar *name, gint size, gboolean scalable)
 {
     NkXdgThemeTheme *theme;
     gchar *file;
@@ -570,10 +635,16 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gc
     if ( theme == NULL )
         theme = _nk_xdg_theme_get_theme(self, TYPE_ICON, "hicolor");
 
+    guint64 value;
     NkXdgThemeIconFindData data = {
+        .context = ICONDIR_CONTEXT_CUSTOM,
+        .context_custom = context_name,
         .size = size,
         .scalable = scalable,
     };
+    if ( nk_enum_parse(context_name, _nk_xdg_theme_icon_dir_context_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_context_names), TRUE, &value) )
+        data.context = value;
+
     if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
         return file;
 
@@ -587,7 +658,7 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gc
         l = strlen(name) - strlen("-symbolic") + 1;
         no_symbolic_name = g_newa(gchar, l);
         g_snprintf(no_symbolic_name, l, "%s", name);
-        return nk_xdg_theme_get_icon(self, theme_name, no_symbolic_name, size, scalable);
+        return nk_xdg_theme_get_icon(self, theme_name, context_name, no_symbolic_name, size, scalable);
     }
 
     return NULL;
