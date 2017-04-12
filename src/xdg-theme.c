@@ -113,6 +113,7 @@ typedef struct {
     const gchar *context_custom;
     gint size;
     gboolean scalable;
+    gboolean svg;
 } NkXdgThemeIconFindData;
 
 typedef struct {
@@ -614,7 +615,7 @@ _nk_xdg_theme_icon_find_file(NkXdgThemeTheme *self, const gchar *name, gpointer 
 
         for ( path = subdir->base.paths ; *path != NULL ; ++path )
         {
-            if ( _nk_xdg_theme_try_file(*path, name, ( subdir->type == ICONDIR_TYPE_SCALABLE ) ? _nk_xdg_theme_icon_extensions : _nk_xdg_theme_icon_extensions + 1, ret) )
+            if ( _nk_xdg_theme_try_file(*path, name, data->svg ? _nk_xdg_theme_icon_extensions : _nk_xdg_theme_icon_extensions + 1, ret) )
                 return TRUE;
         }
     }
@@ -623,7 +624,7 @@ _nk_xdg_theme_icon_find_file(NkXdgThemeTheme *self, const gchar *name, gpointer 
 }
 
 gchar *
-nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gchar *context_name, const gchar *name, gint size, gboolean scalable)
+nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gchar *context_name, const gchar *name, gint size, gboolean scalable, gboolean svg)
 {
     NkXdgThemeTheme *theme;
     gchar *file;
@@ -637,6 +638,7 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gc
         .context_custom = context_name,
         .size = size,
         .scalable = scalable,
+        .svg = svg,
     };
     if ( nk_enum_parse(context_name, _nk_xdg_theme_icon_dir_context_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_context_names), TRUE, &value) )
         data.context = value;
@@ -654,7 +656,7 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gc
         l = strlen(name) - strlen("-symbolic") + 1;
         no_symbolic_name = g_newa(gchar, l);
         g_snprintf(no_symbolic_name, l, "%s", name);
-        return nk_xdg_theme_get_icon(self, theme_name, context_name, no_symbolic_name, size, scalable);
+        return nk_xdg_theme_get_icon(self, theme_name, context_name, no_symbolic_name, size, scalable, svg);
     }
 
     return NULL;

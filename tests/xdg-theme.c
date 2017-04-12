@@ -48,6 +48,7 @@ typedef struct {
     const gchar *context;
     gint size;
     gboolean scalable;
+    gboolean svg;
     const gchar *profile;
     const gchar *result;
 } NkXdgThemeTestData;
@@ -64,6 +65,7 @@ static const struct {
             .name = "zoom-in-symbolic",
             .size = 48,
             .scalable = TRUE,
+            .svg = TRUE,
             .result = "/usr/share/icons/gnome/scalable/actions/zoom-in-symbolic.svg"
         }
     },
@@ -75,6 +77,7 @@ static const struct {
             .name = "zoom-in-symbolic",
             .size = 48,
             .scalable = FALSE,
+            .svg = FALSE,
             .result = "/usr/share/icons/gnome/48x48/actions/zoom-in.png"
         }
     },
@@ -86,11 +89,12 @@ static const struct {
             .name = "trophy-gold-symbolic",
             .size = 48,
             .scalable = TRUE,
+            .svg = TRUE,
             .result = "/usr/share/icons/gnome/48x48/status/trophy-gold.png"
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/context/exist-match",
+        .testpath = "/nkutils/xdg-theme/icon/context/exist-match/1",
         .data = {
             .type = TYPE_ICON,
             .theme = "gnome",
@@ -98,6 +102,7 @@ static const struct {
             .context = "Status",
             .size = 48,
             .scalable = TRUE,
+            .svg = TRUE,
             .result = "/usr/share/icons/gnome/scalable/status/network-wireless-signal-ok-symbolic.svg"
         }
     },
@@ -111,11 +116,12 @@ static const struct {
             .context = "Applications",
             .size = 48,
             .scalable = TRUE,
+            .svg = TRUE,
             .result = NULL
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/context/exist-match-2",
+        .testpath = "/nkutils/xdg-theme/icon/context/exist-match/2",
         .data = {
             .no_skip = TRUE,
             .type = TYPE_ICON,
@@ -124,6 +130,7 @@ static const struct {
             .context = "Emblems",
             .size = 48,
             .scalable = TRUE,
+            .svg = TRUE,
             .result = "/usr/share/icons/gnome/scalable/emblems/emblem-favorite-symbolic.svg"
         }
     },
@@ -136,6 +143,7 @@ static const struct {
             .name = "nothing-on-earth-will-have-that-name",
             .size = 48,
             .scalable = TRUE,
+            .svg = TRUE,
             .result = NULL
         }
     },
@@ -148,6 +156,7 @@ static const struct {
             .name = "nothing-on-earth-will-have-that-name",
             .size = 48,
             .scalable = TRUE,
+            .svg = TRUE,
             .result = NULL
         }
     },
@@ -208,7 +217,7 @@ _nk_uuid_tests_func(gconstpointer user_data)
     switch ( data->type )
     {
     case TYPE_ICON:
-        file = nk_xdg_theme_get_icon(context, data->theme, data->context, data->name, data->size, data->scalable);
+        file = nk_xdg_theme_get_icon(context, data->theme, data->context, data->name, data->size, data->scalable, data->svg);
     break;
     case TYPE_SOUND:
         file = nk_xdg_theme_get_sound(context, data->theme, data->name, data->profile, NULL);
