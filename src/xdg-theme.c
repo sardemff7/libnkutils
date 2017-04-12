@@ -626,6 +626,10 @@ _nk_xdg_theme_icon_find_file(NkXdgThemeTheme *self, const gchar *name, gpointer 
 gchar *
 nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gchar *context_name, const gchar *name, gint size, gboolean scalable, gboolean svg)
 {
+    g_return_val_if_fail(self != NULL, NULL);
+    g_return_val_if_fail(name != NULL, NULL);
+    g_return_val_if_fail(scalable || ! svg, NULL);
+
     NkXdgThemeTheme *theme;
     gchar *file;
     theme = _nk_xdg_theme_get_theme(self, TYPE_ICON, theme_name);
@@ -701,6 +705,9 @@ _nk_xdg_theme_sound_find_file(NkXdgThemeTheme *self, const gchar *name_, gpointe
 gchar *
 nk_xdg_theme_get_sound(NkXdgThemeContext *self, const gchar *theme_name, const gchar *name, const gchar *profile, const gchar *locale)
 {
+    g_return_val_if_fail(self != NULL, NULL);
+    g_return_val_if_fail(name != NULL, NULL);
+
     NkXdgThemeTheme *theme;
     gchar *file;
     theme = _nk_xdg_theme_get_theme(self, TYPE_SOUND, theme_name);
