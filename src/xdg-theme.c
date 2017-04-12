@@ -112,7 +112,7 @@ typedef struct {
     NkXdgThemeIconDirContext context;
     const gchar *context_custom;
     gint size;
-    gboolean scalable;
+    gint scale;
     gboolean svg;
 } NkXdgThemeIconFindData;
 
@@ -130,6 +130,7 @@ typedef struct {
     NkXdgThemeDir base;
     NkXdgThemeIconDirType type;
     gint size;
+    gint scale;
     gint min;
     gint max;
     NkXdgThemeIconDirContext context;
@@ -216,11 +217,19 @@ _nk_xdg_theme_icon_subdir_new(GKeyFile *file, const gchar *subdir)
         g_clear_error(&error);
         return NULL;
     }
+    gint scale;
+    scale = g_key_file_get_integer(file, subdir, "Scale", &error);
+    if ( error != NULL )
+    {
+        scale = 1;
+        g_clear_error(&error);
+    }
 
     NkXdgThemeIconDir *self;
     self = g_slice_new0(NkXdgThemeIconDir);
 
-    self->size = size;
+    self->size = size * scale;
+    self->scale = scale;
     self->min = self->size;
     self->max = self->size;
 
@@ -245,6 +254,7 @@ _nk_xdg_theme_icon_subdir_new(GKeyFile *file, const gchar *subdir)
             threshold = 2;
             g_clear_error(&error);
         }
+        threshold *= scale;
         self->min -= threshold;
         self->max += threshold;
         self->base.weight = (G_MININT>>2) + self->size + 1; /* So that Threshold size comes just before same Fixed */
@@ -259,13 +269,13 @@ _nk_xdg_theme_icon_subdir_new(GKeyFile *file, const gchar *subdir)
 
         limit = g_key_file_get_integer(file, subdir, "MinSize", &error);
         if ( error == NULL )
-            self->min = limit;
+            self->min = limit * scale;
         else
             g_clear_error(&error);
 
         limit = g_key_file_get_integer(file, subdir, "MaxSize", &error);
         if ( error == NULL )
-            self->max = limit;
+            self->max = limit * scale;
         else
             g_clear_error(&error);
 
@@ -607,8 +617,6 @@ _nk_xdg_theme_icon_find_file(NkXdgThemeTheme *self, const gchar *name, gpointer 
     {
         NkXdgThemeIconDir *subdir = subdir_->data;
         gchar **path;
-        if ( ( subdir->type == ICONDIR_TYPE_SCALABLE ) && ( ! data->scalable ) )
-            continue;
 
         if ( ( data->context != ICONDIR_CONTEXT_UNKNOWN ) && ( subdir->context != ICONDIR_CONTEXT_UNKNOWN ) )
         {
@@ -618,7 +626,7 @@ _nk_xdg_theme_icon_find_file(NkXdgThemeTheme *self, const gchar *name, gpointer 
                 continue;
         }
 
-        if ( ( data->size > 0 ) && ( ( data->size < subdir->min ) || ( data->size > subdir->max ) ) )
+        if ( ( data->size > 0 ) && ( ( data->scale != subdir->scale ) || ( data->size < subdir->min ) || ( data->size > subdir->max ) ) )
             continue;
 
         for ( path = subdir->base.paths ; *path != NULL ; ++path )
@@ -632,11 +640,11 @@ _nk_xdg_theme_icon_find_file(NkXdgThemeTheme *self, const gchar *name, gpointer 
 }
 
 gchar *
-nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gchar *context_name, const gchar *name, gint size, gboolean scalable, gboolean svg)
+nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gchar *context_name, const gchar *name, gint size, gint scale, gboolean svg)
 {
     g_return_val_if_fail(self != NULL, NULL);
     g_return_val_if_fail(name != NULL, NULL);
-    g_return_val_if_fail(scalable || ! svg, NULL);
+    g_return_val_if_fail(scale > 0, NULL);
 
     NkXdgThemeTheme *theme;
     gchar *file;
@@ -648,8 +656,8 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gc
     NkXdgThemeIconFindData data = {
         .context = ICONDIR_CONTEXT_CUSTOM,
         .context_custom = context_name,
-        .size = size,
-        .scalable = scalable,
+        .size = size * scale,
+        .scale = scale,
         .svg = svg,
     };
     if ( nk_enum_parse(context_name, _nk_xdg_theme_icon_dir_context_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_context_names), TRUE, &value) )
@@ -658,7 +666,7 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gc
     if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
         return file;
 
-    if ( _nk_xdg_theme_try_fallback(self->dirs[TYPE_ICON], DATADIR G_DIR_SEPARATOR_S "pixmaps", theme_name, name, scalable ? _nk_xdg_theme_icon_extensions : _nk_xdg_theme_icon_extensions + 1, &file) )
+    if ( _nk_xdg_theme_try_fallback(self->dirs[TYPE_ICON], DATADIR G_DIR_SEPARATOR_S "pixmaps", theme_name, name, svg ? _nk_xdg_theme_icon_extensions : _nk_xdg_theme_icon_extensions + 1, &file) )
         return file;
 
     if ( g_str_has_suffix(name, "-symbolic") )
@@ -668,7 +676,7 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gc
         l = strlen(name) - strlen("-symbolic") + 1;
         no_symbolic_name = g_newa(gchar, l);
         g_snprintf(no_symbolic_name, l, "%s", name);
-        return nk_xdg_theme_get_icon(self, theme_name, context_name, no_symbolic_name, size, scalable, svg);
+        return nk_xdg_theme_get_icon(self, theme_name, context_name, no_symbolic_name, size, scale, svg);
     }
 
     return NULL;

@@ -31,7 +31,7 @@ typedef struct _NkXdgThemeContext NkXdgThemeContext;
 NkXdgThemeContext *nk_xdg_theme_context_new(void);
 void nk_xdg_theme_context_free(NkXdgThemeContext *context);
 
-gchar *nk_xdg_theme_get_icon(NkXdgThemeContext *context, const gchar *theme, const gchar *context_name, const gchar *name, gint size, gboolean scalable, gboolean svg);
+gchar *nk_xdg_theme_get_icon(NkXdgThemeContext *context, const gchar *theme, const gchar *context_name, const gchar *name, gint size, gint scale, gboolean svg);
 gchar *nk_xdg_theme_get_sound(NkXdgThemeContext *context, const gchar *theme, const gchar *name, const gchar *profile, const gchar *locale);
 
 #endif /* __NK_UTILS_XDG_THEME_H__ */
