@@ -273,6 +273,11 @@ _nk_xdg_theme_icon_subdir_new(GKeyFile *file, const gchar *subdir)
         g_slice_free(NkXdgThemeIconDir, self);
         g_return_val_if_reached(NULL);
     }
+    if ( self->max < self->min )
+    {
+        g_slice_free(NkXdgThemeIconDir, self);
+        return NULL;
+    }
 
     gchar *context;
     context = g_key_file_get_string(file, subdir, "Context", NULL);
