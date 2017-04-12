@@ -135,6 +135,78 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/xdg-theme/icon/threshold/found",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = NULL,
+            .name = "geany",
+            .size = 18,
+            .scalable = FALSE,
+            .svg = FALSE,
+            .result = "/usr/share/icons/hicolor/16x16/apps/geany.png"
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/size/fallback/1",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = NULL,
+            .name = "htop",
+            .size = 19,
+            .scalable = FALSE,
+            .svg = FALSE,
+            .result = "/usr/share/pixmaps/htop.png"
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/size/fallback/2",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = NULL,
+            .name = "htop",
+            .size = 2,
+            .scalable = FALSE,
+            .svg = FALSE,
+            .result = "/usr/share/pixmaps/htop.png"
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/size/biggest/fixed",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "gnome",
+            .name = "edit-find-symbolic",
+            .size = 0,
+            .scalable = FALSE,
+            .svg = FALSE,
+            .result = "/usr/share/icons/gnome/48x48/actions/edit-find.png"
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/size/biggest/scalable",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "gnome",
+            .name = "edit-find-symbolic",
+            .size = 0,
+            .scalable = TRUE,
+            .svg = FALSE,
+            .result = "/usr/share/icons/gnome/256x256/actions/edit-find.png"
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/size/biggest/svg",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "gnome",
+            .name = "edit-find-symbolic",
+            .size = 0,
+            .scalable = TRUE,
+            .svg = TRUE,
+            .result = "/usr/share/icons/gnome/scalable/actions/edit-find-symbolic.svg"
+        }
+    },
+    {
         .testpath = "/nkutils/xdg-theme/icon/not-found",
         .data = {
             .no_skip = TRUE,

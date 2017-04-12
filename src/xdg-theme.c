@@ -247,13 +247,14 @@ _nk_xdg_theme_icon_subdir_new(GKeyFile *file, const gchar *subdir)
         }
         self->min -= threshold;
         self->max += threshold;
+        self->base.weight = (G_MININT>>2) + self->size + 1; /* So that Threshold size comes just before same Fixed */
     }
     break;
     case ICONDIR_TYPE_FIXED:
+        self->base.weight = (G_MININT>>2) + self->size;
     break;
     case ICONDIR_TYPE_SCALABLE:
     {
-        self->base.weight = 1;
         gint limit;
 
         limit = g_key_file_get_integer(file, subdir, "MinSize", &error);
@@ -267,6 +268,8 @@ _nk_xdg_theme_icon_subdir_new(GKeyFile *file, const gchar *subdir)
             self->max = limit;
         else
             g_clear_error(&error);
+
+        self->base.weight = ( ( self->max - self->min ) << 4 ) / self->size;
     }
     break;
     default:
@@ -615,7 +618,7 @@ _nk_xdg_theme_icon_find_file(NkXdgThemeTheme *self, const gchar *name, gpointer 
                 continue;
         }
 
-        if ( ( data->size < subdir->min ) || ( data->size > subdir->max ) )
+        if ( ( data->size > 0 ) && ( ( data->size < subdir->min ) || ( data->size > subdir->max ) ) )
             continue;
 
         for ( path = subdir->base.paths ; *path != NULL ; ++path )
