@@ -607,10 +607,25 @@ _nk_xdg_theme_try_fallback(gchar **dirs, const gchar *extra_dir, const gchar *th
     return FALSE;
 }
 
+static gint
+_nk_xdg_theme_icon_subdir_compute_distance(NkXdgThemeIconDir *self, gint size)
+{
+    if ( self->type == ICONDIR_TYPE_FIXED )
+        return ABS(self->size - size);
+    if ( size < self->min )
+        return self->min - size;
+    if ( size > self->max )
+        return size - self->max;
+    return 0;
+}
+
 static gboolean
 _nk_xdg_theme_icon_find_file(NkXdgThemeTheme *self, const gchar *name, gpointer user_data, gchar **ret)
 {
     NkXdgThemeIconFindData *data = user_data;
+
+    gint best_distance = G_MAXINT;
+    gchar *best_file = NULL;
 
     GList *subdir_;
     for ( subdir_ = self->subdirs ; subdir_ != NULL ; subdir_ = g_list_next(subdir_) )
@@ -626,17 +641,40 @@ _nk_xdg_theme_icon_find_file(NkXdgThemeTheme *self, const gchar *name, gpointer 
                 continue;
         }
 
-        if ( ( data->size > 0 ) && ( ( data->scale != subdir->scale ) || ( data->size < subdir->min ) || ( data->size > subdir->max ) ) )
-            continue;
+        gboolean try_best = ( ( data->size > 0 ) && ( ( data->scale != subdir->scale ) || ( data->size < subdir->min ) || ( data->size > subdir->max ) ) );
 
         for ( path = subdir->base.paths ; *path != NULL ; ++path )
         {
-            if ( _nk_xdg_theme_try_file(*path, name, data->svg ? _nk_xdg_theme_icon_extensions : _nk_xdg_theme_icon_extensions + 1, ret) )
-                return TRUE;
+            gchar *file;
+            if ( _nk_xdg_theme_try_file(*path, name, data->svg ? _nk_xdg_theme_icon_extensions : _nk_xdg_theme_icon_extensions + 1, &file) )
+            {
+                if ( try_best )
+                {
+                    gint distance;
+                    distance = _nk_xdg_theme_icon_subdir_compute_distance(subdir, data->size);
+                    if ( distance < best_distance )
+                    {
+                        g_free(best_file);
+                        best_file = file;
+                        best_distance = distance;
+                    }
+                    else
+                        g_free(file);
+                }
+                else
+                {
+                    *ret = file;
+                    return TRUE;
+                }
+            }
         }
     }
 
-    return FALSE;
+    if ( best_file == NULL )
+        return FALSE;
+
+    *ret = best_file;
+    return TRUE;
 }
 
 gchar *

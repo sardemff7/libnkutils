@@ -195,6 +195,18 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/xdg-theme/icon/size/best-distance",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "gnome",
+            .name = "edit-find",
+            .size = 19,
+            .scale = 1,
+            .svg = FALSE,
+            .result = "/usr/share/icons/gnome/22x22/actions/edit-find.png"
+        }
+    },
+    {
         .testpath = "/nkutils/xdg-theme/icon/not-found",
         .data = {
             .no_skip = TRUE,
