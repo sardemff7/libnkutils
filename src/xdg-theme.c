@@ -704,7 +704,7 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gc
     if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
         return file;
 
-    if ( _nk_xdg_theme_try_fallback(self->dirs[TYPE_ICON], DATADIR G_DIR_SEPARATOR_S "pixmaps", theme_name, name, svg ? _nk_xdg_theme_icon_extensions : _nk_xdg_theme_icon_extensions + 1, &file) )
+    if ( _nk_xdg_theme_try_fallback(self->dirs[TYPE_ICON], G_DIR_SEPARATOR_S "usr" G_DIR_SEPARATOR_S "share" G_DIR_SEPARATOR_S "pixmaps", theme_name, name, svg ? _nk_xdg_theme_icon_extensions : _nk_xdg_theme_icon_extensions + 1, &file) )
         return file;
 
     if ( g_str_has_suffix(name, "-symbolic") )
