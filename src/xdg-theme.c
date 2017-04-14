@@ -684,12 +684,6 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gc
     g_return_val_if_fail(name != NULL, NULL);
     g_return_val_if_fail(scale > 0, NULL);
 
-    NkXdgThemeTheme *theme;
-    gchar *file;
-    theme = _nk_xdg_theme_get_theme(self, TYPE_ICON, theme_name);
-    if ( theme == NULL )
-        theme = _nk_xdg_theme_get_theme(self, TYPE_ICON, "hicolor");
-
     guint64 value;
     NkXdgThemeIconFindData data = {
         .context = ICONDIR_CONTEXT_CUSTOM,
@@ -701,6 +695,14 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gc
     if ( nk_enum_parse(context_name, _nk_xdg_theme_icon_dir_context_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_context_names), TRUE, &value) )
         data.context = value;
 
+    NkXdgThemeTheme *theme;
+    gchar *file;
+
+    theme = _nk_xdg_theme_get_theme(self, TYPE_ICON, theme_name);
+    if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
+        return file;
+
+    theme = _nk_xdg_theme_get_theme(self, TYPE_ICON, "hicolor");
     if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
         return file;
 

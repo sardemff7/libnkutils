@@ -98,6 +98,19 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/xdg-theme/icon/theme-found/fallback",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "gnome",
+            .name = "geany",
+            .size = 16,
+            .scale = 1,
+            .svg = FALSE,
+            .result = "/usr/share/icons/hicolor/16x16/apps/geany.png",
+            .theme_test = "/usr/share/icons/gnome/index.theme",
+        }
+    },
+    {
         .testpath = "/nkutils/xdg-theme/icon/context/exist-match/1",
         .data = {
             .type = TYPE_ICON,
