@@ -51,6 +51,7 @@ typedef struct {
     gboolean svg;
     const gchar *profile;
     const gchar *result;
+    const gchar *theme_test;
 } NkXdgThemeTestData;
 
 static const struct {
@@ -66,7 +67,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/gnome/scalable/actions/zoom-in-symbolic.svg"
+            .result = "/usr/share/icons/gnome/scalable/actions/zoom-in-symbolic.svg",
+            .theme_test = "/usr/share/icons/gnome/index.theme",
         }
     },
     {
@@ -78,7 +80,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/icons/gnome/48x48/actions/zoom-in.png"
+            .result = "/usr/share/icons/gnome/48x48/actions/zoom-in.png",
+            .theme_test = "/usr/share/icons/gnome/index.theme",
         }
     },
     {
@@ -90,7 +93,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/gnome/48x48/status/trophy-gold.png"
+            .result = "/usr/share/icons/gnome/48x48/status/trophy-gold.png",
+            .theme_test = "/usr/share/icons/gnome/index.theme",
         }
     },
     {
@@ -103,7 +107,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/gnome/scalable/status/network-wireless-signal-ok-symbolic.svg"
+            .result = "/usr/share/icons/gnome/scalable/status/network-wireless-signal-ok-symbolic.svg",
+            .theme_test = "/usr/share/icons/gnome/index.theme",
         }
     },
     {
@@ -117,7 +122,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = NULL
+            .result = NULL,
+            .theme_test = "/usr/share/icons/gnome/index.theme",
         }
     },
     {
@@ -131,7 +137,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/gnome/scalable/emblems/emblem-favorite-symbolic.svg"
+            .result = "/usr/share/icons/gnome/scalable/emblems/emblem-favorite-symbolic.svg",
+            .theme_test = "/usr/share/icons/gnome/index.theme",
         }
     },
     {
@@ -143,7 +150,8 @@ static const struct {
             .size = 18,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/icons/hicolor/16x16/apps/geany.png"
+            .result = "/usr/share/icons/hicolor/16x16/apps/geany.png",
+            .theme_test = "/usr/share/icons/hicolor/index.theme",
         }
     },
     {
@@ -155,7 +163,7 @@ static const struct {
             .size = 19,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/pixmaps/htop.png"
+            .result = "/usr/share/pixmaps/htop.png",
         }
     },
     {
@@ -167,7 +175,7 @@ static const struct {
             .size = 2,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/pixmaps/htop.png"
+            .result = "/usr/share/pixmaps/htop.png",
         }
     },
     {
@@ -179,7 +187,8 @@ static const struct {
             .size = 0,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/icons/gnome/256x256/actions/edit-find.png"
+            .result = "/usr/share/icons/gnome/256x256/actions/edit-find.png",
+            .theme_test = "/usr/share/icons/gnome/index.theme",
         }
     },
     {
@@ -191,7 +200,8 @@ static const struct {
             .size = 0,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/gnome/scalable/actions/edit-find-symbolic.svg"
+            .result = "/usr/share/icons/gnome/scalable/actions/edit-find-symbolic.svg",
+            .theme_test = "/usr/share/icons/gnome/index.theme",
         }
     },
     {
@@ -203,7 +213,8 @@ static const struct {
             .size = 19,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/icons/gnome/22x22/actions/edit-find.png"
+            .result = "/usr/share/icons/gnome/22x22/actions/edit-find.png",
+            .theme_test = "/usr/share/icons/gnome/index.theme",
         }
     },
     {
@@ -216,7 +227,7 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = NULL
+            .result = NULL,
         }
     },
     {
@@ -229,7 +240,7 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = NULL
+            .result = NULL,
         }
     },
     {
@@ -239,7 +250,8 @@ static const struct {
             .theme = "freedesktop",
             .name = "network-connectivity-established",
             .profile = "stereo",
-            .result = "/usr/share/sounds/freedesktop/stereo/network-connectivity-established.oga"
+            .result = "/usr/share/sounds/freedesktop/stereo/network-connectivity-established.oga",
+            .theme_test = "/usr/share/sounds/freedesktop/index.theme",
         }
     },
     {
@@ -249,7 +261,8 @@ static const struct {
             .theme = "freedesktop",
             .name = "bell-too-specific",
             .profile = "stereo",
-            .result = "/usr/share/sounds/freedesktop/stereo/bell.oga"
+            .result = "/usr/share/sounds/freedesktop/stereo/bell.oga",
+            .theme_test = "/usr/share/sounds/freedesktop/index.theme",
         }
     },
     {
@@ -259,7 +272,8 @@ static const struct {
             .theme = "non-existing-i-hope",
             .name = "dialog-information",
             .profile = "stereo",
-            .result = "/usr/share/sounds/freedesktop/stereo/dialog-information.oga"
+            .result = "/usr/share/sounds/freedesktop/stereo/dialog-information.oga",
+            .theme_test = "/usr/share/sounds/freedesktop/index.theme",
         }
     },
     {
@@ -269,7 +283,7 @@ static const struct {
             .theme = "purple",
             .name = "logout",
             .profile = "stereo",
-            .result = "/usr/share/sounds/purple/logout.wav"
+            .result = "/usr/share/sounds/purple/logout.wav",
         }
     },
 };
@@ -279,10 +293,13 @@ _nk_uuid_tests_func(gconstpointer user_data)
 {
     const NkXdgThemeTestData *data = user_data;
 
-    if ( ( ! data->no_skip) && ( ! g_file_test(data->result, G_FILE_TEST_IS_REGULAR) ) )
+    if ( ! data->no_skip )
     {
-        g_test_skip("Theme not installed");
-        return;
+        if ( ! g_file_test(data->result, G_FILE_TEST_IS_REGULAR) && ( ( data->theme_test == NULL ) || ( ! g_file_test(data->theme_test, G_FILE_TEST_IS_REGULAR) ) ) )
+        {
+            g_test_skip("Theme not installed");
+            return;
+        }
     }
 
     gchar *file;
