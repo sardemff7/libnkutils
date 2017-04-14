@@ -308,7 +308,7 @@ _nk_uuid_tests_func(gconstpointer user_data)
 
     if ( ! data->no_skip )
     {
-        if ( ! g_file_test(data->result, G_FILE_TEST_IS_REGULAR) && ( ( data->theme_test == NULL ) || ( ! g_file_test(data->theme_test, G_FILE_TEST_IS_REGULAR) ) ) )
+        if ( ! g_file_test(data->result, G_FILE_TEST_IS_REGULAR) || ( ( data->theme_test != NULL ) && ( ! g_file_test(data->theme_test, G_FILE_TEST_IS_REGULAR) ) ) )
         {
             g_test_skip("Theme not installed");
             return;
