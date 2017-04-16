@@ -41,7 +41,6 @@ typedef enum {
 } NkXdgThemeTestType;
 
 typedef struct {
-    gboolean no_skip;
     NkXdgThemeTestType type;
     const gchar *theme;
     const gchar *name;
@@ -127,7 +126,6 @@ static const struct {
     {
         .testpath = "/nkutils/xdg-theme/icon/context/exist-no-match",
         .data = {
-            .no_skip = TRUE,
             .type = TYPE_ICON,
             .theme = "gnome",
             .name = "network-wireless-signal-ok-symbolic",
@@ -142,7 +140,6 @@ static const struct {
     {
         .testpath = "/nkutils/xdg-theme/icon/context/exist-match/2",
         .data = {
-            .no_skip = TRUE,
             .type = TYPE_ICON,
             .theme = "gnome",
             .name = "emblem-favorite-symbolic",
@@ -233,7 +230,6 @@ static const struct {
     {
         .testpath = "/nkutils/xdg-theme/icon/not-found",
         .data = {
-            .no_skip = TRUE,
             .type = TYPE_ICON,
             .theme = "do-not-exists-hopefully",
             .name = "nothing-on-earth-will-have-that-name",
@@ -246,7 +242,6 @@ static const struct {
     {
         .testpath = "/nkutils/xdg-theme/icon/no-theme",
         .data = {
-            .no_skip = TRUE,
             .type = TYPE_ICON,
             .theme = NULL,
             .name = "nothing-on-earth-will-have-that-name",
@@ -306,13 +301,11 @@ _nk_uuid_tests_func(gconstpointer user_data)
 {
     const NkXdgThemeTestData *data = user_data;
 
-    if ( ! data->no_skip )
+    if ( ( ( data->result != NULL ) && ( ! g_file_test(data->result, G_FILE_TEST_IS_REGULAR) ) )
+         || ( ( data->theme_test != NULL ) && ( ! g_file_test(data->theme_test, G_FILE_TEST_IS_REGULAR) ) ) )
     {
-        if ( ! g_file_test(data->result, G_FILE_TEST_IS_REGULAR) || ( ( data->theme_test != NULL ) && ( ! g_file_test(data->theme_test, G_FILE_TEST_IS_REGULAR) ) ) )
-        {
-            g_test_skip("Theme not installed");
-            return;
-        }
+        g_test_skip("Theme not installed");
+        return;
     }
 
     gchar *file;
