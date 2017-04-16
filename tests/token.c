@@ -399,12 +399,14 @@ _nk_token_list_tests_func(gconstpointer user_data)
     NkTokenList *token_list;
     token_list = nk_token_list_parse(g_strdup(data->source));
     g_assert_nonnull(token_list);
+    g_assert_nonnull(nk_token_list_ref(token_list));
 
     gchar *result;
     result = nk_token_list_replace(token_list, _nk_token_list_tests_callback, data);
 
     g_assert_cmpstr(result, ==, data->result);
 
+    nk_token_list_unref(token_list);
     nk_token_list_unref(token_list);
 }
 
