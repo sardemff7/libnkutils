@@ -1,5 +1,5 @@
 dist: trusty
-sudo: required
+sudo: false
 
 language: c
 compiler:
@@ -8,14 +8,14 @@ compiler:
 
 addons:
     apt:
-        sources:
-            - debian-sid
         packages:
             - autoconf
             - automake
             - make
             - xsltproc
-            - uuid-dev
+            # Workaround
+            - libaprutil1-dev
+            #- uuid-dev
             - libglib2.0-dev
             - gnome-icon-theme-extras
             - gnome-icon-theme-symbolic
