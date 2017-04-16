@@ -28,6 +28,7 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <string.h>
+#include <locale.h>
 
 #include <glib.h>
 
@@ -324,11 +325,11 @@ _nk_uuid_tests_func(gconstpointer user_data)
     g_free(file);
 }
 
-#include <locale.h>
 int
 main(int argc, char *argv[])
 {
-  setlocale (LC_ALL, "");
+    setlocale(LC_ALL, "");
+
     g_test_init(&argc, &argv, NULL);
 
     g_test_set_nonfatal_assertions();
