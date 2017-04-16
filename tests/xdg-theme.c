@@ -153,7 +153,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/threshold/found",
+        .testpath = "/nkutils/xdg-theme/icon/threshold/found/1",
         .data = {
             .type = TYPE_ICON,
             .theme = NULL,
@@ -166,7 +166,33 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/size/fallback/1",
+        .testpath = "/nkutils/xdg-theme/icon/threshold/found/2",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = NULL,
+            .name = "pidgin",
+            .size = 18,
+            .scale = 1,
+            .svg = FALSE,
+            .result = "/usr/share/icons/hicolor/16x16/apps/pidgin.png",
+            .theme_test = "/usr/share/icons/hicolor/index.theme",
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/size/fallback/hicolor/1",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "gnome",
+            .name = "pidgin",
+            .size = 0,
+            .scale = 1,
+            .svg = TRUE,
+            .result = "/usr/share/icons/hicolor/scalable/apps/pidgin.svg",
+            .theme_test = "/usr/share/icons/gnome/index.theme",
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/size/fallback/pixmaps/1",
         .data = {
             .type = TYPE_ICON,
             .theme = NULL,
@@ -178,15 +204,15 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/size/fallback/2",
+        .testpath = "/nkutils/xdg-theme/icon/size/fallback/pixmaps/2",
         .data = {
             .type = TYPE_ICON,
             .theme = NULL,
-            .name = "htop",
-            .size = 2,
+            .name = "debian-logo",
+            .size = 0,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/pixmaps/htop.png",
+            .result = "/usr/share/pixmaps/debian-logo.png",
         }
     },
     {
