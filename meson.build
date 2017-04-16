@@ -22,10 +22,9 @@
 # THE SOFTWARE.
 #
 
-nk_enabled_modules = []
-foreach m : nk_modules
-    nk_enabled_modules += '-'.join(m.split('/'))
-endforeach
+project('libnkutils', 'c',
+    license: 'MIT'
+)
 
 nk_glib_min_version = '2.40'
 
@@ -59,31 +58,28 @@ nkutils_manfiles = files('man/libnkutils-man.xml')
 nkutils_docbook_conditions = []
 
 foreach m : nk_modules
-    if nk_enabled_modules.contains(m)
+    if get_option(m)
         nk_options += '@0@=true'.format(m)
     endif
-    set_variable(m.underscorify(), nk_enabled_modules.contains(m))
+    set_variable(m.underscorify(), get_option(m) or not meson.is_subproject())
 endforeach
 
 foreach f : nk_features
     s = f.split('/')
     m = s[0]
     f = '-'.join(s)
-    if nk_enabled_modules.contains(f)
+    if get_option(f) or not meson.is_subproject()
         nk_options += '@0@=true'.format(f)
         nk_args += '-DNK_ENABLE_@0@'.format(f.underscorify().to_upper())
         nkutils_docbook_conditions += 'nk_enable_@0@'.format(f.underscorify().to_lower())
         set_variable(m.underscorify(), true)
     endif
 endforeach
-if is_variable('docbook_conditions')
-    docbook_conditions += nkutils_docbook_conditions
-endif
 
 foreach d : nk_dependencies
     m = d[1]
     d = '-'.join(d[0].split('/'))
-    if nk_enabled_modules.contains(d)
+    if get_option(d)
         set_variable(m.underscorify(), true)
     endif
 endforeach
