@@ -22,25 +22,82 @@
 # THE SOFTWARE.
 #
 
+nk_enabled_modules = []
+foreach m : nk_modules
+    nk_enabled_modules += '-'.join(m.split('/'))
+endforeach
+
 nk_glib_min_version = '2.40'
+
+nk_options = []
+
+nk_modules = [
+    'uuid',
+    'token',
+    'xdg-theme',
+    'enum',
+    'colour'
+]
+nk_features = [
+    'token/enum',
+    'colour/alpha',
+    'colour/double',
+    'colour/string'
+]
+nk_dependencies = [
+    [ 'token/enum', 'enum' ],
+    [ 'xdg-theme', 'enum' ],
+]
 
 nk_sources = []
 nk_args = [ '-DDATADIR="@0@"'.format(join_paths(get_option('prefix'), get_option('datadir'))) ]
 nk_deps = [ dependency('glib-2.0', version: '>= @0@'.format(nk_glib_min_version)) ]
 nk_test_deps = [ dependency('gobject-2.0') ]
 
-foreach f : nk_modules
-    if f.contains('/')
-        nk_modules += f.split('/')[0]
+nkutils_xsltpath = join_paths(meson.current_source_dir(), 'man')
+nkutils_manfiles = files('man/libnkutils-man.xml')
+nkutils_docbook_conditions = []
+
+foreach m : nk_modules
+    if nk_enabled_modules.contains(m)
+        nk_options += '@0@=true'.format(m)
+    endif
+    set_variable(m.underscorify(), nk_enabled_modules.contains(m))
+endforeach
+
+foreach f : nk_features
+    s = f.split('/')
+    m = s[0]
+    f = '-'.join(s)
+    if nk_enabled_modules.contains(f)
+        nk_options += '@0@=true'.format(f)
+        nk_args += '-DNK_ENABLE_@0@'.format(f.underscorify().to_upper())
+        nkutils_docbook_conditions += 'nk_enable_@0@'.format(f.underscorify().to_lower())
+        set_variable(m.underscorify(), true)
+    endif
+endforeach
+if is_variable('docbook_conditions')
+    docbook_conditions += nkutils_docbook_conditions
+endif
+
+foreach d : nk_dependencies
+    m = d[1]
+    d = '-'.join(d[0].split('/'))
+    if nk_enabled_modules.contains(d)
+        set_variable(m.underscorify(), true)
     endif
 endforeach
 
-if nk_modules.contains('uuid')
-    nk_sources += [
-        'src/uuid-internal.h',
-        'src/uuid.c',
-        'src/nkutils-uuid.h',
-    ]
+foreach m : nk_modules
+    if get_variable(m.underscorify())
+        nk_sources += [
+            'src/@0@.c'.format(m),
+            'src/nkutils-@0@.h'.format(m),
+        ]
+    endif
+endforeach
+
+if uuid
     nk_libuuid = dependency('uuid', required: false)
     nk_apr_util_1 = dependency('apr-util-1', required: false)
     nk_apr_util = dependency('apr-util', required: false)
@@ -56,48 +113,7 @@ if nk_modules.contains('uuid')
     else
         error('libnkutils: A UUID library is required')
     endif
-endif
-
-if nk_modules.contains('token')
-    if nk_modules.contains('token/enum')
-        nk_modules += 'enum'
-        nk_args += '-DNK_ENABLE_TOKEN_ENUM'
-    endif
-    nk_sources += [
-        'src/token.c',
-        'src/nkutils-token.h',
-    ]
-endif
-
-if nk_modules.contains('xdg-theme')
-    nk_modules += 'enum'
-    nk_sources += [
-        'src/xdg-theme.c',
-        'src/nkutils-xdg-theme.h',
-    ]
-endif
-
-if nk_modules.contains('enum')
-    nk_sources += [
-        'src/enum.c',
-        'src/nkutils-enum.h',
-    ]
-endif
-
-if nk_modules.contains('colour')
-    if nk_modules.contains('colour/alpha')
-        nk_args += '-DNK_ENABLE_COLOUR_ALPHA'
-    endif
-    if nk_modules.contains('colour/double')
-        nk_args += '-DNK_ENABLE_COLOUR_DOUBLE'
-    endif
-    if nk_modules.contains('colour/string')
-        nk_args += '-DNK_ENABLE_COLOUR_STRING'
-    endif
-    nk_sources += [
-        'src/colour.c',
-        'src/nkutils-colour.h',
-    ]
+    nk_sources += 'src/uuid-internal.h'
 endif
 
 nk_lib = static_library('nkutils', nk_sources, c_args: nk_args, dependencies: nk_deps)
@@ -105,20 +121,8 @@ nk_inc = include_directories('src')
 
 libnkutils = declare_dependency(link_with: nk_lib, include_directories: nk_inc, dependencies: nk_deps)
 
-
-if is_variable('docbook_conditions')
-    nkutils_xsltpath = join_paths(meson.current_source_dir(), 'man')
-    nkutils_manfiles = files('man/libnkutils-man.xml')
-
-    foreach f : nk_modules
-        if f.contains('/')
-            docbook_conditions += 'nk_enable_@0@'.format(f.underscorify().to_lower())
-        endif
-    endforeach
-endif
-
-foreach m : [ 'uuid', 'token', 'xdg-theme', 'enum', 'colour' ]
-    if nk_modules.contains(m)
+foreach m : nk_modules
+    if get_variable(m.underscorify())
         nk_test = executable('nk-@0@.test'.format(m), 'tests/@0@.c'.format(m), dependencies: libnkutils)
         test('libnkutils @0@ module tests'.format(m), nk_test)
     endif
