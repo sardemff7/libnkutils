@@ -37,12 +37,20 @@ typedef struct {
     const gchar *string;
     const gchar *generated_string;
     const NkColour colour;
+    gboolean ret;
 } NkColourTestData;
 
 static const struct {
     const gchar *testpath;
     NkColourTestData data;
 } _nk_colour_tests_list[] = {
+    {
+        .testpath = "/nkutils/colour/null",
+        .data ={
+            .string = NULL,
+            .ret = FALSE,
+        }
+    },
 #ifdef NK_ENABLE_COLOUR_ALPHA
     {
         .testpath = "/nkutils/colour/hex/8",
@@ -53,7 +61,8 @@ static const struct {
                 .green = 0xdd,
                 .blue  = 0xee,
                 .alpha = 0x7f
-            }
+            },
+            .ret = TRUE,
         }
     },
 #endif /* NK_ENABLE_COLOUR_ALPHA */
@@ -66,7 +75,8 @@ static const struct {
                 .green = 0x13,
                 .blue  = 0x14,
                 .alpha = 0xff
-            }
+            },
+            .ret = TRUE,
         }
     },
 #ifdef NK_ENABLE_COLOUR_ALPHA
@@ -80,7 +90,8 @@ static const struct {
                 .green = 0xbb,
                 .blue  = 0xcc,
                 .alpha = 0xdd
-            }
+            },
+            .ret = TRUE,
         }
     },
 #endif /* NK_ENABLE_COLOUR_ALPHA */
@@ -94,7 +105,15 @@ static const struct {
                 .green = 0x66,
                 .blue  = 0x99,
                 .alpha = 0xff
-            }
+            },
+            .ret = TRUE,
+        }
+    },
+    {
+        .testpath = "/nkutils/colour/hex/bad",
+        .data ={
+            .string = "#69",
+            .ret = FALSE,
         }
     },
     {
@@ -107,7 +126,8 @@ static const struct {
                 .green = 127,
                 .blue  = 0,
                 .alpha = 0xff
-            }
+            },
+            .ret = TRUE,
         }
     },
     {
@@ -120,7 +140,8 @@ static const struct {
                 .green = 127,
                 .blue  = 0,
                 .alpha = 0xff
-            }
+            },
+            .ret = TRUE,
         }
     },
 #ifdef NK_ENABLE_COLOUR_ALPHA
@@ -134,10 +155,32 @@ static const struct {
                 .green = 237,
                 .blue  = 3,
                 .alpha = 0x33
-            }
+            },
+            .ret = TRUE,
         }
     },
 #endif /* NK_ENABLE_COLOUR_ALPHA */
+    {
+        .testpath = "/nkutils/colour/rgb/bad/1",
+        .data ={
+            .string = "rgb(100%, 50%, 0%",
+            .ret = FALSE,
+        }
+    },
+    {
+        .testpath = "/nkutils/colour/rgb/bad/2",
+        .data ={
+            .string = "rgb100%, 50%, 0%",
+            .ret = FALSE,
+        }
+    },
+    {
+        .testpath = "/nkutils/colour/bad",
+        .data ={
+            .string = "white",
+            .ret = FALSE,
+        }
+    },
 };
 
 static void
@@ -148,11 +191,15 @@ _nk_colour_tests_func(gconstpointer user_data)
     NkColour colour = {0};
     gboolean r;
     r = nk_colour_parse(data->string, &colour);
-    g_assert_true(r);
+    g_assert_true(r == data->ret);
+    g_assert_cmpuint(colour.red, ==, data->colour.red);
     g_assert_cmpuint(colour.red, ==, data->colour.red);
     g_assert_cmpuint(colour.green, ==, data->colour.green);
     g_assert_cmpuint(colour.blue, ==, data->colour.blue);
     g_assert_cmpuint(colour.alpha, ==, data->colour.alpha);
+
+    if ( ! r )
+        return;
 
 #ifdef NK_ENABLE_COLOUR_STRING
     const gchar *string;
@@ -176,6 +223,7 @@ typedef struct {
     const gchar *string;
     const gchar *generated_string;
     const NkColourDouble colour;
+    gboolean ret;
 } NkColourDoubleTestData;
 
 static const struct {
@@ -193,7 +241,8 @@ static const struct {
                 .green = .866,
                 .blue  = .933,
                 .alpha = .498
-            }
+            },
+            .ret = TRUE,
         }
     },
 #endif /* NK_ENABLE_COLOUR_ALPHA */
@@ -207,7 +256,8 @@ static const struct {
                 .green = .074,
                 .blue  = .078,
                 .alpha = 1.
-            }
+            },
+            .ret = TRUE,
         }
     },
 #ifdef NK_ENABLE_COLOUR_ALPHA
@@ -221,7 +271,8 @@ static const struct {
                 .green = .733,
                 .blue  = .800,
                 .alpha = .866
-            }
+            },
+            .ret = TRUE,
         }
     },
 #endif /* NK_ENABLE_COLOUR_ALPHA */
@@ -235,7 +286,8 @@ static const struct {
                 .green = .400,
                 .blue  = .600,
                 .alpha = 1.
-            }
+            },
+            .ret = TRUE,
         }
     },
     {
@@ -248,7 +300,8 @@ static const struct {
                 .green = .400,
                 .blue  = .600,
                 .alpha = 1.
-            }
+            },
+            .ret = TRUE,
         }
     },
 #ifdef NK_ENABLE_COLOUR_ALPHA
@@ -262,10 +315,18 @@ static const struct {
                 .green = 0.,
                 .blue  = .498,
                 .alpha = .1
-            }
+            },
+            .ret = TRUE,
         }
     },
 #endif /* NK_ENABLE_COLOUR_ALPHA */
+    {
+        .testpath = "/nkutils/colour/double/bad",
+        .data ={
+            .string = "black",
+            .ret = FALSE,
+        }
+    },
 };
 
 static void
@@ -276,11 +337,14 @@ _nk_colour_double_tests_func(gconstpointer user_data)
     NkColourDouble colour = {0};
     gboolean r;
     r = nk_colour_double_parse(data->string, &colour);
-    g_assert_true(r);
+    g_assert_true(r == data->ret);
     g_assert_cmpfloat_near(colour.red, data->colour.red, 0.001);
     g_assert_cmpfloat_near(colour.green, data->colour.green, 0.001);
     g_assert_cmpfloat_near(colour.blue, data->colour.blue, 0.001);
     g_assert_cmpfloat_near(colour.alpha, data->colour.alpha, 0.001);
+
+    if ( ! r )
+        return;
 
 #ifdef NK_ENABLE_COLOUR_STRING
     const gchar *string;

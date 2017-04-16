@@ -136,7 +136,8 @@ _nk_colour_parse(const gchar *s, NkColour *colour, gdouble *ra)
             a = da * 255;
         }
 #endif /* NK_ENABLE_COLOUR_ALPHA */
-        if ( g_strcmp0(s, ")") != 0 ) return FALSE;
+        if ( g_strcmp0(s, ")") != 0 )
+            return FALSE;
     }
     else
         return FALSE;
