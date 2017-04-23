@@ -176,10 +176,11 @@ _nk_xdg_theme_find_dirs(NkXdgThemeContext *self, NkXdgThemeThemeType type)
     const gchar * const *system_dirs;
     system_dirs = g_get_system_data_dirs();
 
-    while ( system_dirs[length] != NULL ) ++length; /* will give us the NULL terminator */
+    while ( system_dirs[length] != NULL ) ++length;
     ++length; /* user dir */
+    ++length; /* NULL */
 
-    dirs = g_new0(gchar *, length);
+    dirs = g_new(gchar *, length);
 
 #define try_dir(dir) G_STMT_START { \
         gchar *_tmp_dir = g_build_filename(dir, subdir, NULL); \
@@ -194,6 +195,8 @@ _nk_xdg_theme_find_dirs(NkXdgThemeContext *self, NkXdgThemeThemeType type)
     const gchar * const *system_dir;
     for ( system_dir = system_dirs ; *system_dir != NULL ; ++system_dir )
         try_dir(*system_dir);
+
+    dirs[current] = NULL;
 
 #undef try_dir
 
@@ -356,14 +359,18 @@ static gboolean
 _nk_xdg_theme_find(NkXdgThemeTheme *self)
 {
     const gchar *section = _nk_xdg_theme_sections[self->type];
+    gchar **dirs = self->context->dirs[self->type];
     GKeyFile *file;
+
+    if ( dirs == NULL )
+        return FALSE;
 
     file = g_key_file_new();
     g_key_file_set_list_separator(file, ',');
 
     gboolean found = FALSE;
     gchar **dir;
-    for ( dir = self->context->dirs[self->type] ; ( ! found ) && ( *dir != NULL ) ; ++dir )
+    for ( dir = dirs ; ( ! found ) && ( *dir != NULL ) ; ++dir )
     {
         gchar *filename;
         filename = g_build_filename(*dir, self->name, "index.theme", NULL);
@@ -590,6 +597,7 @@ _nk_xdg_theme_try_fallback(gchar **dirs, const gchar *extra_dir, const gchar *th
     }
 
     gchar **dir;
+    if ( dirs != NULL )
     for ( dir = dirs ; *dir != NULL ; ++dir )
     {
         if ( ( themed_name != NULL ) && _nk_xdg_theme_try_file(*dir, themed_name, extensions, ret) )
