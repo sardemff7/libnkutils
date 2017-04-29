@@ -98,19 +98,23 @@ endforeach
 
 if uuid
     nk_libuuid = dependency('uuid', required: false)
-    nk_apr_util_1 = dependency('apr-util-1', required: false)
-    nk_apr_util = dependency('apr-util', required: false)
     if nk_libuuid.found()
         nk_sources += 'src/uuid-libuuid.c'
         nk_deps += nk_libuuid
-    elif nk_apr_util_1.found()
-        nk_sources += 'src/uuid-apr-util.c'
-        nk_deps += nk_apr_util_1
-    elif nk_apr_util.found()
-        nk_sources += 'src/uuid-apr-util.c'
-        nk_deps += nk_apr_util
     else
-        error('libnkutils: A UUID library is required')
+        nk_apr_util_1 = dependency('apr-util-1', required: false)
+        if nk_apr_util_1.found()
+            nk_sources += 'src/uuid-apr-util.c'
+            nk_deps += nk_apr_util_1
+        else
+            nk_apr_util = dependency('apr-util', required: false)
+            if nk_apr_util.found()
+                nk_sources += 'src/uuid-apr-util.c'
+                nk_deps += nk_apr_util
+            else
+                error('libnkutils: A UUID library is required')
+            endif
+        endif
     endif
     nk_sources += 'src/uuid-internal.h'
 endif
