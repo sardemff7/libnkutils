@@ -172,6 +172,62 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/colour/hsl/plain",
+        .data ={
+            .string = "hsl(210, 50%, 50%)",
+            .generated_string = "#4080bf",
+            .colour = {
+                .red   = .25,
+                .green = .50,
+                .blue  = .75,
+                .alpha = 1.
+            },
+            .ret = TRUE,
+        }
+    },
+    {
+        .testpath = "/nkutils/colour/hsl/alpha",
+        .data ={
+            .string = "hsla(210, 50%, 50%, 0.75)",
+            .generated_string = "#4080bfbf",
+            .colour = {
+                .red   = .25,
+                .green = .50,
+                .blue  = .75,
+                .alpha = .75
+            },
+            .ret = TRUE,
+        }
+    },
+    {
+        .testpath = "/nkutils/colour/hwb/plain",
+        .data ={
+            .string = "hwb(120, 20%, 60%)",
+            .generated_string = "#336633",
+            .colour = {
+                .red   = .2,
+                .green = .4,
+                .blue  = .2,
+                .alpha = 1.
+            },
+            .ret = TRUE,
+        }
+    },
+    {
+        .testpath = "/nkutils/colour/hwb/alpha",
+        .data ={
+            .string = "hwb(120, 20%, 60%, 0.5)",
+            .generated_string = "#33663380",
+            .colour = {
+                .red   = .2,
+                .green = .4,
+                .blue  = .2,
+                .alpha = .5
+            },
+            .ret = TRUE,
+        }
+    },
+    {
         .testpath = "/nkutils/colour/bad",
         .data ={
             .string = "black",
