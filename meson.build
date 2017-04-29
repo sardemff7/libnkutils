@@ -23,7 +23,10 @@
 #
 
 project('libnkutils', 'c',
-    license: 'MIT'
+    license: 'MIT',
+    default_options: [
+        'c_std=gnu11',
+    ],
 )
 
 nk_glib_min_version = '2.40'
