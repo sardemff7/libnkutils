@@ -445,7 +445,7 @@ static const struct {
 };
 
 static const gchar *
-_nk_token_list_enum_tests_callback(const gchar *token, guint64 value, const gchar *key, gint64 index, gpointer user_data)
+_nk_token_list_enum_tests_callback(const gchar *token, guint64 value, G_GNUC_UNUSED const gchar *key, G_GNUC_UNUSED  gint64 index, gpointer user_data)
 {
     const gchar * const *data = user_data;
     g_assert_cmpstr(token, ==, _nk_token_list_enum_tests_tokens[value]);
