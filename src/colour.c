@@ -35,9 +35,7 @@
 #include <string.h>
 
 #include <glib.h>
-#ifdef NK_ENABLE_COLOUR_STRING
 #include <glib/gprintf.h>
-#endif /* NK_ENABLE_COLOUR_STRING */
 
 #include "nkutils-colour.h"
 
@@ -114,11 +112,9 @@ _nk_colour_parse(const gchar *s, NkColour *colour, gdouble *ra)
 
         s += strlen("rgb");
 
-#ifdef NK_ENABLE_COLOUR_ALPHA
         gboolean alpha;
         alpha = ( *s == 'a' );
         if ( alpha ) ++s;
-#endif /* NK_ENABLE_COLOUR_ALPHA */
 
         if ( *s++ != '(' )
             return FALSE;
@@ -128,14 +124,12 @@ _nk_colour_parse(const gchar *s, NkColour *colour, gdouble *ra)
         _nk_colour_check_number(s, g);
         _nk_colour_check_comma(s);
         _nk_colour_check_number(s, b);
-#ifdef NK_ENABLE_COLOUR_ALPHA
         if ( alpha )
         {
             _nk_colour_check_comma(s);
             _nk_colour_check_number_full(s, da, gdouble, g_ascii_strtod,, 0., 1.);
             a = da * 255;
         }
-#endif /* NK_ENABLE_COLOUR_ALPHA */
         if ( g_strcmp0(s, ")") != 0 )
             return FALSE;
     }
@@ -158,7 +152,6 @@ nk_colour_parse(const gchar *string, NkColour *colour)
     return _nk_colour_parse(string, colour, NULL);
 }
 
-#ifdef NK_ENABLE_COLOUR_DOUBLE
 gboolean
 nk_colour_double_parse(const gchar *string, NkColourDouble *colour)
 {
@@ -177,20 +170,16 @@ nk_colour_double_parse(const gchar *string, NkColourDouble *colour)
 
     return FALSE;
 }
-#endif /* NK_ENABLE_COLOUR_DOUBLE */
 
-#ifdef NK_ENABLE_COLOUR_STRING
 
 #define HEX_COLOUR_MAXLEN 10 /* strlen("#rrggbbaa") + 1 */
 const gchar *
 nk_colour_to_hex(const NkColour *colour)
 {
     static gchar string[HEX_COLOUR_MAXLEN];
-#ifdef NK_ENABLE_COLOUR_ALPHA
     if ( colour->alpha != 0xff )
         g_snprintf(string, HEX_COLOUR_MAXLEN, "#%02x%02x%02x%02x", colour->red, colour->green, colour->blue, colour->alpha);
     else
-#endif /* NK_ENABLE_COLOUR_ALPHA */
         g_snprintf(string, HEX_COLOUR_MAXLEN, "#%02x%02x%02x", colour->red, colour->green, colour->blue);
     return string;
 }
@@ -198,11 +187,9 @@ nk_colour_to_hex(const NkColour *colour)
 static inline void
 _nk_colour_to_rgba_internal(gchar *string, gulong n, guint8 red, guint8 green, guint8 blue, gint alpha_precision, gdouble alpha)
 {
-#ifdef NK_ENABLE_COLOUR_ALPHA
     if ( alpha != 1.0 )
         g_snprintf(string, n, "rgba(%u,%u,%u,%.*lf)", red, green, blue, alpha_precision, alpha);
     else
-#endif /* NK_ENABLE_COLOUR_ALPHA */
         g_snprintf(string, n, "rgb(%u,%u,%u)", red, green, blue);
 }
 
@@ -215,7 +202,6 @@ nk_colour_to_rgba(const NkColour *colour)
     return string;
 }
 
-#ifdef NK_ENABLE_COLOUR_DOUBLE
 const gchar *
 nk_colour_double_to_hex(const NkColourDouble *colour)
 {
@@ -236,6 +222,4 @@ nk_colour_double_to_rgba(const NkColourDouble *colour)
     _nk_colour_to_rgba_internal(string, COLOUR_DOUBLE_RGBA_MAXLEN, colour->red * 255, colour->green * 255, colour->blue * 255, 10, colour->alpha);
     return string;
 }
-#endif /* NK_ENABLE_COLOUR_DOUBLE */
 
-#endif /* NK_ENABLE_COLOUR_STRING */

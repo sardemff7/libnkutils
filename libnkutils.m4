@@ -56,11 +56,10 @@ AC_DEFUN([NK_ENABLE_MODULES], [
 ])
 
 m4_define([_NK_MODULES], [uuid enum token colour xdg-theme])
-m4_define([_NK_FEATURES], [token/enum colour/alpha colour/double colour/string])
 
 
 # auto-enable
-m4_define([_nk_dependent_enum], [token/enum xdg-theme])
+m4_define([_nk_dependent_enum], [token xdg-theme])
 
 
 
@@ -76,24 +75,9 @@ AC_DEFUN([_NK_MODULE_CHECK_DEPENDENT], [m4_ifdef([$1], m4_map_args_w($1, [[ -o x
 
 
 AC_DEFUN([_NK_ENABLE_MODULE], [
-    m4_if(m4_index([$1], [/]), [-1], [
-        _NK_ENABLE_MODULE_INTERNAL([$1])
-    ], [
-        _NK_ENABLE_MODULE_INTERNAL(m4_substr([$1], 0, m4_index([$1], [/])), m4_substr([$1], m4_incr(m4_index([$1], [/]))), [$1])
-    ])
-])
-
-AC_DEFUN([_NK_ENABLE_MODULE_INTERNAL], [
     m4_if(m4_index(_NK_MODULES, [$1]), [-1], [AC_MSG_ERROR([libnkutils: No ][$1][ module])])
     m4_ifdef([_NK_]m4_toupper([$1])[_CHECK], [_NK_]m4_toupper([$1])[_CHECK])
     [nk_module_]AS_TR_SH([$1])[_enable=yes]
-
-    m4_ifnblank([$2], [
-        m4_if(m4_index(_NK_FEATURES, [$3]), [-1], [AC_MSG_ERROR([libnkutils: No ][$2][ in module ][$1])])
-        [_nk_module_]AS_TR_SH([$3])[_enable=yes]
-        [AM_DOCBOOK_CONDITIONS="${AM_DOCBOOK_CONDITIONS};nk_enable_]AS_TR_SH([$3])["]
-        AC_DEFINE([NK_ENABLE_]AS_TR_CPP([$3]), [1], [libnkutils ][$1][ module feature ][$2])
-    ])
 ])
 
 # Special dependencies

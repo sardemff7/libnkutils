@@ -40,14 +40,8 @@ nk_modules = [
     'enum',
     'colour'
 ]
-nk_features = [
-    'token/enum',
-    'colour/alpha',
-    'colour/double',
-    'colour/string'
-]
 nk_dependencies = [
-    [ 'token/enum', 'enum' ],
+    [ 'token', 'enum' ],
     [ 'xdg-theme', 'enum' ],
 ]
 
@@ -67,23 +61,9 @@ foreach m : nk_modules
     set_variable(m.underscorify(), get_option(m) or not meson.is_subproject())
 endforeach
 
-foreach f : nk_features
-    s = f.split('/')
-    m = s[0]
-    f = '-'.join(s)
-    if get_option(f) or not meson.is_subproject()
-        nk_options += '@0@=true'.format(f)
-        nk_args += '-DNK_ENABLE_@0@'.format(f.underscorify().to_upper())
-        nkutils_docbook_conditions += 'nk_enable_@0@'.format(f.underscorify().to_lower())
-        set_variable(m.underscorify(), true)
-    endif
-endforeach
-
 foreach d : nk_dependencies
-    m = d[1]
-    d = '-'.join(d[0].split('/'))
-    if get_option(d)
-        set_variable(m.underscorify(), true)
+    if get_option(d[0])
+        set_variable(d[1].underscorify(), true)
     endif
 endforeach
 

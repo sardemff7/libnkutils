@@ -51,7 +51,6 @@ static const struct {
             .ret = FALSE,
         }
     },
-#ifdef NK_ENABLE_COLOUR_ALPHA
     {
         .testpath = "/nkutils/colour/hex/8",
         .data ={
@@ -65,7 +64,6 @@ static const struct {
             .ret = TRUE,
         }
     },
-#endif /* NK_ENABLE_COLOUR_ALPHA */
     {
         .testpath = "/nkutils/colour/hex/6",
         .data ={
@@ -79,7 +77,6 @@ static const struct {
             .ret = TRUE,
         }
     },
-#ifdef NK_ENABLE_COLOUR_ALPHA
     {
         .testpath = "/nkutils/colour/hex/4",
         .data ={
@@ -94,7 +91,6 @@ static const struct {
             .ret = TRUE,
         }
     },
-#endif /* NK_ENABLE_COLOUR_ALPHA */
     {
         .testpath = "/nkutils/colour/hex/3",
         .data ={
@@ -144,7 +140,6 @@ static const struct {
             .ret = TRUE,
         }
     },
-#ifdef NK_ENABLE_COLOUR_ALPHA
     {
         .testpath = "/nkutils/colour/rgba",
         .data ={
@@ -159,7 +154,6 @@ static const struct {
             .ret = TRUE,
         }
     },
-#endif /* NK_ENABLE_COLOUR_ALPHA */
     {
         .testpath = "/nkutils/colour/rgb/bad/1",
         .data ={
@@ -201,7 +195,6 @@ _nk_colour_tests_func(gconstpointer user_data)
     if ( ! r )
         return;
 
-#ifdef NK_ENABLE_COLOUR_STRING
     const gchar *string;
     const gchar *wanted_string = ( data->generated_string != NULL ) ? data->generated_string : data->string;
 
@@ -212,10 +205,8 @@ _nk_colour_tests_func(gconstpointer user_data)
 
     g_assert_nonnull(string);
     g_assert_cmpstr(string, ==, wanted_string);
-#endif /* NK_ENABLE_COLOUR_STRING */
 }
 
-#ifdef NK_ENABLE_COLOUR_DOUBLE
 
 #define g_assert_cmpfloat_near(a, b, delta) G_STMT_START { g_assert_cmpfloat((b - delta), <, a); g_assert_cmpfloat(a, <, (b + delta)); } G_STMT_END
 
@@ -230,7 +221,6 @@ static const struct {
     const gchar *testpath;
     NkColourDoubleTestData data;
 } _nk_colour_double_tests_list[] = {
-#ifdef NK_ENABLE_COLOUR_ALPHA
     {
         .testpath = "/nkutils/colour/double/hex/8",
         .data ={
@@ -245,7 +235,6 @@ static const struct {
             .ret = TRUE,
         }
     },
-#endif /* NK_ENABLE_COLOUR_ALPHA */
     {
         .testpath = "/nkutils/colour/double/hex/6",
         .data ={
@@ -260,7 +249,6 @@ static const struct {
             .ret = TRUE,
         }
     },
-#ifdef NK_ENABLE_COLOUR_ALPHA
     {
         .testpath = "/nkutils/colour/double/hex/4",
         .data ={
@@ -275,7 +263,6 @@ static const struct {
             .ret = TRUE,
         }
     },
-#endif /* NK_ENABLE_COLOUR_ALPHA */
     {
         .testpath = "/nkutils/colour/double/hex/3",
         .data ={
@@ -304,7 +291,6 @@ static const struct {
             .ret = TRUE,
         }
     },
-#ifdef NK_ENABLE_COLOUR_ALPHA
     {
         .testpath = "/nkutils/colour/double/rgba",
         .data ={
@@ -319,7 +305,6 @@ static const struct {
             .ret = TRUE,
         }
     },
-#endif /* NK_ENABLE_COLOUR_ALPHA */
     {
         .testpath = "/nkutils/colour/double/bad",
         .data ={
@@ -346,7 +331,6 @@ _nk_colour_double_tests_func(gconstpointer user_data)
     if ( ! r )
         return;
 
-#ifdef NK_ENABLE_COLOUR_STRING
     const gchar *string;
     const gchar *wanted_string = ( data->generated_string != NULL ) ? data->generated_string : data->string;
 
@@ -357,11 +341,9 @@ _nk_colour_double_tests_func(gconstpointer user_data)
 
     g_assert_nonnull(string);
     g_assert_cmpstr(string, ==, wanted_string);
-#endif /* NK_ENABLE_COLOUR_STRING */
 }
 
 
-#endif /* NK_ENABLE_COLOUR_DOUBLE */
 
 int
 main(int argc, char *argv[])
@@ -374,10 +356,8 @@ main(int argc, char *argv[])
     for ( i = 0 ; i < G_N_ELEMENTS(_nk_colour_tests_list) ; ++i )
         g_test_add_data_func(_nk_colour_tests_list[i].testpath, &_nk_colour_tests_list[i].data, _nk_colour_tests_func);
 
-#ifdef NK_ENABLE_COLOUR_DOUBLE
     for ( i = 0 ; i < G_N_ELEMENTS(_nk_colour_double_tests_list) ; ++i )
         g_test_add_data_func(_nk_colour_double_tests_list[i].testpath, &_nk_colour_double_tests_list[i].data, _nk_colour_double_tests_func);
-#endif /* NK_ENABLE_COLOUR_DOUBLE */
 
     return g_test_run();
 }

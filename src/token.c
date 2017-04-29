@@ -37,9 +37,7 @@
 
 #include <glib.h>
 
-#ifdef NK_ENABLE_TOKEN_ENUM
 #include "nkutils-enum.h"
-#endif /* NK_ENABLE_TOKEN_ENUM */
 
 #include "nkutils-token.h"
 
@@ -283,7 +281,6 @@ nk_token_list_parse(gchar *string)
     return self;
 }
 
-#ifdef NK_ENABLE_TOKEN_ENUM
 NkTokenList *
 nk_token_list_parse_enum(gchar *string, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens)
 {
@@ -313,7 +310,6 @@ fail:
     nk_token_list_unref(self);
     return NULL;
 }
-#endif /* NK_ENABLE_TOKEN_ENUM */
 
 NkTokenList *
 nk_token_list_ref(NkTokenList *self)

@@ -410,7 +410,6 @@ _nk_token_list_tests_func(gconstpointer user_data)
     nk_token_list_unref(token_list);
 }
 
-#ifdef NK_ENABLE_TOKEN_ENUM
 typedef enum {
     TOKEN_FRUIT,
     TOKEN_RECIPE,
@@ -469,7 +468,6 @@ _nk_token_list_enum_tests_func(gconstpointer user_data)
 
     nk_token_list_unref(token_list);
 }
-#endif /* NK_ENABLE_TOKEN_ENUM */
 
 int
 main(int argc, char *argv[])
@@ -482,10 +480,8 @@ main(int argc, char *argv[])
     for ( i = 0 ; i < G_N_ELEMENTS(_nk_token_list_tests_list) ; ++i )
         g_test_add_data_func(_nk_token_list_tests_list[i].testpath, &_nk_token_list_tests_list[i].data, _nk_token_list_tests_func);
 
-#ifdef NK_ENABLE_TOKEN_ENUM
     for ( i = 0 ; i < G_N_ELEMENTS(_nk_token_list_enum_tests_list) ; ++i )
         g_test_add_data_func(_nk_token_list_enum_tests_list[i].testpath, &_nk_token_list_enum_tests_list[i].data, _nk_token_list_enum_tests_func);
-#endif /* NK_ENABLE_TOKEN_ENUM */
 
     return g_test_run();
 }
