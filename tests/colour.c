@@ -188,7 +188,10 @@ _nk_colour_tests_func(gconstpointer user_data)
     NkColour colour = {0};
     gboolean r;
     r = nk_colour_parse(data->string, &colour);
-    g_assert_true(r == data->ret);
+    if ( data->ret )
+        g_assert_true(r);
+    else
+        g_assert_false(r);
     g_assert_cmpfloat_near(colour.red, data->colour.red, 0.001);
     g_assert_cmpfloat_near(colour.green, data->colour.green, 0.001);
     g_assert_cmpfloat_near(colour.blue, data->colour.blue, 0.001);
