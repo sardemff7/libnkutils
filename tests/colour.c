@@ -203,10 +203,10 @@ _nk_colour_tests_func(gconstpointer user_data)
     const gchar *string;
     const gchar *wanted_string = ( data->generated_string != NULL ) ? data->generated_string : data->string;
 
-    if ( data->string[0] == '#' )
-        string = nk_colour_to_hex(&data->colour);
-    else
+    if ( g_str_has_prefix(wanted_string, "rgb") )
         string = nk_colour_to_rgba(&data->colour);
+    else
+        string = nk_colour_to_hex(&data->colour);
 
     g_assert_nonnull(string);
     g_assert_cmpstr(string, ==, wanted_string);
