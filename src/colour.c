@@ -39,118 +39,206 @@
 
 #include "nkutils-colour.h"
 
-#define NK_COMMA ,
 
-#define _nk_colour_parse_hex(r, c1, c2) G_STMT_START { \
-    gchar s__[3] = { c1, c2, '\0' }; \
-    gchar *e__; \
-    guint64 v__; \
-    v__ = g_ascii_strtoull(s__, &e__, 16); \
-    if ( s__ == e__ ) return FALSE; \
-    if ( v__ > 255 ) return FALSE; \
-    r = (gdouble) v__ / 255.; \
-    } G_STMT_END
+static GScanner *_nk_colour_scanner = NULL;
 
-#define _nk_colour_walk_white(s) G_STMT_START { while ( g_ascii_isspace(*s) ) ++s; } G_STMT_END
-#define _nk_colour_check_number_full(s, r, c) G_STMT_START { \
-    _nk_colour_walk_white(s); \
-    gchar *e__; \
-    gdouble v__; \
-    v__ = g_ascii_strtod(s, &e__); \
-    if ( s == e__ ) return FALSE; \
-    s = e__; \
-    if ( *s == '%' ) { r = CLAMP(v__, 0., 100.) / 100.; ++s; } \
-    else { r = c } \
-    _nk_colour_walk_white(s); \
-    } G_STMT_END
-#define _nk_colour_check_number(s, r) _nk_colour_check_number_full(s, r, CLAMP(v__, 0., 255.) / 255.; )
-#define _nk_colour_check_comma(s) G_STMT_START { if ( *s != ',' ) return FALSE; ++s; } G_STMT_END
+typedef enum {
+    NK_COLOUR_SCOPE_BASE,
+} NkColourScope;
 
-#define _nk_colour_uint8_to_double(u) (((gdouble)(u)) / 255.)
+typedef enum {
+    NK_COLOUR_SYMBOL_BASE_RGB,
+    NK_COLOUR_SYMBOL_BASE_RGBA,
+} NkColourSymbolBase;
 
-static gboolean
-_nk_colour_parse(const gchar *s, NkColour *colour)
+static const gchar * const _nk_colour_scanner_symbols_base[] = {
+    [NK_COLOUR_SYMBOL_BASE_RGB] = "rgb",
+    [NK_COLOUR_SYMBOL_BASE_RGBA] = "rgba",
+};
+
+#define IS_BETWEEN(x, low, high) ( ( (x) >= (low) ) && ( (x) <= (high) ) )
+
+static inline gboolean
+_nk_colour_parse_hex(gdouble *r, gchar c1, gchar c2)
 {
-    if ( s == NULL )
+    gchar s[3] = { c1, c2, '\0' }, *e;
+    guint64 v;
+
+    v = g_ascii_strtoull(s, &e, 16);
+    if ( s == e )
+        return FALSE;
+    if ( v > 255 )
         return FALSE;
 
-    gdouble r = 0., g = 0., b = 0., a = 1.;
+    *r = (gdouble) v / 255.;
+    return TRUE;
+}
 
-    if ( g_str_has_prefix(s, "#") )
+static inline gboolean
+_nk_colour_parse_alpha_value(gdouble *r, gboolean expected)
+{
+    if ( expected != ( g_scanner_peek_next_token(_nk_colour_scanner) == G_TOKEN_COMMA ) )
+        return FALSE;
+    if ( ! expected )
+        return TRUE;
+    g_scanner_get_next_token(_nk_colour_scanner);
+
+    if ( g_scanner_get_next_token(_nk_colour_scanner) != G_TOKEN_FLOAT )
+        return FALSE;
+
+    gdouble v = _nk_colour_scanner->value.v_float;
+    if ( g_scanner_peek_next_token(_nk_colour_scanner) == '%' )
     {
-        s += strlen("#");
-        switch ( strlen(s) )
-        {
-        case 8: /* rrggbbaa */
-            _nk_colour_parse_hex(a, s[6], s[7]);
-            /* fallthrough */
-        case 6: /* rrggbb */
-            _nk_colour_parse_hex(r, s[0], s[1]);
-            _nk_colour_parse_hex(g, s[2], s[3]);
-            _nk_colour_parse_hex(b, s[4], s[5]);
-        break;
-        case 4: /* rgba */
-            _nk_colour_parse_hex(a, s[3], s[3]);
-            /* fallthrough */
-        case 3: /* rgb */
-            _nk_colour_parse_hex(r, s[0], s[0]);
-            _nk_colour_parse_hex(g, s[1], s[1]);
-            _nk_colour_parse_hex(b, s[2], s[2]);
-        break;
-        default:
-            return FALSE;
-        }
-    }
-    else if ( g_str_has_prefix(s, "rgb") )
-    {
+        g_scanner_get_next_token(_nk_colour_scanner);
 
-        s += strlen("rgb");
-
-        gboolean alpha;
-        alpha = ( *s == 'a' );
-        if ( alpha ) ++s;
-
-        if ( *s++ != '(' )
+        if ( ! IS_BETWEEN(v, 0., 100.) )
             return FALSE;
 
-        _nk_colour_check_number(s, r);
-        _nk_colour_check_comma(s);
-        _nk_colour_check_number(s, g);
-        _nk_colour_check_comma(s);
-        _nk_colour_check_number(s, b);
-        if ( alpha )
-        {
-            _nk_colour_check_comma(s);
-            _nk_colour_check_number_full(s, a, CLAMP(v__, 0., 1.););
-        }
-        if ( g_strcmp0(s, ")") != 0 )
-            return FALSE;
+        *r = v / 100.;
     }
     else
+    {
+        if ( ! IS_BETWEEN(v, 0., 1.) )
+            return FALSE;
+
+        *r = v;
+    }
+
+    return TRUE;
+}
+
+static inline gboolean
+_nk_colour_parse_rgb_value(gdouble *r)
+{
+    if ( g_scanner_get_next_token(_nk_colour_scanner) != G_TOKEN_FLOAT )
         return FALSE;
 
-    colour->red   = r;
-    colour->green = g;
-    colour->blue  = b;
-    colour->alpha = a;
+    gdouble v = _nk_colour_scanner->value.v_float;
+    if ( g_scanner_peek_next_token(_nk_colour_scanner) == '%' )
+    {
+        g_scanner_get_next_token(_nk_colour_scanner);
+
+        if ( ! IS_BETWEEN(v, 0., 100.) )
+            return FALSE;
+
+        *r = v / 100.;
+    }
+    else
+    {
+        if ( ! IS_BETWEEN(v, 0., 255.) )
+            return FALSE;
+
+        *r = v / 255.;
+    }
 
     return TRUE;
 }
 
 gboolean
-nk_colour_parse(const gchar *string, NkColour *colour)
+nk_colour_parse(const gchar *s, NkColour *colour)
 {
-    NkColour colour_;
-
-    if ( _nk_colour_parse(string, &colour_) )
+    if ( _nk_colour_scanner == NULL )
     {
-        *colour = colour_;
-        return TRUE;
+        _nk_colour_scanner = g_scanner_new(NULL);
+        _nk_colour_scanner->config->int_2_float = TRUE;
+        _nk_colour_scanner->config->cset_identifier_first = "#" G_CSET_a_2_z G_CSET_A_2_Z G_CSET_LATINS G_CSET_LATINC;
+        _nk_colour_scanner->config->cpair_comment_single = "";
+        _nk_colour_scanner->config->case_sensitive = TRUE;
+
+        gsize i;
+        for ( i = 0 ; i < G_N_ELEMENTS(_nk_colour_scanner_symbols_base) ; ++i )
+            g_scanner_scope_add_symbol(_nk_colour_scanner, NK_COLOUR_SCOPE_BASE, _nk_colour_scanner_symbols_base[i], GUINT_TO_POINTER(i));
     }
 
-    return FALSE;
-}
+    if ( s == NULL )
+        return FALSE;
 
+    g_scanner_input_text(_nk_colour_scanner, s, strlen(s));
+    g_scanner_set_scope(_nk_colour_scanner, NK_COLOUR_SCOPE_BASE);
+
+    NkColour colour_ = { .alpha = 1. };
+    switch ( g_scanner_get_next_token(_nk_colour_scanner) )
+    {
+    case G_TOKEN_SYMBOL:
+    {
+        NkColourSymbolBase symbol = _nk_colour_scanner->value.v_int;
+        gboolean alpha = FALSE;
+        switch ( symbol )
+        {
+        case NK_COLOUR_SYMBOL_BASE_RGBA:
+            alpha = TRUE;
+        case NK_COLOUR_SYMBOL_BASE_RGB:
+            if ( g_scanner_get_next_token(_nk_colour_scanner) != G_TOKEN_LEFT_PAREN )
+                return FALSE;
+            if ( ! _nk_colour_parse_rgb_value(&colour_.red) )
+                return FALSE;
+            if ( g_scanner_get_next_token(_nk_colour_scanner) != G_TOKEN_COMMA )
+                return FALSE;
+            if ( ! _nk_colour_parse_rgb_value(&colour_.green) )
+                return FALSE;
+            if ( g_scanner_get_next_token(_nk_colour_scanner) != G_TOKEN_COMMA )
+                return FALSE;
+            if ( ! _nk_colour_parse_rgb_value(&colour_.blue) )
+                return FALSE;
+            if ( ! _nk_colour_parse_alpha_value(&colour_.alpha, alpha) )
+                return FALSE;
+            if ( g_scanner_get_next_token(_nk_colour_scanner) != G_TOKEN_RIGHT_PAREN )
+                return FALSE;
+        break;
+        }
+    }
+    break;
+    case G_TOKEN_IDENTIFIER:
+        if ( _nk_colour_scanner->value.v_identifier[0] == '#' )
+        {
+            if ( g_scanner_peek_next_token(_nk_colour_scanner) != G_TOKEN_EOF )
+                return FALSE;
+
+            const gchar *hex = _nk_colour_scanner->value.v_identifier + strlen("#");
+            switch ( strlen(hex) )
+            {
+            case 8: /* rrggbbaa */
+                if ( ! _nk_colour_parse_hex(&colour_.alpha, hex[6], hex[7]) )
+                    return FALSE;
+                /* fallthrough */
+            case 6: /* rrggbb */
+                if ( ! _nk_colour_parse_hex(&colour_.red, hex[0], hex[1]) )
+                    return FALSE;
+                if ( ! _nk_colour_parse_hex(&colour_.green, hex[2], hex[3]) )
+                    return FALSE;
+                if ( ! _nk_colour_parse_hex(&colour_.blue, hex[4], hex[5]) )
+                    return FALSE;
+            break;
+            case 4: /* rgba */
+                if ( ! _nk_colour_parse_hex(&colour_.alpha, hex[3], hex[3]) )
+                    return FALSE;
+                /* fallthrough */
+            case 3: /* rgb */
+                if ( ! _nk_colour_parse_hex(&colour_.red, hex[0], hex[0]) )
+                    return FALSE;
+                if ( ! _nk_colour_parse_hex(&colour_.green, hex[1], hex[1]) )
+                    return FALSE;
+                if ( ! _nk_colour_parse_hex(&colour_.blue, hex[2], hex[2]) )
+                    return FALSE;
+            break;
+            default:
+                return FALSE;
+            }
+        }
+        else
+            return FALSE;
+    break;
+    default:
+        return FALSE;
+    }
+
+    if ( g_scanner_get_next_token(_nk_colour_scanner) != G_TOKEN_EOF )
+        return FALSE;
+
+    *colour = colour_;
+
+    return TRUE;
+}
 
 #define HEX_COLOUR_MAXLEN 10 /* strlen("#rrggbbaa") + 1 */
 const gchar *
