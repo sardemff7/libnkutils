@@ -27,24 +27,14 @@
 #define __NK_UTILS_COLOUR_H__
 
 typedef struct {
-    guint8 red;
-    guint8 green;
-    guint8 blue;
-    guint8 alpha;
-} NkColour;
-
-typedef struct {
     gdouble red;
     gdouble green;
     gdouble blue;
     gdouble alpha;
-} NkColourDouble;
+} NkColour;
 
 gboolean nk_colour_parse(const gchar *string, NkColour *colour);
-gboolean nk_colour_double_parse(const gchar *string, NkColourDouble *colour);
 const gchar *nk_colour_to_hex(const NkColour *colour);
 const gchar *nk_colour_to_rgba(const NkColour *colour);
-const gchar *nk_colour_double_to_hex(const NkColourDouble *colour);
-const gchar *nk_colour_double_to_rgba(const NkColourDouble *colour);
 
 #endif /* __NK_UTILS_COLOUR_H__ */

@@ -48,37 +48,33 @@
     v__ = g_ascii_strtoull(s__, &e__, 16); \
     if ( s__ == e__ ) return FALSE; \
     if ( v__ > 255 ) return FALSE; \
-    r = v__; \
+    r = (gdouble) v__ / 255.; \
     } G_STMT_END
 
 #define _nk_colour_walk_white(s) G_STMT_START { while ( g_ascii_isspace(*s) ) ++s; } G_STMT_END
-#define _nk_colour_check_number_full(s, r, t, f, fargs, v1, v2) G_STMT_START { \
+#define _nk_colour_check_number_full(s, r, c) G_STMT_START { \
     _nk_colour_walk_white(s); \
     gchar *e__; \
-    t v__; \
-    v__ = f(s, &e__ fargs); \
+    gdouble v__; \
+    v__ = g_ascii_strtod(s, &e__); \
     if ( s == e__ ) return FALSE; \
     s = e__; \
-    r = CLAMP(v__, v1, v2); \
+    if ( *s == '%' ) { r = CLAMP(v__, 0., 100.) / 100.; ++s; } \
+    else { r = c } \
     _nk_colour_walk_white(s); \
     } G_STMT_END
-#define _nk_colour_check_number(s, r) G_STMT_START { \
-    _nk_colour_check_number_full(s, r, gint64, g_ascii_strtoll,NK_COMMA 10, 0, 255); \
-    if ( *s == '%' ) { r = ( MIN(r, 100) * 255 ) / 100; ++s; } \
-    _nk_colour_walk_white(s); \
-    } G_STMT_END
+#define _nk_colour_check_number(s, r) _nk_colour_check_number_full(s, r, CLAMP(v__, 0., 255.) / 255.; )
 #define _nk_colour_check_comma(s) G_STMT_START { if ( *s != ',' ) return FALSE; ++s; } G_STMT_END
 
 #define _nk_colour_uint8_to_double(u) (((gdouble)(u)) / 255.)
 
 static gboolean
-_nk_colour_parse(const gchar *s, NkColour *colour, gdouble *ra)
+_nk_colour_parse(const gchar *s, NkColour *colour)
 {
     if ( s == NULL )
         return FALSE;
 
-    guint8 r = 0, g = 0, b = 0, a = 255;
-    gdouble da = 1.;
+    gdouble r = 0., g = 0., b = 0., a = 1.;
 
     if ( g_str_has_prefix(s, "#") )
     {
@@ -87,7 +83,6 @@ _nk_colour_parse(const gchar *s, NkColour *colour, gdouble *ra)
         {
         case 8: /* rrggbbaa */
             _nk_colour_parse_hex(a, s[6], s[7]);
-            da = _nk_colour_uint8_to_double(a);
             /* fallthrough */
         case 6: /* rrggbb */
             _nk_colour_parse_hex(r, s[0], s[1]);
@@ -96,7 +91,6 @@ _nk_colour_parse(const gchar *s, NkColour *colour, gdouble *ra)
         break;
         case 4: /* rgba */
             _nk_colour_parse_hex(a, s[3], s[3]);
-            da = _nk_colour_uint8_to_double(a);
             /* fallthrough */
         case 3: /* rgb */
             _nk_colour_parse_hex(r, s[0], s[0]);
@@ -127,8 +121,7 @@ _nk_colour_parse(const gchar *s, NkColour *colour, gdouble *ra)
         if ( alpha )
         {
             _nk_colour_check_comma(s);
-            _nk_colour_check_number_full(s, da, gdouble, g_ascii_strtod,, 0., 1.);
-            a = da * 255;
+            _nk_colour_check_number_full(s, a, CLAMP(v__, 0., 1.););
         }
         if ( g_strcmp0(s, ")") != 0 )
             return FALSE;
@@ -140,8 +133,6 @@ _nk_colour_parse(const gchar *s, NkColour *colour, gdouble *ra)
     colour->green = g;
     colour->blue  = b;
     colour->alpha = a;
-    if ( ra != NULL )
-        *ra = da;
 
     return TRUE;
 }
@@ -149,22 +140,11 @@ _nk_colour_parse(const gchar *s, NkColour *colour, gdouble *ra)
 gboolean
 nk_colour_parse(const gchar *string, NkColour *colour)
 {
-    return _nk_colour_parse(string, colour, NULL);
-}
-
-gboolean
-nk_colour_double_parse(const gchar *string, NkColourDouble *colour)
-{
     NkColour colour_;
-    gdouble a;
 
-    if ( _nk_colour_parse(string, &colour_, &a) )
+    if ( _nk_colour_parse(string, &colour_) )
     {
-        colour->red   = _nk_colour_uint8_to_double(colour_.red);
-        colour->green = _nk_colour_uint8_to_double(colour_.green);
-        colour->blue  = _nk_colour_uint8_to_double(colour_.blue);
-        colour->alpha = a;
-
+        *colour = colour_;
         return TRUE;
     }
 
@@ -176,50 +156,33 @@ nk_colour_double_parse(const gchar *string, NkColourDouble *colour)
 const gchar *
 nk_colour_to_hex(const NkColour *colour)
 {
+    guint8 red   = (guint8) ( colour->red   * 255. + 0.5 );
+    guint8 green = (guint8) ( colour->green * 255. + 0.5 );
+    guint8 blue  = (guint8) ( colour->blue  * 255. + 0.5 );
+    guint8 alpha = (guint8) ( colour->alpha * 255. + 0.5 );
+
     static gchar string[HEX_COLOUR_MAXLEN];
-    if ( colour->alpha != 0xff )
-        g_snprintf(string, HEX_COLOUR_MAXLEN, "#%02x%02x%02x%02x", colour->red, colour->green, colour->blue, colour->alpha);
+    if ( alpha != 0xff )
+        g_snprintf(string, HEX_COLOUR_MAXLEN, "#%02x%02x%02x%02x", red, green, blue, alpha);
     else
-        g_snprintf(string, HEX_COLOUR_MAXLEN, "#%02x%02x%02x", colour->red, colour->green, colour->blue);
+        g_snprintf(string, HEX_COLOUR_MAXLEN, "#%02x%02x%02x", red, green, blue);
     return string;
 }
 
-static inline void
-_nk_colour_to_rgba_internal(gchar *string, gulong n, guint8 red, guint8 green, guint8 blue, gint alpha_precision, gdouble alpha)
-{
-    if ( alpha != 1.0 )
-        g_snprintf(string, n, "rgba(%u,%u,%u,%.*lf)", red, green, blue, alpha_precision, alpha);
-    else
-        g_snprintf(string, n, "rgb(%u,%u,%u)", red, green, blue);
-}
-
-#define COLOUR_RGBA_MAXLEN 24 /* strlen("rgba(255,255,255,0.000)") + 1 */
+#define COLOUR_DOUBLE_RGBA_MAXLEN 64 /* strlen("rgba(255.0000000000,255.0000000000,255.0000000000,0.0000000000)") + 1 */
 const gchar *
 nk_colour_to_rgba(const NkColour *colour)
 {
-    static gchar string[COLOUR_RGBA_MAXLEN]; /* strlen("rgba(255,255,255,0.000)") + 1 */
-    _nk_colour_to_rgba_internal(string, COLOUR_RGBA_MAXLEN, colour->red, colour->green, colour->blue, 3, (gdouble)colour->alpha / 255.);
-    return string;
-}
+    gdouble red   = colour->red   * 255.;
+    gdouble green = colour->green * 255.;
+    gdouble blue  = colour->blue  * 255.;
+    gdouble alpha = colour->alpha;
 
-const gchar *
-nk_colour_double_to_hex(const NkColourDouble *colour)
-{
-    NkColour colour_ = {
-        .red   = colour->red   * 255,
-        .green = colour->green * 255,
-        .blue  = colour->blue  * 255,
-        .alpha = colour->alpha * 255
-    };
-    return nk_colour_to_hex(&colour_);
-}
-
-#define COLOUR_DOUBLE_RGBA_MAXLEN 31 /* strlen("rgba(255,255,255,0.0000000000)") + 1 */
-const gchar *
-nk_colour_double_to_rgba(const NkColourDouble *colour)
-{
-    static gchar string[COLOUR_DOUBLE_RGBA_MAXLEN]; /* strlen("rgba(255,255,255,0.0000000000)") + 1 */
-    _nk_colour_to_rgba_internal(string, COLOUR_DOUBLE_RGBA_MAXLEN, colour->red * 255, colour->green * 255, colour->blue * 255, 10, colour->alpha);
+    static gchar string[COLOUR_DOUBLE_RGBA_MAXLEN];
+    if ( alpha != 1.0 )
+        g_snprintf(string, COLOUR_DOUBLE_RGBA_MAXLEN, "rgba(%.10lf,%.10lf,%.10lf,%.10lf)", red, green, blue, alpha);
+    else
+        g_snprintf(string, COLOUR_DOUBLE_RGBA_MAXLEN, "rgb(%.10lf,%.10lf,%.10lf)", red, green, blue);
     return string;
 }
 

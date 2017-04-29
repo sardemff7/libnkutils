@@ -33,6 +33,9 @@
 
 #include <nkutils-colour.h>
 
+
+#define g_assert_cmpfloat_near(a, b, delta) G_STMT_START { g_assert_cmpfloat((b - delta), <, a); g_assert_cmpfloat(a, <, (b + delta)); } G_STMT_END
+
 typedef struct {
     const gchar *string;
     const gchar *generated_string;
@@ -56,10 +59,10 @@ static const struct {
         .data ={
             .string = "#ffddee7f",
             .colour = {
-                .red   = 0xff,
-                .green = 0xdd,
-                .blue  = 0xee,
-                .alpha = 0x7f
+                .red   = 1.,
+                .green = .866,
+                .blue  = .933,
+                .alpha = .498
             },
             .ret = TRUE,
         }
@@ -69,10 +72,10 @@ static const struct {
         .data ={
             .string = "#121314",
             .colour = {
-                .red   = 0x12,
-                .green = 0x13,
-                .blue  = 0x14,
-                .alpha = 0xff
+                .red   = .070,
+                .green = .074,
+                .blue  = .078,
+                .alpha = 1.
             },
             .ret = TRUE,
         }
@@ -83,10 +86,10 @@ static const struct {
             .string = "#abcd",
             .generated_string = "#aabbccdd",
             .colour = {
-                .red   = 0xaa,
-                .green = 0xbb,
-                .blue  = 0xcc,
-                .alpha = 0xdd
+                .red   = .666,
+                .green = .733,
+                .blue  = .800,
+                .alpha = .866
             },
             .ret = TRUE,
         }
@@ -97,10 +100,10 @@ static const struct {
             .string = "#369",
             .generated_string = "#336699",
             .colour = {
-                .red   = 0x33,
-                .green = 0x66,
-                .blue  = 0x99,
-                .alpha = 0xff
+                .red   = .200,
+                .green = .400,
+                .blue  = .600,
+                .alpha = 1.
             },
             .ret = TRUE,
         }
@@ -115,13 +118,13 @@ static const struct {
     {
         .testpath = "/nkutils/colour/rgb",
         .data ={
-            .string = "rgb(255, 127, 0)",
-            .generated_string = "rgb(255,127,0)",
+            .string = "rgb(51, 102, 153)",
+            .generated_string = "rgb(51.0000000000,102.0000000000,153.0000000000)",
             .colour = {
-                .red   = 255,
-                .green = 127,
-                .blue  = 0,
-                .alpha = 0xff
+                .red   = .200,
+                .green = .400,
+                .blue  = .600,
+                .alpha = 1.
             },
             .ret = TRUE,
         }
@@ -130,12 +133,12 @@ static const struct {
         .testpath = "/nkutils/colour/rgb/percentage",
         .data ={
             .string = "rgb(100%, 50%, 0%)",
-            .generated_string = "rgb(255,127,0)",
+            .generated_string = "rgb(255.0000000000,127.5000000000,0.0000000000)",
             .colour = {
-                .red   = 255,
-                .green = 127,
-                .blue  = 0,
-                .alpha = 0xff
+                .red   = 1.,
+                .green = .500,
+                .blue  = 0.,
+                .alpha = 1.
             },
             .ret = TRUE,
         }
@@ -143,13 +146,13 @@ static const struct {
     {
         .testpath = "/nkutils/colour/rgba",
         .data ={
-            .string = "rgba(152, 237, 3, 0.2)",
-            .generated_string = "rgba(152,237,3,0.200)",
+            .string = "rgba(255, 0, 127, .1)",
+            .generated_string = "rgba(255.0000000000,0.0000000000,126.9900000000,0.1000000000)",
             .colour = {
-                .red   = 152,
-                .green = 237,
-                .blue  = 3,
-                .alpha = 0x33
+                .red   = 1.,
+                .green = 0.,
+                .blue  = .498,
+                .alpha = .1
             },
             .ret = TRUE,
         }
@@ -171,7 +174,7 @@ static const struct {
     {
         .testpath = "/nkutils/colour/bad",
         .data ={
-            .string = "white",
+            .string = "black",
             .ret = FALSE,
         }
     },
@@ -186,11 +189,10 @@ _nk_colour_tests_func(gconstpointer user_data)
     gboolean r;
     r = nk_colour_parse(data->string, &colour);
     g_assert_true(r == data->ret);
-    g_assert_cmpuint(colour.red, ==, data->colour.red);
-    g_assert_cmpuint(colour.red, ==, data->colour.red);
-    g_assert_cmpuint(colour.green, ==, data->colour.green);
-    g_assert_cmpuint(colour.blue, ==, data->colour.blue);
-    g_assert_cmpuint(colour.alpha, ==, data->colour.alpha);
+    g_assert_cmpfloat_near(colour.red, data->colour.red, 0.001);
+    g_assert_cmpfloat_near(colour.green, data->colour.green, 0.001);
+    g_assert_cmpfloat_near(colour.blue, data->colour.blue, 0.001);
+    g_assert_cmpfloat_near(colour.alpha, data->colour.alpha, 0.001);
 
     if ( ! r )
         return;
@@ -208,142 +210,6 @@ _nk_colour_tests_func(gconstpointer user_data)
 }
 
 
-#define g_assert_cmpfloat_near(a, b, delta) G_STMT_START { g_assert_cmpfloat((b - delta), <, a); g_assert_cmpfloat(a, <, (b + delta)); } G_STMT_END
-
-typedef struct {
-    const gchar *string;
-    const gchar *generated_string;
-    const NkColourDouble colour;
-    gboolean ret;
-} NkColourDoubleTestData;
-
-static const struct {
-    const gchar *testpath;
-    NkColourDoubleTestData data;
-} _nk_colour_double_tests_list[] = {
-    {
-        .testpath = "/nkutils/colour/double/hex/8",
-        .data ={
-            .string = "#ffddee7f",
-            .generated_string = "#ffdced7e",
-            .colour = {
-                .red   = 1.,
-                .green = .866,
-                .blue  = .933,
-                .alpha = .498
-            },
-            .ret = TRUE,
-        }
-    },
-    {
-        .testpath = "/nkutils/colour/double/hex/6",
-        .data ={
-            .string = "#121314",
-            .generated_string = "#111213",
-            .colour = {
-                .red   = .070,
-                .green = .074,
-                .blue  = .078,
-                .alpha = 1.
-            },
-            .ret = TRUE,
-        }
-    },
-    {
-        .testpath = "/nkutils/colour/double/hex/4",
-        .data ={
-            .string = "#abcd",
-            .generated_string = "#a9baccdc",
-            .colour = {
-                .red   = .666,
-                .green = .733,
-                .blue  = .800,
-                .alpha = .866
-            },
-            .ret = TRUE,
-        }
-    },
-    {
-        .testpath = "/nkutils/colour/double/hex/3",
-        .data ={
-            .string = "#369",
-            .generated_string = "#336699",
-            .colour = {
-                .red   = .200,
-                .green = .400,
-                .blue  = .600,
-                .alpha = 1.
-            },
-            .ret = TRUE,
-        }
-    },
-    {
-        .testpath = "/nkutils/colour/double/rgb",
-        .data ={
-            .string = "rgb(51, 102, 153)",
-            .generated_string = "rgb(51,102,153)",
-            .colour = {
-                .red   = .200,
-                .green = .400,
-                .blue  = .600,
-                .alpha = 1.
-            },
-            .ret = TRUE,
-        }
-    },
-    {
-        .testpath = "/nkutils/colour/double/rgba",
-        .data ={
-            .string = "rgba(255, 0, 127, .1)",
-            .generated_string = "rgba(255,0,126,0.1000000000)",
-            .colour = {
-                .red   = 1.,
-                .green = 0.,
-                .blue  = .498,
-                .alpha = .1
-            },
-            .ret = TRUE,
-        }
-    },
-    {
-        .testpath = "/nkutils/colour/double/bad",
-        .data ={
-            .string = "black",
-            .ret = FALSE,
-        }
-    },
-};
-
-static void
-_nk_colour_double_tests_func(gconstpointer user_data)
-{
-    const NkColourDoubleTestData *data = user_data;
-
-    NkColourDouble colour = {0};
-    gboolean r;
-    r = nk_colour_double_parse(data->string, &colour);
-    g_assert_true(r == data->ret);
-    g_assert_cmpfloat_near(colour.red, data->colour.red, 0.001);
-    g_assert_cmpfloat_near(colour.green, data->colour.green, 0.001);
-    g_assert_cmpfloat_near(colour.blue, data->colour.blue, 0.001);
-    g_assert_cmpfloat_near(colour.alpha, data->colour.alpha, 0.001);
-
-    if ( ! r )
-        return;
-
-    const gchar *string;
-    const gchar *wanted_string = ( data->generated_string != NULL ) ? data->generated_string : data->string;
-
-    if ( data->string[0] == '#' )
-        string = nk_colour_double_to_hex(&data->colour);
-    else
-        string = nk_colour_double_to_rgba(&data->colour);
-
-    g_assert_nonnull(string);
-    g_assert_cmpstr(string, ==, wanted_string);
-}
-
-
 
 int
 main(int argc, char *argv[])
@@ -355,9 +221,6 @@ main(int argc, char *argv[])
     gsize i;
     for ( i = 0 ; i < G_N_ELEMENTS(_nk_colour_tests_list) ; ++i )
         g_test_add_data_func(_nk_colour_tests_list[i].testpath, &_nk_colour_tests_list[i].data, _nk_colour_tests_func);
-
-    for ( i = 0 ; i < G_N_ELEMENTS(_nk_colour_double_tests_list) ; ++i )
-        g_test_add_data_func(_nk_colour_double_tests_list[i].testpath, &_nk_colour_double_tests_list[i].data, _nk_colour_double_tests_func);
 
     return g_test_run();
 }
