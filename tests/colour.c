@@ -185,7 +185,7 @@ _nk_colour_tests_func(gconstpointer user_data)
 {
     const NkColourTestData *data = user_data;
 
-    NkColour colour = {0};
+    NkColour colour = { .alpha = 0 };
     gboolean r;
     r = nk_colour_parse(data->string, &colour);
     if ( data->ret )
