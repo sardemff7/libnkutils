@@ -34,6 +34,8 @@ typedef struct {
     gchar string[NK_UUID_FORMATTED_LENGTH + 1];
 } NkUuid;
 
+#define NK_UUID_INIT { .data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, .string = "00000000-0000-0000-0000-000000000000" }
+
 void nk_uuid_generate(NkUuid *uuid);
 gboolean nk_uuid_parse(NkUuid *uuid, const gchar *string);
 

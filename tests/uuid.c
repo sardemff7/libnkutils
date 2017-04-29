@@ -66,7 +66,7 @@ static const struct {
 static void
 _nk_uuid_tests_parse_func(void)
 {
-    NkUuid uuid = { 0 }, uuid2 = { 0 };
+    NkUuid uuid = NK_UUID_INIT, uuid2 = NK_UUID_INIT;
 
     nk_uuid_generate(&uuid);
     g_assert_true(nk_uuid_parse(&uuid2, uuid.string));
@@ -77,7 +77,7 @@ static void
 _nk_uuid_tests_fail_func(gconstpointer user_data)
 {
     const gchar *str = user_data;
-    NkUuid uuid = { 0 };
+    NkUuid uuid = NK_UUID_INIT;
 
     g_assert_false(nk_uuid_parse(&uuid, str));
 }
@@ -87,7 +87,7 @@ _nk_uuid_tests_ns_func(gconstpointer user_data)
 {
     const NkUuidTestData *data = user_data;
 
-    NkUuid uuid = { 0 };
+    NkUuid uuid = NK_UUID_INIT;
     g_assert_true(nk_uuid_parse(&uuid, data->ns));
     g_assert_cmpstr(uuid.string, ==, data->ns);
     nk_uuid_from_name(&uuid, data->name, -1);
