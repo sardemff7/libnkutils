@@ -228,9 +228,23 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/colour/named",
+        .data ={
+            .string = "gold",
+            .generated_string = "#ffd700",
+            .colour = {
+                .red   = 1.,
+                .green = .843,
+                .blue  = 0.,
+                .alpha = 1.
+            },
+            .ret = TRUE,
+        }
+    },
+    {
         .testpath = "/nkutils/colour/bad",
         .data ={
-            .string = "black",
+            .string = "no-colour-has-that-name",
             .ret = FALSE,
         }
     },

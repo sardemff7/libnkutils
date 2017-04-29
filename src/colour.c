@@ -41,6 +41,8 @@
 
 #define DMODULO(d, m) ( (d) - (guint64) (d) + ( (guint64) (d) % (m) ) )
 
+#define RGB_TO_COLOUR(r, g, b) { .red = (gdouble) (r) / 255., .green = (gdouble) (g) / 255., .blue = (gdouble) (b) / 255., .alpha = 1. }
+
 static GScanner *_nk_colour_scanner = NULL;
 
 typedef enum {
@@ -76,6 +78,161 @@ static const gchar * const _nk_colour_scanner_symbols_angle_units[] = {
     [NK_COLOUR_ANGLE_GRAD] = "grad",
     [NK_COLOUR_ANGLE_RAD] = "rad",
     [NK_COLOUR_ANGLE_TURN] = "turn",
+};
+
+static const struct {
+    const gchar *name;
+    NkColour value;
+} _nk_colour_scanner_named_colours[] = {
+    { "transparent", { .red = 0., .green = 0., .blue = 0., .alpha = 0. } },
+    { "aliceblue", RGB_TO_COLOUR(240, 248, 255) },
+    { "antiquewhite", RGB_TO_COLOUR(250, 235, 215) },
+    { "aqua", RGB_TO_COLOUR(0, 255, 255) },
+    { "aquamarine", RGB_TO_COLOUR(127, 255, 212) },
+    { "azure", RGB_TO_COLOUR(240, 255, 255) },
+    { "beige", RGB_TO_COLOUR(245, 245, 220) },
+    { "bisque", RGB_TO_COLOUR(255, 228, 196) },
+    { "black", RGB_TO_COLOUR(0, 0, 0) },
+    { "blanchedalmond", RGB_TO_COLOUR(255, 235, 205) },
+    { "blue", RGB_TO_COLOUR(0, 0, 255) },
+    { "blueviolet", RGB_TO_COLOUR(138, 43, 226) },
+    { "brown", RGB_TO_COLOUR(165, 42, 42) },
+    { "burlywood", RGB_TO_COLOUR(222, 184, 135) },
+    { "cadetblue", RGB_TO_COLOUR(95, 158, 160) },
+    { "chartreuse", RGB_TO_COLOUR(127, 255, 0) },
+    { "chocolate", RGB_TO_COLOUR(210, 105, 30) },
+    { "coral", RGB_TO_COLOUR(255, 127, 80) },
+    { "cornflowerblue", RGB_TO_COLOUR(100, 149, 237) },
+    { "cornsilk", RGB_TO_COLOUR(255, 248, 220) },
+    { "crimson", RGB_TO_COLOUR(220, 20, 60) },
+    { "cyan", RGB_TO_COLOUR(0, 255, 255) },
+    { "darkblue", RGB_TO_COLOUR(0, 0, 139) },
+    { "darkcyan", RGB_TO_COLOUR(0, 139, 139) },
+    { "darkgoldenrod", RGB_TO_COLOUR(184, 134, 11) },
+    { "darkgray", RGB_TO_COLOUR(169, 169, 169) },
+    { "darkgreen", RGB_TO_COLOUR(0, 100, 0) },
+    { "darkgrey", RGB_TO_COLOUR(169, 169, 169) },
+    { "darkkhaki", RGB_TO_COLOUR(189, 183, 107) },
+    { "darkmagenta", RGB_TO_COLOUR(139, 0, 139) },
+    { "darkolivegreen", RGB_TO_COLOUR(85, 107, 47) },
+    { "darkorange", RGB_TO_COLOUR(255, 140, 0) },
+    { "darkorchid", RGB_TO_COLOUR(153, 50, 204) },
+    { "darkred", RGB_TO_COLOUR(139, 0, 0) },
+    { "darksalmon", RGB_TO_COLOUR(233, 150, 122) },
+    { "darkseagreen", RGB_TO_COLOUR(143, 188, 143) },
+    { "darkslateblue", RGB_TO_COLOUR(72, 61, 139) },
+    { "darkslategray", RGB_TO_COLOUR(47, 79, 79) },
+    { "darkslategrey", RGB_TO_COLOUR(47, 79, 79) },
+    { "darkturquoise", RGB_TO_COLOUR(0, 206, 209) },
+    { "darkviolet", RGB_TO_COLOUR(148, 0, 211) },
+    { "deeppink", RGB_TO_COLOUR(255, 20, 147) },
+    { "deepskyblue", RGB_TO_COLOUR(0, 191, 255) },
+    { "dimgray", RGB_TO_COLOUR(105, 105, 105) },
+    { "dimgrey", RGB_TO_COLOUR(105, 105, 105) },
+    { "dodgerblue", RGB_TO_COLOUR(30, 144, 255) },
+    { "firebrick", RGB_TO_COLOUR(178, 34, 34) },
+    { "floralwhite", RGB_TO_COLOUR(255, 250, 240) },
+    { "forestgreen", RGB_TO_COLOUR(34, 139, 34) },
+    { "fuchsia", RGB_TO_COLOUR(255, 0, 255) },
+    { "gainsboro", RGB_TO_COLOUR(220, 220, 220) },
+    { "ghostwhite", RGB_TO_COLOUR(248, 248, 255) },
+    { "gold", RGB_TO_COLOUR(255, 215, 0) },
+    { "goldenrod", RGB_TO_COLOUR(218, 165, 32) },
+    { "gray", RGB_TO_COLOUR(128, 128, 128) },
+    { "green", RGB_TO_COLOUR(0, 128, 0) },
+    { "greenyellow", RGB_TO_COLOUR(173, 255, 47) },
+    { "grey", RGB_TO_COLOUR(128, 128, 128) },
+    { "honeydew", RGB_TO_COLOUR(240, 255, 240) },
+    { "hotpink", RGB_TO_COLOUR(255, 105, 180) },
+    { "indianred", RGB_TO_COLOUR(205, 92, 92) },
+    { "indigo", RGB_TO_COLOUR(75, 0, 130) },
+    { "ivory", RGB_TO_COLOUR(255, 255, 240) },
+    { "khaki", RGB_TO_COLOUR(240, 230, 140) },
+    { "lavender", RGB_TO_COLOUR(230, 230, 250) },
+    { "lavenderblush", RGB_TO_COLOUR(255, 240, 245) },
+    { "lawngreen", RGB_TO_COLOUR(124, 252, 0) },
+    { "lemonchiffon", RGB_TO_COLOUR(255, 250, 205) },
+    { "lightblue", RGB_TO_COLOUR(173, 216, 230) },
+    { "lightcoral", RGB_TO_COLOUR(240, 128, 128) },
+    { "lightcyan", RGB_TO_COLOUR(224, 255, 255) },
+    { "lightgoldenrodyellow", RGB_TO_COLOUR(250, 250, 210) },
+    { "lightgray", RGB_TO_COLOUR(211, 211, 211) },
+    { "lightgreen", RGB_TO_COLOUR(144, 238, 144) },
+    { "lightgrey", RGB_TO_COLOUR(211, 211, 211) },
+    { "lightpink", RGB_TO_COLOUR(255, 182, 193) },
+    { "lightsalmon", RGB_TO_COLOUR(255, 160, 122) },
+    { "lightseagreen", RGB_TO_COLOUR(32, 178, 170) },
+    { "lightskyblue", RGB_TO_COLOUR(135, 206, 250) },
+    { "lightslategray", RGB_TO_COLOUR(119, 136, 153) },
+    { "lightslategrey", RGB_TO_COLOUR(119, 136, 153) },
+    { "lightsteelblue", RGB_TO_COLOUR(176, 196, 222) },
+    { "lightyellow", RGB_TO_COLOUR(255, 255, 224) },
+    { "lime", RGB_TO_COLOUR(0, 255, 0) },
+    { "limegreen", RGB_TO_COLOUR(50, 205, 50) },
+    { "linen", RGB_TO_COLOUR(250, 240, 230) },
+    { "magenta", RGB_TO_COLOUR(255, 0, 255) },
+    { "maroon", RGB_TO_COLOUR(128, 0, 0) },
+    { "mediumaquamarine", RGB_TO_COLOUR(102, 205, 170) },
+    { "mediumblue", RGB_TO_COLOUR(0, 0, 205) },
+    { "mediumorchid", RGB_TO_COLOUR(186, 85, 211) },
+    { "mediumpurple", RGB_TO_COLOUR(147, 112, 219) },
+    { "mediumseagreen", RGB_TO_COLOUR(60, 179, 113) },
+    { "mediumslateblue", RGB_TO_COLOUR(123, 104, 238) },
+    { "mediumspringgreen", RGB_TO_COLOUR(0, 250, 154) },
+    { "mediumturquoise", RGB_TO_COLOUR(72, 209, 204) },
+    { "mediumvioletred", RGB_TO_COLOUR(199, 21, 133) },
+    { "midnightblue", RGB_TO_COLOUR(25, 25, 112) },
+    { "mintcream", RGB_TO_COLOUR(245, 255, 250) },
+    { "mistyrose", RGB_TO_COLOUR(255, 228, 225) },
+    { "moccasin", RGB_TO_COLOUR(255, 228, 181) },
+    { "navajowhite", RGB_TO_COLOUR(255, 222, 173) },
+    { "navy", RGB_TO_COLOUR(0, 0, 128) },
+    { "oldlace", RGB_TO_COLOUR(253, 245, 230) },
+    { "olive", RGB_TO_COLOUR(128, 128, 0) },
+    { "olivedrab", RGB_TO_COLOUR(107, 142, 35) },
+    { "orange", RGB_TO_COLOUR(255, 165, 0) },
+    { "orangered", RGB_TO_COLOUR(255, 69, 0) },
+    { "orchid", RGB_TO_COLOUR(218, 112, 214) },
+    { "palegoldenrod", RGB_TO_COLOUR(238, 232, 170) },
+    { "palegreen", RGB_TO_COLOUR(152, 251, 152) },
+    { "paleturquoise", RGB_TO_COLOUR(175, 238, 238) },
+    { "palevioletred", RGB_TO_COLOUR(219, 112, 147) },
+    { "papayawhip", RGB_TO_COLOUR(255, 239, 213) },
+    { "peachpuff", RGB_TO_COLOUR(255, 218, 185) },
+    { "peru", RGB_TO_COLOUR(205, 133, 63) },
+    { "pink", RGB_TO_COLOUR(255, 192, 203) },
+    { "plum", RGB_TO_COLOUR(221, 160, 221) },
+    { "powderblue", RGB_TO_COLOUR(176, 224, 230) },
+    { "purple", RGB_TO_COLOUR(128, 0, 128) },
+    { "rebeccapurple", RGB_TO_COLOUR(102, 51, 153) },
+    { "red", RGB_TO_COLOUR(255, 0, 0) },
+    { "rosybrown", RGB_TO_COLOUR(188, 143, 143) },
+    { "royalblue", RGB_TO_COLOUR(65, 105, 225) },
+    { "saddlebrown", RGB_TO_COLOUR(139, 69, 19) },
+    { "salmon", RGB_TO_COLOUR(250, 128, 114) },
+    { "sandybrown", RGB_TO_COLOUR(244, 164, 96) },
+    { "seagreen", RGB_TO_COLOUR(46, 139, 87) },
+    { "seashell", RGB_TO_COLOUR(255, 245, 238) },
+    { "sienna", RGB_TO_COLOUR(160, 82, 45) },
+    { "silver", RGB_TO_COLOUR(192, 192, 192) },
+    { "skyblue", RGB_TO_COLOUR(135, 206, 235) },
+    { "slateblue", RGB_TO_COLOUR(106, 90, 205) },
+    { "slategray", RGB_TO_COLOUR(112, 128, 144) },
+    { "slategrey", RGB_TO_COLOUR(112, 128, 144) },
+    { "snow", RGB_TO_COLOUR(255, 250, 250) },
+    { "springgreen", RGB_TO_COLOUR(0, 255, 127) },
+    { "steelblue", RGB_TO_COLOUR(70, 130, 180) },
+    { "tan", RGB_TO_COLOUR(210, 180, 140) },
+    { "teal", RGB_TO_COLOUR(0, 128, 128) },
+    { "thistle", RGB_TO_COLOUR(216, 191, 216) },
+    { "tomato", RGB_TO_COLOUR(255, 99, 71) },
+    { "turquoise", RGB_TO_COLOUR(64, 224, 208) },
+    { "violet", RGB_TO_COLOUR(238, 130, 238) },
+    { "wheat", RGB_TO_COLOUR(245, 222, 179) },
+    { "white", RGB_TO_COLOUR(255, 255, 255) },
+    { "whitesmoke", RGB_TO_COLOUR(245, 245, 245) },
+    { "yellow", RGB_TO_COLOUR(255, 255, 0) },
+    { "yellowgreen", RGB_TO_COLOUR(154, 205, 50) },
 };
 
 #define IS_BETWEEN(x, low, high) ( ( (x) >= (low) ) && ( (x) <= (high) ) )
@@ -269,6 +426,21 @@ _nk_colour_hwb_to_rgb(NkColour *colour, gdouble h, gdouble w, gdouble b)
     colour->blue  += w;
 }
 
+static gboolean
+_nk_colour_search_named(NkColour *colour, const gchar *name)
+{
+    gsize i;
+    for ( i = 0 ; i < G_N_ELEMENTS(_nk_colour_scanner_named_colours) ; ++i )
+    {
+        if ( g_ascii_strcasecmp(name, _nk_colour_scanner_named_colours[i].name) == 0 )
+        {
+            *colour = _nk_colour_scanner_named_colours[i].value;
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 gboolean
 nk_colour_parse(const gchar *s, NkColour *colour)
 {
@@ -406,9 +578,13 @@ nk_colour_parse(const gchar *s, NkColour *colour)
                 return FALSE;
             }
         }
-        else
+        else if ( ! _nk_colour_search_named(&colour_, _nk_colour_scanner->value.v_identifier) )
             return FALSE;
     break;
+    break;
+    case G_TOKEN_STRING:
+        if ( ! _nk_colour_search_named(&colour_, _nk_colour_scanner->value.v_string) )
+            return FALSE;
     default:
         return FALSE;
     }
