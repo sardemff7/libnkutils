@@ -26,6 +26,7 @@ project('libnkutils', 'c',
     license: 'MIT',
     default_options: [
         'c_std=gnu11',
+        'warning_level=3',
     ],
 )
 
