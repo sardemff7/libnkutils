@@ -220,6 +220,27 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/basic/anti-substitute/with",
+        .data = {
+            .source = "I want to eat a ${adjective:!sweat }lemon.",
+            .data = {
+                { .token = "adjective", .content = "juicy" },
+                { .token = NULL }
+            },
+            .result = "I want to eat a lemon."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/anti-substitute/without",
+        .data = {
+            .source = "I want to eat a ${adjective:!sweat }lemon.",
+            .data = {
+                { .token = NULL }
+            },
+            .result = "I want to eat a sweat lemon."
+        }
+    },
+    {
         .testpath = "/nkutils/token/basic/replace/full",
         .data = {
             .source = "You can make a ${recipe/split/cream} with ${fruit}.",

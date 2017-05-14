@@ -55,6 +55,7 @@ typedef struct {
     const gchar *fallback;
     const gchar *substitute;
     NkTokenRegex *replace;
+    gboolean no_data;
 } NkToken;
 
 struct _NkTokenList {
@@ -198,6 +199,10 @@ nk_token_list_parse(gchar *string)
                 break;
                 case '+':
                     token.substitute = ++w;
+                break;
+                case '!':
+                    token.no_data = TRUE;
+                    token.fallback = ++w;
                 break;
                 default:
                     /* Just fail on malformed string */
@@ -391,7 +396,7 @@ nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callba
                     g_string_append(string, n);
                 g_free(n);
             }
-            else
+            else if ( ! self->tokens[i].no_data )
                 g_string_append(string, data);
         }
         else if ( self->tokens[i].fallback != NULL )

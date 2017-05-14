@@ -42,6 +42,10 @@
             The syntax is: <userinput>${<replaceable>reference-name</replaceable>:+<replaceable>substitute-value</replaceable>}</userinput>.
         </para>
         <para>
+            You can use a substitute value if the data resolves to <literal>nothing</literal>.
+            The syntax is: <userinput>${<replaceable>reference-name</replaceable>:!<replaceable>substitute-value</replaceable>}</userinput>.
+        </para>
+        <para>
             You can replace parts of the data using the regex mechanism.
             The syntax is: <userinput>${<replaceable>reference-name</replaceable>/<replaceable>regex</replaceable>/<replaceable>replacement</replaceable>}</userinput>.
             The <replaceable>replacement</replaceable> part is optional (including the preceding forward slash). If it is omitted, matching parts of the data will simply be removed.
@@ -87,6 +91,22 @@
                 <listitem>
                     <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>fruit</varname> is <literal>"pear"</literal>and <varname>addition</varname> is <literal>nothing</literal>.</para>
                     <para>Resolves to: <literal>Bob is eating a pear.</literal></para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><literal>"${name} is eating a ${addition:! raw }${fruit}."</literal></term>
+                <listitem>
+                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>fruit</varname> is <literal>"pear"</literal> and <varname>addition</varname> is <literal>"chocolate"</literal>.</para>
+                    <para>Resolves to: <literal>Bob is eating a pear.</literal></para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><literal>"${name} is eating a ${addition:! raw }${fruit}."</literal></term>
+                <listitem>
+                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>fruit</varname> is <literal>"pear"</literal>and <varname>addition</varname> is <literal>nothing</literal>.</para>
+                    <para>Resolves to: <literal>Bob is eating a raw pear.</literal></para>
                 </listitem>
             </varlistentry>
 
