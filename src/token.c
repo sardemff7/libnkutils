@@ -274,7 +274,19 @@ nk_token_list_parse(gchar *string)
             break;
         }
         case '$':
-            ++w;
+        {
+            *w = '\0';
+            if ( *string != '\0' )
+            {
+                NkToken token = {
+                    .string = string
+                };
+                ++self->size;
+                self->tokens = g_renew(NkToken, self->tokens, self->size);
+                self->tokens[self->size - 1] = token;
+            }
+            string = ++w;
+        }
         default:
         break;
         }

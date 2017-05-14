@@ -396,6 +396,16 @@ static const struct {
             .result = "You can make a ${(<adjective>) }banana split with a banana${ and <addition}."
         }
     },
+    {
+        .testpath = "/nkutils/token/basic/double-dollar",
+        .data = {
+            .source = "echo $${PATH}",
+            .data = {
+                { .token = NULL }
+            },
+            .result = "echo ${PATH}"
+        }
+    },
 };
 
 static const gchar *
