@@ -60,8 +60,9 @@ typedef struct {
 struct _NkTokenList {
     guint64 ref_count;
     gchar *string;
-    gsize size;
+    gsize length;
     NkToken *tokens;
+    gsize size;
 };
 
 static gchar *
@@ -120,9 +121,10 @@ nk_token_list_parse(gchar *string)
     self = g_new0(NkTokenList, 1);
     self->ref_count = 1;
     self->string = string;
+    self->length = strlen(self->string);
 
     gchar *w = string;
-    while ( ( w = g_utf8_strchr(w, -1, '$') ) != NULL )
+    while ( ( w = g_utf8_strchr(w, self->length - ( w - self->string ), '$') ) != NULL )
     {
         gchar *b = w;
         w = g_utf8_next_char(w);
@@ -355,7 +357,7 @@ nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callba
     g_return_val_if_fail(callback != NULL, NULL);
 
     GString *string;
-    string = g_string_new("");
+    string = g_string_sized_new(self->length);
 
     gsize i;
     for ( i = 0 ; i < self->size ; ++i )
