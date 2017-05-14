@@ -75,42 +75,42 @@
             </varlistentry>
 
             <varlistentry>
-                <term><literal>"${name} is eating a ${meat}${condiment:+ with }${condiment}."</literal></term>
+                <term><literal>"${name} is eating a ${fruit}${addition:+ cooked with }${addition}."</literal></term>
                 <listitem>
-                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>meat</varname> is <literal>"steak"</literal> and <varname>condiment</varname> is <literal>"mustard"</literal>.</para>
-                    <para>Resolves to: <literal>Bob is eating a steak with mustard.</literal></para>
+                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>fruit</varname> is <literal>"pear"</literal> and <varname>addition</varname> is <literal>"chocolate"</literal>.</para>
+                    <para>Resolves to: <literal>Bob is eating a pear cooked with chocolate.</literal></para>
                 </listitem>
             </varlistentry>
 
             <varlistentry>
-                <term><literal>"${name} is eating a ${meat}${condiment:+ with }${condiment}."</literal></term>
+                <term><literal>"${name} is eating a ${fruit}${addition:+ cooked with }${addition}."</literal></term>
                 <listitem>
-                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>meat</varname> is <literal>"steak"</literal>and <varname>condiment</varname> is <literal>nothing</literal>.</para>
-                    <para>Resolves to: <literal>Bob is eating a steak.</literal></para>
+                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>fruit</varname> is <literal>"pear"</literal>and <varname>addition</varname> is <literal>nothing</literal>.</para>
+                    <para>Resolves to: <literal>Bob is eating a pear.</literal></para>
                 </listitem>
             </varlistentry>
 
             <varlistentry>
-                <term><literal>"${name} is eating a ${meat}${condiment/^/ with }."</literal></term>
+                <term><literal>"${name} is eating a ${fruit}${addition/^/ cooked with }."</literal></term>
                 <listitem>
-                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>meat</varname> is <literal>"steak"</literal> and <varname>condiment</varname> is <literal>"mustard"</literal>.</para>
-                    <para>Resolves to: <literal>Bob is eating a steak with mustard.</literal></para>
+                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>fruit</varname> is <literal>"pear"</literal> and <varname>addition</varname> is <literal>"chocolate"</literal>.</para>
+                    <para>Resolves to: <literal>Bob is eating a pear cooked with chocolate.</literal></para>
                 </listitem>
             </varlistentry>
 
             <varlistentry>
-                <term><literal>"${name} is eating a ${meat}${condiment/^/ with }."</literal></term>
+                <term><literal>"${name} is eating a ${fruit}${addition/^/ cooked with }."</literal></term>
                 <listitem>
-                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>meat</varname> is <literal>"steak"</literal>and <varname>condiment</varname> is <literal>nothing</literal>.</para>
-                    <para>Resolves to: <literal>Bob is eating a steak.</literal></para>
+                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>fruit</varname> is <literal>"pear"</literal>and <varname>addition</varname> is <literal>nothing</literal>.</para>
+                    <para>Resolves to: <literal>Bob is eating a pear.</literal></para>
                 </listitem>
             </varlistentry>
 
             <varlistentry>
-                <term><literal>"${name} is eating a ${meat}${condiment/^/ with /$/ from France}."</literal></term>
+                <term><literal>"${name} is eating a ${fruit}${addition/^/ cooked with /$/ from Switzerland}."</literal></term>
                 <listitem>
-                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>meat</varname> is <literal>"steak"</literal> and <varname>condiment</varname> is <literal>"mustard"</literal>.</para>
-                    <para>Resolves to: <literal>Bob is eating a steak with mustard from France.</literal></para>
+                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>fruit</varname> is <literal>"pear"</literal> and <varname>addition</varname> is <literal>"chocolate"</literal>.</para>
+                    <para>Resolves to: <literal>Bob is eating a pear cooked with chocolate from Switzerland.</literal></para>
                 </listitem>
             </varlistentry>
         </variablelist>
