@@ -90,7 +90,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/wrong",
+        .testpath = "/nkutils/token/basic/wrong/1",
         .data = {
             .source = "You can make ${recipe} with $fruit.",
             .data = {
@@ -102,7 +102,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/wrong/0",
+        .testpath = "/nkutils/token/basic/wrong/2",
         .data = {
             .source = "$fruit is good.",
             .data = {
@@ -114,7 +114,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/subscript/index",
+        .testpath = "/nkutils/token/key/index",
         .data = {
             .source = "You can make a ${recipe[0]} with ${fruit}.",
             .data = {
@@ -126,7 +126,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/subscript/key",
+        .testpath = "/nkutils/token/key/name",
         .data = {
             .source = "You can make a ${recipe[icecream]} with ${fruit}.",
             .data = {
@@ -138,7 +138,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/subscript/key/modifier",
+        .testpath = "/nkutils/token/key/name/modifier",
         .data = {
             .source = "You can make a ${recipe[cake]:-banana cake} with ${fruit}.",
             .data = {
@@ -150,7 +150,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/subscript/join/replace",
+        .testpath = "/nkutils/token/key/join/replace",
         .data = {
             .source = "You can make [${recipes[@@]/@/], [}] with ${fruit}.",
             .data = {
@@ -162,14 +162,14 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/wrong/modifier",
+        .testpath = "/nkutils/token/wrong/modifier",
         .data = {
             .source = "You can make a ${recipe} with ${fruit::}.",
             .error = NK_TOKEN_ERROR_UNKNOWN_MODIFIER,
         }
     },
     {
-        .testpath = "/nkutils/token/basic/fallback/with",
+        .testpath = "/nkutils/token/fallback/with",
         .data = {
             .source = "I want to eat ${fruit:-an apple}.",
             .data = {
@@ -180,7 +180,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/fallback/without",
+        .testpath = "/nkutils/token/fallback/without",
         .data = {
             .source = "I want to eat ${fruit:-an apple}.",
             .data = {
@@ -190,7 +190,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/substitute/with",
+        .testpath = "/nkutils/token/substitute/with",
         .data = {
             .source = "You can make a ${adjective:+(}${adjective}${adjective:+) }${recipe} with ${fruit}${addition:+ and }${addition}.",
             .data = {
@@ -204,7 +204,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/substitute/without",
+        .testpath = "/nkutils/token/substitute/without",
         .data = {
             .source = "You can make a ${adjective:+(}${adjective}${adjective:+) }${recipe} with ${fruit}${addition:+ and }${addition}.",
             .data = {
@@ -216,7 +216,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/anti-substitute/with",
+        .testpath = "/nkutils/token/anti-substitute/with",
         .data = {
             .source = "I want to eat a ${adjective:!sweat }lemon.",
             .data = {
@@ -227,7 +227,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/anti-substitute/without",
+        .testpath = "/nkutils/token/anti-substitute/without",
         .data = {
             .source = "I want to eat a ${adjective:!sweat }lemon.",
             .data = {
@@ -237,7 +237,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/full",
+        .testpath = "/nkutils/token/replace/full",
         .data = {
             .source = "You can make a ${recipe/split/cream} with ${fruit}.",
             .data = {
@@ -249,7 +249,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/missing",
+        .testpath = "/nkutils/token/replace/missing",
         .data = {
             .source = "You can make a ${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
@@ -261,7 +261,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/capture",
+        .testpath = "/nkutils/token/replace/capture",
         .data = {
             .source = "You can make a ${adjective/(.+)/(\\1) }${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
@@ -275,7 +275,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/before-after/with",
+        .testpath = "/nkutils/token/replace/before-after/with",
         .data = {
             .source = "You can make a ${adjective/^/(/$/) }${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
@@ -289,7 +289,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/before-after/without",
+        .testpath = "/nkutils/token/replace/before-after/without",
         .data = {
             .source = "You can make a ${adjective/^/(/$/) }${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
@@ -301,7 +301,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/remove",
+        .testpath = "/nkutils/token/replace/remove",
         .data = {
             .source = "You can make a ${recipe/ split} with ${fruit}.",
             .data = {
@@ -313,7 +313,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/multiple",
+        .testpath = "/nkutils/token/replace/multiple",
         .data = {
             .source = "You can make ${recipe/a banana/an apple pie/ split} with ${fruit/.+/apples}.",
             .data = {
@@ -325,7 +325,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/braces/paired",
+        .testpath = "/nkutils/token/replace/braces/paired",
         .data = {
             .source = "You can make a ${adjective/.{2}$/y/^/(/$/) }${recipe} with ${fruit}${addition/\\{//\\}//^/ and }.",
             .data = {
@@ -339,7 +339,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/braces/opening",
+        .testpath = "/nkutils/token/replace/braces/opening",
         .data = {
             .source = "You can make a ${adjective/.{2}$/y/^/(/$/) }${recipe} with ${fruit}${addition/\\{//^/ and }.",
             .data = {
@@ -353,7 +353,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/braces/closing",
+        .testpath = "/nkutils/token/replace/braces/closing",
         .data = {
             .source = "You can make a ${adjective/.{2}$/y/^/(/$/) }${recipe} with ${fruit}${addition/\\}//^/ and }.",
             .data = {
@@ -367,7 +367,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/escaping/backslash",
+        .testpath = "/nkutils/token/replace/escaping/backslash",
         .data = {
             .source = "You can make a ${adjective/^/(/$/) /\\\\}${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
@@ -381,7 +381,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/escaping/forwardslash/1",
+        .testpath = "/nkutils/token/replace/escaping/forwardslash/1",
         .data = {
             .source = "${data/\\/}",
             .data = {
@@ -392,7 +392,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/escaping/forwardslash/2",
+        .testpath = "/nkutils/token/replace/escaping/forwardslash/2",
         .data = {
             .source = "${data/a/\\/}",
             .data = {
@@ -403,7 +403,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/escaping/forwardslash/3",
+        .testpath = "/nkutils/token/replace/escaping/forwardslash/3",
         .data = {
             .source = "${data/a/\\//b/x}",
             .data = {
@@ -414,7 +414,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/escaping/right-curly-bracket/2",
+        .testpath = "/nkutils/token/replace/escaping/right-curly-bracket/2",
         .data = {
             .source = "${data/a/\\}}",
             .data = {
@@ -425,7 +425,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/old/before-after",
+        .testpath = "/nkutils/token/old/before-after",
         .data = {
             .source = "You can make a ${(<adjective>) }${recipe} with ${fruit}${ and <addition}.",
             .data = {
@@ -437,7 +437,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/double-dollar",
+        .testpath = "/nkutils/token/double-dollar",
         .data = {
             .source = "echo $${PATH}",
             .data = {
