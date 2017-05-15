@@ -67,10 +67,8 @@ struct _NkTokenList {
 };
 
 static gchar *
-_nk_token_strchr_escape(gchar *s, gssize l, gunichar c, gunichar pair_c)
+_nk_token_strchr_escape(gchar *s, gsize l, gunichar c, gunichar pair_c)
 {
-    if ( l < 0 )
-        l = strlen(s);
     gchar *e = s + l;
 
     gsize pair_count = 0;
@@ -144,7 +142,7 @@ nk_token_list_parse(gchar *string)
                 w = g_utf8_next_char(w);
 
 
-            e = _nk_token_strchr_escape(w, -1, '}', '{');
+            e = _nk_token_strchr_escape(w, self->length - ( w - self->string ), '}', '{');
             if ( e == NULL )
                 continue;
 
