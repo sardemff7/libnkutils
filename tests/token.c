@@ -169,6 +169,39 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/wrong/key/index",
+        .data = {
+            .source = "You can make a ${recipe[18446744073709551616]} with ${fruit}.",
+            .error = NK_TOKEN_ERROR_WRONG_KEY,
+        }
+    },
+    {
+        .testpath = "/nkutils/token/wrong/key",
+        .data = {
+            .source = "You can make a ${recipe[|]} with ${fruit}.",
+            .error = NK_TOKEN_ERROR_WRONG_KEY,
+        }
+    },
+    {
+        .testpath = "/nkutils/token/wrong/regex/pattern",
+        .data = {
+            .source = "You can make a ${recipe/[} with ${fruit}.",
+            .error = NK_TOKEN_ERROR_REGEX,
+        }
+    },
+    {
+        .testpath = "/nkutils/token/wrong/regex/replace",
+        .data = {
+            .source = "You can make ${recipe/a/\\gwrong} with ${fruit}.",
+            .data = {
+                { .token = "fruit", .content = "a banana" },
+                { .token = "recipe", .content = "a banana split" },
+                { .token = NULL }
+            },
+            .result = "You can make  with a banana."
+        }
+    },
+    {
         .testpath = "/nkutils/token/fallback/with",
         .data = {
             .source = "I want to eat ${fruit:-an apple}.",
@@ -522,6 +555,20 @@ static const struct {
             },
             .used_tokens = (1 << TOKEN_FRUIT) | (1 << TOKEN_RECIPE),
             .result = "You can make a banana split with a banana."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/enum/wrong/regex",
+        .data = {
+            .source = "You can make a ${recipe/[} with ${fruit}.",
+            .error = NK_TOKEN_ERROR_REGEX,
+        }
+    },
+    {
+        .testpath = "/nkutils/token/enum/wrong/token",
+        .data = {
+            .source = "You can make a ${recipe} with ${fruit} and ${addition}.",
+            .error = NK_TOKEN_ERROR_UNKNOWN_TOKEN,
         }
     },
 };
