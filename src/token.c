@@ -251,9 +251,14 @@ nk_token_list_parse(gchar *string, GError **error)
                 c = 0;
                 do
                 {
-                    token.replace[c].regex = g_regex_new(++w, G_REGEX_OPTIMIZE, 0, error);
+                    GError *_inner_error_ = NULL;
+                    token.replace[c].regex = g_regex_new(++w, G_REGEX_OPTIMIZE, 0, &_inner_error_);
                     if ( token.replace[c].regex == NULL )
+                    {
+                        g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_REGEX, "Wrong regex: %s", _inner_error_->message);
+                        g_clear_error(&_inner_error_);
                         goto fail;
+                    }
 
                     w = w + strlen(w) + 1;
                     token.replace[c].replacement = ( w > e ) ? "" : w;
