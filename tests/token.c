@@ -381,6 +381,50 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/basic/replace/escaping/forwardslash/1",
+        .data = {
+            .source = "${data/\\/}",
+            .data = {
+                { .token = "data", .content = "/" },
+                { .token = NULL }
+            },
+            .result = ""
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/replace/escaping/forwardslash/2",
+        .data = {
+            .source = "${data/a/\\/}",
+            .data = {
+                { .token = "data", .content = "a" },
+                { .token = NULL }
+            },
+            .result = "/"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/replace/escaping/forwardslash/3",
+        .data = {
+            .source = "${data/a/\\//b/x}",
+            .data = {
+                { .token = "data", .content = "ab" },
+                { .token = NULL }
+            },
+            .result = "/x"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/basic/replace/escaping/right-curly-bracket/2",
+        .data = {
+            .source = "${data/a/\\}}",
+            .data = {
+                { .token = "data", .content = "a" },
+                { .token = NULL }
+            },
+            .result = "}"
+        }
+    },
+    {
         .testpath = "/nkutils/token/basic/old/before-after",
         .data = {
             .source = "You can make a ${(<adjective>) }${recipe} with ${fruit}${ and <addition}.",

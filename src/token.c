@@ -93,6 +93,15 @@ _nk_token_strchr_escape(gchar *s, gsize l, gunichar c, gunichar pair_c)
             if ( wc == '\\' )
                 /* Escaping a backslash, avoid escaping the next char */
                 wc = '\0';
+            else if ( wc == c )
+            {
+                w = g_utf8_prev_char(w);
+                pc = wc;
+                gchar *to, *from;
+                for ( to = w, from = g_utf8_next_char(w) ; from <= e ; ++to, ++from )
+                    *to = *from;
+                e = to;
+            }
             continue;
         }
 
