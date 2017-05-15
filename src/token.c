@@ -176,7 +176,7 @@ nk_token_list_parse(gchar *string, GError **error)
                     index = g_ascii_strtoll(w, &ie, 10);
                     if ( ( errno != 0 ) || ( w == ie ) )
                     {
-                        g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_KEY, "Could not parse index value: %s", key);
+                        g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_KEY, "Could not parse index value: %s", ss);
                         goto fail;
                     }
                     w = ie;
@@ -197,7 +197,7 @@ nk_token_list_parse(gchar *string, GError **error)
 
                 if ( g_utf8_get_char(w) != ']' )
                 {
-                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_KEY, "Wrong key value: %s", key);
+                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_KEY, "Wrong key value: %s", ss);
                     goto fail;
                 }
 
