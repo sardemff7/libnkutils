@@ -503,6 +503,7 @@ static const gchar const * const _nk_token_list_enum_tests_tokens[_TOKEN_SIZE] =
 typedef struct {
     const gchar *source;
     gchar *data[_TOKEN_SIZE];
+    guint64 used_tokens;
     gint error;
     const gchar *result;
 } NkTokenListEnumTestData;
@@ -519,6 +520,7 @@ static const struct {
                 [TOKEN_FRUIT]  = "a banana",
                 [TOKEN_RECIPE] = "a banana split",
             },
+            .used_tokens = (1 << TOKEN_FRUIT) | (1 << TOKEN_RECIPE),
             .result = "You can make a banana split with a banana."
         }
     },
@@ -537,9 +539,10 @@ _nk_token_list_enum_tests_func(gconstpointer user_data)
 {
     NkTokenListEnumTestData *data = (NkTokenListEnumTestData *) user_data;
     NkTokenList *token_list;
+    guint64 used_tokens;
     GError *error = NULL;
 
-    token_list = nk_token_list_parse_enum(g_strdup(data->source), _nk_token_list_enum_tests_tokens, _TOKEN_SIZE, NULL, &error);
+    token_list = nk_token_list_parse_enum(g_strdup(data->source), _nk_token_list_enum_tests_tokens, _TOKEN_SIZE, &used_tokens, &error);
     if ( data->result == NULL )
     {
         g_assert_null(token_list);
@@ -548,6 +551,8 @@ _nk_token_list_enum_tests_func(gconstpointer user_data)
     }
     g_assert_no_error(error);
     g_assert_nonnull(token_list);
+    if ( data->used_tokens != 0 )
+        g_assert_cmpuint(used_tokens, ==, data->used_tokens);
 
     gchar *result;
     result = nk_token_list_replace(token_list, _nk_token_list_enum_tests_callback, data->data);
