@@ -44,8 +44,8 @@ typedef struct {
 
 typedef struct {
     const gchar *source;
-    NkTokenError error;
     NkTokenTestDataData data[MAX_DATA + 1];
+    gint error;
     const gchar *result;
 } NkTokenTestData;
 
@@ -473,7 +473,7 @@ _nk_token_list_tests_func(gconstpointer user_data)
     if ( data->result == NULL )
     {
         g_assert_null(token_list);
-        g_assert_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_UNKNOWN_MODIFIER);
+        g_assert_error(error, NK_TOKEN_ERROR, data->error);
         return;
     }
     g_assert_nonnull(token_list);
@@ -503,6 +503,7 @@ static const gchar const * const _nk_token_list_enum_tests_tokens[_TOKEN_SIZE] =
 typedef struct {
     const gchar *source;
     gchar *data[_TOKEN_SIZE];
+    gint error;
     const gchar *result;
 } NkTokenListEnumTestData;
 
@@ -542,7 +543,7 @@ _nk_token_list_enum_tests_func(gconstpointer user_data)
     if ( data->result == NULL )
     {
         g_assert_null(token_list);
-        g_assert_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_UNKNOWN_MODIFIER);
+        g_assert_error(error, NK_TOKEN_ERROR, data->error);
         return;
     }
     g_assert_no_error(error);
