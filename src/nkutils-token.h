@@ -26,12 +26,22 @@
 #ifndef __NK_UTILS_TOKEN_H__
 #define __NK_UTILS_TOKEN_H__
 
+
+typedef enum {
+    NK_TOKEN_ERROR_WRONG_KEY,
+    NK_TOKEN_ERROR_UNKNOWN_MODIFIER,
+    NK_TOKEN_ERROR_UNKNOWN_TOKEN,
+} NkTokenError;
+
 typedef struct _NkTokenList NkTokenList;
 
 typedef const gchar *(*NkTokenListReplaceCallback)(const gchar *token, guint64 value, const gchar *key, gint64 index, gpointer user_data);
 
-NkTokenList *nk_token_list_parse(gchar *string);
-NkTokenList *nk_token_list_parse_enum(gchar *string, const gchar * const *tokens, guint64 size, guint64 *used_tokens);
+GQuark nk_token_error_quark(void);
+#define NK_TOKEN_ERROR (nk_token_error_quark())
+
+NkTokenList *nk_token_list_parse(gchar *string, GError **error);
+NkTokenList *nk_token_list_parse_enum(gchar *string, const gchar * const *tokens, guint64 size, guint64 *used_tokens, GError **error);
 NkTokenList *nk_token_list_ref(NkTokenList *token_list);
 void nk_token_list_unref(NkTokenList *token_list);
 gchar *nk_token_list_replace(const NkTokenList *token_list, NkTokenListReplaceCallback callback, gpointer user_data);

@@ -44,6 +44,7 @@ typedef struct {
 
 typedef struct {
     const gchar *source;
+    NkTokenError error;
     NkTokenTestDataData data[MAX_DATA + 1];
     const gchar *result;
 } NkTokenTestData;
@@ -164,12 +165,7 @@ static const struct {
         .testpath = "/nkutils/token/basic/wrong/modifier",
         .data = {
             .source = "You can make a ${recipe} with ${fruit::}.",
-            .data = {
-                { .token = "fruit", .content = "a banana" },
-                { .token = "recipe", .content = "banana split" },
-                { .token = NULL }
-            },
-            .result = "You can make a banana split with ${fruit::}."
+            .error = NK_TOKEN_ERROR_UNKNOWN_MODIFIER,
         }
     },
     {
@@ -371,7 +367,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/basic/replace/escaping",
+        .testpath = "/nkutils/token/basic/replace/escaping/backslash",
         .data = {
             .source = "You can make a ${adjective/^/(/$/) /\\\\}${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
@@ -426,10 +422,18 @@ static void
 _nk_token_list_tests_func(gconstpointer user_data)
 {
     NkTokenTestData *data = (NkTokenTestData *) user_data;
-
     NkTokenList *token_list;
-    token_list = nk_token_list_parse(g_strdup(data->source));
+    GError *error = NULL;
+
+    token_list = nk_token_list_parse(g_strdup(data->source), &error);
+    if ( data->result == NULL )
+    {
+        g_assert_null(token_list);
+        g_assert_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_UNKNOWN_MODIFIER);
+        return;
+    }
     g_assert_nonnull(token_list);
+    g_assert_no_error(error);
     g_assert_nonnull(nk_token_list_ref(token_list));
 
     gchar *result;
@@ -487,9 +491,17 @@ static void
 _nk_token_list_enum_tests_func(gconstpointer user_data)
 {
     NkTokenListEnumTestData *data = (NkTokenListEnumTestData *) user_data;
-
     NkTokenList *token_list;
-    token_list = nk_token_list_parse_enum(g_strdup(data->source), _nk_token_list_enum_tests_tokens, _TOKEN_SIZE, NULL);
+    GError *error = NULL;
+
+    token_list = nk_token_list_parse_enum(g_strdup(data->source), _nk_token_list_enum_tests_tokens, _TOKEN_SIZE, NULL, &error);
+    if ( data->result == NULL )
+    {
+        g_assert_null(token_list);
+        g_assert_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_UNKNOWN_MODIFIER);
+        return;
+    }
+    g_assert_no_error(error);
     g_assert_nonnull(token_list);
 
     gchar *result;

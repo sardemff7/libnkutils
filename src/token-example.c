@@ -85,8 +85,15 @@ main(int argc, char *argv[])
         .argv = argv + 2,
     };
     gchar *result;
+    GError *error = NULL;
 
-    template = nk_token_list_parse(g_strdup(argv[1]));
+    template = nk_token_list_parse(g_strdup(argv[1]), &error);
+    if ( template == NULL )
+    {
+        g_warning("Template string could not be parsed: %s", error->message);
+        g_clear_error(&error);
+        return 2;
+    }
     result = nk_token_list_replace(template, _nktoken_replace_callback, &args);
 
     g_print("%s\n", result);

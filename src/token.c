@@ -66,6 +66,13 @@ struct _NkTokenList {
     gsize size;
 };
 
+
+GQuark
+nk_token_error_quark(void)
+{
+    return g_quark_from_static_string("nk_token_error-quark");
+}
+
 static gchar *
 _nk_token_strchr_escape(gchar *s, gsize l, gunichar c, gunichar pair_c)
 {
@@ -111,9 +118,10 @@ _nk_token_strchr_escape(gchar *s, gsize l, gunichar c, gunichar pair_c)
 }
 
 NkTokenList *
-nk_token_list_parse(gchar *string)
+nk_token_list_parse(gchar *string, GError **error)
 {
     g_return_val_if_fail(string != NULL, NULL);
+    g_return_val_if_fail(error == NULL || *error == NULL, NULL);
 
     NkTokenList *self;
 
@@ -158,7 +166,10 @@ nk_token_list_parse(gchar *string)
                     key = "";
                     index = g_ascii_strtoll(w, &ie, 10);
                     if ( ( errno != 0 ) || ( w == ie ) )
-                        continue;
+                    {
+                        g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_KEY, "Could not parse index value: %s", key);
+                        goto fail;
+                    }
                     w = ie;
                 }
                 else if ( g_unichar_isalpha(g_utf8_get_char(w)) )
@@ -173,10 +184,13 @@ nk_token_list_parse(gchar *string)
                         w = g_utf8_next_char(w);
                 }
                 else
-                    continue;
+                    w = ss;
 
                 if ( g_utf8_get_char(w) != ']' )
-                    continue;
+                {
+                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_KEY, "Wrong key value: %s", key);
+                    goto fail;
+                }
 
                 *ss = '\0';
                 *w++ = '\0';
@@ -204,7 +218,9 @@ nk_token_list_parse(gchar *string)
                 break;
                 default:
                     /* Just fail on malformed string */
-                    continue;
+                    *g_utf8_next_char(w) = '\0';
+                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_UNKNOWN_MODIFIER, "Wrong modifier value: %s", w);
+                    goto fail;
                 }
                 *m = '\0';
             }
@@ -226,20 +242,9 @@ nk_token_list_parse(gchar *string)
                 c = 0;
                 do
                 {
-                    token.replace[c].regex = g_regex_new(++w, G_REGEX_OPTIMIZE, 0, NULL);
+                    token.replace[c].regex = g_regex_new(++w, G_REGEX_OPTIMIZE, 0, error);
                     if ( token.replace[c].regex == NULL )
-                    {
-                        /* Malformed regex, we revert all changes made to the string */
-                        *b = '$';
-                        *e = '}';
-                        for ( m = b ; m < e ; ++m )
-                        {
-                            if ( *m == '\0' )
-                                *m = '/';
-                        }
-                        w = e;
-                        continue;
-                    }
+                        goto fail;
 
                     w = w + strlen(w) + 1;
                     token.replace[c].replacement = ( w > e ) ? "" : w;
@@ -296,17 +301,23 @@ nk_token_list_parse(gchar *string)
     self->tokens[self->size - 1] = token;
 
     return self;
+
+fail:
+    nk_token_list_unref(self);
+    return NULL;
 }
 
 NkTokenList *
-nk_token_list_parse_enum(gchar *string, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens)
+nk_token_list_parse_enum(gchar *string, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens, GError **error)
 {
     g_return_val_if_fail(string != NULL, NULL);
 
     NkTokenList *self;
     guint64 used_tokens = 0;
 
-    self = nk_token_list_parse(string);
+    self = nk_token_list_parse(string, error);
+    if ( self == NULL )
+        return NULL;
 
     gsize i;
     for ( i = 0 ; i < self->size ; ++i )
@@ -324,6 +335,7 @@ nk_token_list_parse_enum(gchar *string, const gchar * const *tokens, guint64 siz
     return self;
 
 fail:
+    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_UNKNOWN_TOKEN, "Unknown token: %s", self->tokens[i].name);
     nk_token_list_unref(self);
     return NULL;
 }
@@ -350,10 +362,7 @@ nk_token_list_unref(NkTokenList *self)
         {
             NkTokenRegex *regex;
             for ( regex = self->tokens[i].replace ; regex->regex != NULL ; ++regex )
-            {
-                if ( regex->regex != NULL )
-                    g_regex_unref(regex->regex);
-            }
+                g_regex_unref(regex->regex);
             g_free(self->tokens[i].replace);
         }
     }
