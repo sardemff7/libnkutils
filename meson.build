@@ -105,6 +105,11 @@ nk_inc = include_directories('src')
 
 libnkutils = declare_dependency(link_with: nk_lib, include_directories: nk_inc, dependencies: nk_deps)
 
+
+if token
+    executable('nktoken-replace', [ 'src/token-example.c' ], dependencies: libnkutils)
+endif
+
 foreach m : nk_modules
     if get_variable(m.underscorify())
         nk_test = executable('nk-@0@.test'.format(m), 'tests/@0@.c'.format(m), c_args: nk_args, dependencies: libnkutils)
