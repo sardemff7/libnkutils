@@ -39,7 +39,7 @@ nk_modules = [
     'token',
     'xdg-theme',
     'enum',
-    'colour'
+    'colour',
 ]
 nk_dependencies = [
     [ 'token', 'enum' ],
