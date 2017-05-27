@@ -49,7 +49,6 @@ nk_dependencies = [
 nk_sources = []
 nk_args = [ '-DDATADIR="@0@"'.format(join_paths(get_option('prefix'), get_option('datadir'))) ]
 nk_deps = [ dependency('glib-2.0', version: '>= @0@'.format(nk_glib_min_version)) ]
-nk_test_deps = [ dependency('gobject-2.0') ]
 
 nkutils_xsltpath = join_paths(meson.current_source_dir(), 'man')
 nkutils_manfiles = files('man/libnkutils-man.xml')
