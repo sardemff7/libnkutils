@@ -3,3 +3,4 @@ option('token', type: 'boolean', value: false, description: 'nkutils token modul
 option('xdg-theme', type: 'boolean', value: false, description: 'nkutils xdg-theme module')
 option('enum', type: 'boolean', value: false, description: 'nkutils enum module')
 option('colour', type: 'boolean', value: false, description: 'nkutils colour module')
+option('bindings', type: 'boolean', value: false, description: 'nkutils bindings module')

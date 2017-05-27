@@ -40,10 +40,12 @@ nk_modules = [
     'xdg-theme',
     'enum',
     'colour',
+    'bindings',
 ]
 nk_dependencies = [
     [ 'token', 'enum' ],
     [ 'xdg-theme', 'enum' ],
+    [ 'bindings', 'enum' ],
 ]
 
 nk_sources = []
@@ -97,6 +99,17 @@ if uuid
         endif
     endif
     nk_sources += 'src/uuid-internal.h'
+endif
+
+if bindings
+    nk_xkbcommon = dependency('xkbcommon', version: '>= 0.4.1')
+    nk_deps += nk_xkbcommon
+    if nk_xkbcommon.version().version_compare('>= 0.7.0')
+        nk_args += '-DNK_XKBCOMMON_HAS_COMPOSE'
+        nk_args += '-DNK_XKBCOMMON_HAS_CONSUMED2'
+    elif nk_xkbcommon.version().version_compare('>= 0.5.0')
+        nk_args += '-DNK_XKBCOMMON_HAS_COMPOSE'
+    endif
 endif
 
 nk_lib = static_library('nkutils', nk_sources, c_args: nk_args, dependencies: nk_deps)

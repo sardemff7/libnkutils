@@ -35,6 +35,7 @@ EXTRA_DIST += \
 NKUTILS_CFLAGS = \
 	-I$(srcdir)/%D%/src \
 	$(_NKUTILS_INTERNAL_UUID_CFLAGS) \
+	$(_NKUTILS_INTERNAL_XKBCOMMON_CFLAGS) \
 	$(_NKUTILS_INTERNAL_GLIB_CFLAGS)
 
 _NKUTILS_INTERNAL_CFLAGS =
@@ -42,6 +43,7 @@ _NKUTILS_INTERNAL_CFLAGS =
 NKUTILS_LIBS = \
 	$(_libnkutils_library) \
 	$(_NKUTILS_INTERNAL_UUID_LIBS) \
+	$(_NKUTILS_INTERNAL_XKBCOMMON_LIBS) \
 	$(_NKUTILS_INTERNAL_GLIB_LIBS)
 
 NKUTILS_XSLTPROCFLAGS = \
@@ -127,6 +129,15 @@ _libnkutils_tests += \
 	%D%/tests/xdg-theme.test
 endif
 
+if NK_ENABLE_BINDINGS
+_libnkutils_sources += \
+	%D%/src/bindings.c \
+	%D%/src/nkutils-bindings.h
+
+_libnkutils_tests += \
+	%D%/tests/bindings.test
+endif
+
 
 #
 # Tests
@@ -194,5 +205,18 @@ endif
 	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
 
 %C%_tests_xdg_theme_test_LDADD = \
+	$(NKUTILS_LIBS) \
+	$(_NKUTILS_INTERNAL_TEST_LIBS)
+
+# bindings
+%C%_tests_bindings_test_SOURCES = \
+	%D%/tests/bindings.c
+
+%C%_tests_bindings_test_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(NKUTILS_CFLAGS) \
+	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
+
+%C%_tests_bindings_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)

@@ -30,6 +30,7 @@ AC_DEFUN([NK_INIT], [
     AC_REQUIRE([PKG_PROG_PKG_CONFIG])
 
     nk_glib_min_version="2.40"
+    nk_xkbcommon_min_version="0.4.1"
 
     m4_map_args_w(_NK_MODULES, [_NK_MODULE_INIT(AS_TR_SH(], [))])
     AC_CONFIG_COMMANDS_PRE([
@@ -55,11 +56,11 @@ AC_DEFUN([NK_ENABLE_MODULES], [
     m4_map_args_w([$1], [_NK_ENABLE_MODULE(], [)])
 ])
 
-m4_define([_NK_MODULES], [uuid enum token colour xdg-theme])
+m4_define([_NK_MODULES], [uuid enum token colour xdg-theme bindings])
 
 
 # auto-enable
-m4_define([_nk_dependent_enum], [token xdg-theme])
+m4_define([_nk_dependent_enum], [token xdg-theme bindings])
 
 
 
@@ -87,4 +88,16 @@ AC_DEFUN([_NK_UUID_CHECK], [
         PKG_CHECK_MODULES([_NKUTILS_INTERNAL_UUID_APR_UTIL], [apr-util], [nk_uuid_apr_util=yes], [nk_uuid_apr_util=no])
     ])
     AS_IF([test x${nk_uuid_libuuid} != xyes -a x${nk_uuid_apr_util} != xyes], [AC_MSG_ERROR([libnkutils: A UUID library is required])])
+])
+
+AC_DEFUN([_NK_BINDINGS_CHECK], [
+    PKG_CHECK_MODULES([_NKUTILS_INTERNAL_XKBCOMMON], [xkbcommon >= ${nk_xkbcommon_min_version}])
+    PKG_CHECK_EXISTS([xkbcommon >= 0.7.0], [
+        AC_DEFINE([NK_XKBCOMMON_HAS_COMPOSE], [1], [b])
+        AC_DEFINE([NK_XKBCOMMON_HAS_CONSUMED2], [1], [b])
+    ], [
+        PKG_CHECK_EXISTS([xkbcommon >= 0.5.0], [
+            AC_DEFINE([NK_XKBCOMMON_HAS_COMPOSE], [1], [b])
+        ])
+    ])
 ])
