@@ -23,7 +23,7 @@ fi
 
 AM_DOCBOOK_CONDITIONS=""
 
-NK_INIT([uuid enum token/enum colour/alpha colour/double xdg-theme])
+NK_INIT(_NK_MODULES)
 
 AC_SUBST([AM_DOCBOOK_CONDITIONS])
 
