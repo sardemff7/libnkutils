@@ -588,10 +588,11 @@ _nk_bindings_binding_trigger(NkBindings *self, NkBindingsBinding *binding, gbool
     if ( binding == NULL )
         return FALSE;
 
-    gboolean handled = ( binding->press.base.callback == NULL );
-    if ( trigger && ( binding->press.base.callback != NULL ) )
+    gboolean handled = FALSE;
+    gboolean has_press = ( binding->press.base.callback != NULL );
+    if ( trigger && has_press )
         handled = binding->press.base.callback(binding->scope, binding->press.base.user_data);
-    if ( ( binding->release.link == NULL ) && ( binding->release.base.callback != NULL ) && handled )
+    if ( ( binding->release.link == NULL ) && ( binding->release.base.callback != NULL ) && ( handled || ( ! has_press ) ) )
         binding->release.link = self->on_release = g_list_prepend(self->on_release, binding);
 
     return ( handled || ( binding->release.link != NULL ) );
