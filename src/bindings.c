@@ -764,12 +764,17 @@ nk_bindings_update_mask(NkBindings *self, xkb_mod_mask_t depressed_mods, xkb_mod
 {
     g_return_if_fail(self != NULL);
 
-    xkb_state_update_mask(self->state, depressed_mods, latched_mods, locked_mods, depressed_layout, latched_layout, locked_layout);
+    enum xkb_state_component changed;
 
-    xkb_mod_mask_t dummy, mask;
-    _nk_bindings_get_modifiers_masks(self, 0, &dummy, &mask);
-    if ( mask == 0 )
-        _nk_bindings_free_on_release(self, TRUE);
+    changed = xkb_state_update_mask(self->state, depressed_mods, latched_mods, locked_mods, depressed_layout, latched_layout, locked_layout);
+
+    if ( changed & XKB_STATE_MODS_EFFECTIVE )
+    {
+        xkb_mod_mask_t dummy, mask;
+        _nk_bindings_get_modifiers_masks(self, 0, &dummy, &mask);
+        if ( mask == 0 )
+            _nk_bindings_free_on_release(self, TRUE);
+    }
 }
 
 void
