@@ -389,6 +389,25 @@ static const struct {
             },
         }
     },
+    {
+        .testpath = "/nkutils/bindings/press-and-release/key",
+        .data = {
+            .bindings = {
+                { .binding = "s", .trigger = 1 },
+                { .binding = "!s", .trigger = 2 },
+                { .binding = NULL }
+            },
+            .keys = {
+                { .key = KEYCODE_A, .text = "a" },
+                { .key = KEYCODE_A, .state = NK_BINDINGS_KEY_STATE_RELEASE },
+                { .key = KEYCODE_S, .triggered = 1 },
+                { .key = KEYCODE_S, .state = NK_BINDINGS_KEY_STATE_RELEASE, .triggered = 2 },
+                { .key = KEYCODE_D, .text = "d" },
+                { .key = KEYCODE_D, .state = NK_BINDINGS_KEY_STATE_RELEASE },
+                { .key = KEYCODE_NONE }
+            },
+        }
+    },
 #ifdef NK_XKBCOMMON_HAS_COMPOSE
     {
         .testpath = "/nkutils/bindings/compose",

@@ -513,7 +513,8 @@ nk_bindings_add_binding(NkBindings *self, guint scope, const gchar *string, NkBi
     }
     else if ( keycode != XKB_KEYCODE_INVALID )
     {
-        if ( ! g_hash_table_contains(group->keycodes, GUINT_TO_POINTER(keycode)) )
+        binding = g_hash_table_lookup(group->keycodes, GUINT_TO_POINTER(keycode));
+        if ( binding == NULL )
         {
             binding = g_slice_new0(NkBindingsBinding);
             g_hash_table_insert(group->keycodes, GUINT_TO_POINTER(keycode), binding);
@@ -531,7 +532,8 @@ nk_bindings_add_binding(NkBindings *self, guint scope, const gchar *string, NkBi
             keysym = last_keysym;
             mask = last_mask;
         }
-        if ( ! g_hash_table_contains(group->keysyms, GUINT_TO_POINTER(keysym)) )
+        binding = g_hash_table_lookup(group->keysyms, GUINT_TO_POINTER(keysym));
+        if ( binding == NULL )
         {
             binding = g_slice_new0(NkBindingsBinding);
             g_hash_table_insert(group->keysyms, GUINT_TO_POINTER(keysym), binding);
