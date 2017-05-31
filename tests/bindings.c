@@ -38,7 +38,6 @@
 
 typedef struct {
     NkBindings *bindings;
-    struct xkb_context *context;
     struct xkb_keymap *keymap;
     struct xkb_state *master_state;
     struct xkb_state *state;
@@ -452,9 +451,8 @@ _nk_bindings_tests_setup(NkBindingsTestFixture *fixture, G_GNUC_UNUSED gconstpoi
         .variant = "intl",
     };
     fixture->bindings = nk_bindings_new();
-    fixture->context = xkb_context_new(XKB_CONTEXT_NO_ENVIRONMENT_NAMES);
-    fixture->seat = nk_bindings_seat_new(fixture->bindings, fixture->context);
-    fixture->keymap = xkb_keymap_new_from_names(fixture->context, &names, XKB_KEYMAP_COMPILE_NO_FLAGS);
+    fixture->seat = nk_bindings_seat_new(fixture->bindings, XKB_CONTEXT_NO_ENVIRONMENT_NAMES);
+    fixture->keymap = xkb_keymap_new_from_names(nk_bindings_seat_get_context(fixture->seat), &names, XKB_KEYMAP_COMPILE_NO_FLAGS);
     fixture->master_state = xkb_state_new(fixture->keymap);
     fixture->state = xkb_state_new(fixture->keymap);
     nk_bindings_seat_update_keymap(fixture->seat, fixture->keymap, fixture->state);
@@ -524,7 +522,6 @@ _nk_bindings_tests_teardown(NkBindingsTestFixture *fixture, G_GNUC_UNUSED gconst
     nk_bindings_seat_free(fixture->seat);
     xkb_state_unref(fixture->state);
     xkb_keymap_unref(fixture->keymap);
-    xkb_context_unref(fixture->context);
     nk_bindings_free(fixture->bindings);
 }
 

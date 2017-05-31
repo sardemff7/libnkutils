@@ -564,13 +564,13 @@ _nk_bindings_try_button_bindings(NkBindings *self, NkBindingsSeat *seat, guint64
 }
 
 NkBindingsSeat *
-nk_bindings_seat_new(NkBindings *bindings, struct xkb_context *context)
+nk_bindings_seat_new(NkBindings *bindings, enum xkb_context_flags flags)
 {
     NkBindingsSeat *self;
 
     self = g_new0(NkBindingsSeat, 1);
     self->bindings = bindings;
-    self->context = xkb_context_ref(context);
+    self->context = xkb_context_new(flags);
 
 #ifdef NK_XKBCOMMON_HAS_COMPOSE
     self->compose.table = xkb_compose_table_new_from_locale(self->context, setlocale(LC_CTYPE, NULL), 0);
