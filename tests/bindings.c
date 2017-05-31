@@ -444,7 +444,7 @@ _nk_bindings_tests_setup(NkBindingsTestFixture *fixture, G_GNUC_UNUSED gconstpoi
 }
 
 static gboolean
-_nk_bindings_tests_callback(guint scope, gpointer user_data)
+_nk_bindings_tests_callback(guint64 scope, gpointer user_data)
 {
     NkBindingsTestBindingSlice *slice = user_data;
     g_assert_cmpuint(scope, ==, 0);

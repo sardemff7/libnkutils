@@ -71,7 +71,7 @@ struct _NkBindingsSeat {
 };
 
 typedef struct {
-    guint id;
+    guint64 id;
     GHashTable *bindings;
 } NkBindingsScope;
 
@@ -96,7 +96,7 @@ typedef struct {
 } NkBindingsBindingRelease;
 
 typedef struct {
-    guint scope;
+    guint64 scope;
     NkBindingsBindingPress press;
     NkBindingsBindingRelease release;
 } NkBindingsBinding;
@@ -226,7 +226,7 @@ _nk_bindings_scope_compare(gconstpointer a, gconstpointer b)
 }
 
 static NkBindingsBindingGroup *
-_nk_bindings_get_group(NkBindings *self, guint scope_id, xkb_mod_mask_t mask)
+_nk_bindings_get_group(NkBindings *self, guint64 scope_id, xkb_mod_mask_t mask)
 {
     GList *link;
     NkBindingsScope *scope, cscope = { .id = scope_id };
@@ -270,7 +270,7 @@ _nk_bindings_parse_modifier(const gchar *string, xkb_mod_mask_t *mask)
 }
 
 gboolean
-nk_bindings_add_binding(NkBindings *self, guint scope, const gchar *string, NkBindingsCallback callback, gpointer user_data, GDestroyNotify notify, GError **error)
+nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string, NkBindingsCallback callback, gpointer user_data, GDestroyNotify notify, GError **error)
 {
     g_return_val_if_fail(self != NULL, FALSE);
     g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
@@ -281,7 +281,7 @@ nk_bindings_add_binding(NkBindings *self, guint scope, const gchar *string, NkBi
     xkb_keysym_t last_keysym = XKB_KEY_NoSymbol;
     xkb_keysym_t keysym = XKB_KEY_NoSymbol;
     xkb_keycode_t keycode = XKB_KEYCODE_INVALID;
-    guint button = 0;
+    guint32 button = 0;
     gboolean double_click = FALSE;
 
     const gchar *w = string;
@@ -443,7 +443,7 @@ nk_bindings_add_binding(NkBindings *self, guint scope, const gchar *string, NkBi
     }
 
     NkBindingsBindingGroup *group;
-    group = _nk_bindings_get_group(self, scope, mask);
+    group = _nk_bindings_get_group(self, scope_id, mask);
 
     NkBindingsBinding *binding = NULL;
     if ( button != 0 )
@@ -498,7 +498,7 @@ nk_bindings_add_binding(NkBindings *self, guint scope, const gchar *string, NkBi
         return FALSE;
     }
 
-    binding->scope = scope;
+    binding->scope = scope_id;
     base->callback = callback;
     base->user_data = user_data;
     base->notify = notify;
@@ -783,7 +783,7 @@ nk_bindings_seat_handle_key(NkBindingsSeat *self, xkb_keycode_t keycode, NkBindi
 }
 
 gboolean
-nk_bindings_seat_handle_button(NkBindingsSeat *self, guint button, NkBindingsButtonState state, guint64 timestamp)
+nk_bindings_seat_handle_button(NkBindingsSeat *self, guint32 button, NkBindingsButtonState state, guint64 timestamp)
 {
     g_return_val_if_fail(self != NULL, FALSE);
 
