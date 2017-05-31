@@ -63,15 +63,16 @@ GQuark nk_bindings_error(void);
 
 NkBindings *nk_bindings_new(struct xkb_context *context, struct xkb_keymap *keymap, struct xkb_state *state);
 void nk_bindings_free(NkBindings *bindings);
-void nk_bindings_update_keymap(NkBindings *self, struct xkb_keymap *keymap, struct xkb_state *state);
-
-struct xkb_context *nk_bindings_get_context(NkBindings *bindings);
 
 typedef gboolean (*NkBindingsCallback)(guint scope, gpointer user_data);
 gboolean nk_bindings_add_binding(NkBindings *bindings, guint scope, const gchar *string, NkBindingsCallback callback, gpointer user_data, GDestroyNotify notify, GError **error);
 
+
+struct xkb_context *nk_bindings_get_context(NkBindings *bindings);
+
 gchar *nk_bindings_handle_key(NkBindings *bindings, xkb_keycode_t key, NkBindingsKeyState state);
 gboolean nk_bindings_handle_button(NkBindings *bindings, guint button, NkBindingsButtonState state, guint64 timestamp);
+void nk_bindings_update_keymap(NkBindings *self, struct xkb_keymap *keymap, struct xkb_state *state);
 void nk_bindings_update_mask(NkBindings *bindings, xkb_mod_mask_t depressed_mods, xkb_mod_mask_t latched_mods, xkb_mod_mask_t locked_mods, xkb_layout_index_t depressed_layout, xkb_layout_index_t latched_layout, xkb_layout_index_t locked_layout);
 void nk_bindings_reset(NkBindings *bindings);
 

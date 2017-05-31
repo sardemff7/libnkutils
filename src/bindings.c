@@ -137,23 +137,6 @@ nk_bindings_error(void)
 }
 
 static void
-_nk_bindings_find_modifier(NkBindings *self, NkBindingsModifiers modifier, ...)
-{
-    va_list names;
-    const gchar *name;
-    xkb_mod_index_t i, *m = self->modifiers[modifier];
-    va_start(names, modifier);
-    while ( ( name = va_arg(names, const gchar *) ) != NULL )
-    {
-        i = xkb_keymap_mod_get_index(self->keymap, name);
-        if ( i != XKB_MOD_INVALID )
-            *m++ = i;
-    }
-    *m = XKB_MOD_INVALID;
-    va_end(names);
-}
-
-static void
 _nk_bindings_scope_free(gpointer data)
 {
     NkBindingsScope *scope = data;
@@ -172,70 +155,6 @@ _nk_bindings_binding_group_free(gpointer data)
     g_hash_table_unref(group->buttons);
 
     g_slice_free(NkBindingsBindingGroup, group);
-}
-
-NkBindings *
-nk_bindings_new(struct xkb_context *context, struct xkb_keymap *keymap, struct xkb_state *state)
-{
-    NkBindings *self;
-
-    self = g_new0(NkBindings, 1);
-    self->context = xkb_context_ref(context);
-    nk_bindings_update_keymap(self, keymap, state);
-
-#ifdef NK_XKBCOMMON_HAS_COMPOSE
-    self->compose.table = xkb_compose_table_new_from_locale(self->context, setlocale(LC_CTYPE, NULL), 0);
-    if ( self->compose.table != NULL )
-        self->compose.state = xkb_compose_state_new(self->compose.table, 0);
-#endif /* NK_XKBCOMMON_HAS_COMPOSE */
-
-    _nk_bindings_find_modifier(self, NK_BINDINGS_MODIFIER_SHIFT, XKB_MOD_NAME_SHIFT, NULL);
-    _nk_bindings_find_modifier(self, NK_BINDINGS_MODIFIER_CONTROL, XKB_MOD_NAME_CTRL, NULL);
-    _nk_bindings_find_modifier(self, NK_BINDINGS_MODIFIER_ALT, XKB_MOD_NAME_ALT, "Alt", "LAlt", "RAlt", "AltGr", "Mod5", "LevelThree", NULL);
-    _nk_bindings_find_modifier(self, NK_BINDINGS_MODIFIER_META, "Meta", NULL);
-    _nk_bindings_find_modifier(self, NK_BINDINGS_MODIFIER_SUPER, XKB_MOD_NAME_LOGO, "Super", NULL);
-    _nk_bindings_find_modifier(self, NK_BINDINGS_MODIFIER_HYPER, "Hyper", NULL);
-
-    self->double_click_delay = 200;
-
-    return self;
-}
-
-static void _nk_bindings_free_on_release(NkBindings *self, gboolean trigger);
-void
-nk_bindings_free(NkBindings *self)
-{
-    if ( self == NULL )
-        return;
-
-    _nk_bindings_free_on_release(self, FALSE);
-
-    g_list_free_full(self->scopes, _nk_bindings_scope_free);
-
-    xkb_keymap_unref(self->keymap);
-    xkb_state_unref(self->state);
-
-    xkb_context_unref(self->context);
-
-    g_free(self);
-}
-
-void
-nk_bindings_update_keymap(NkBindings *self, struct xkb_keymap *keymap, struct xkb_state *state)
-{
-    g_return_if_fail(self != NULL);
-
-    xkb_keymap_unref(self->keymap);
-    xkb_state_unref(self->state);
-
-    self->keymap = xkb_keymap_ref(keymap);
-    self->state = xkb_state_ref(state);
-}
-
-struct xkb_context *
-nk_bindings_get_context(NkBindings *self)
-{
-    return self->context;
 }
 
 static void
@@ -556,6 +475,160 @@ nk_bindings_add_binding(NkBindings *self, guint scope, const gchar *string, NkBi
     return TRUE;
 }
 
+static gboolean
+_nk_bindings_binding_trigger(NkBindings *self, NkBindingsBinding *binding, gboolean trigger)
+{
+    if ( binding == NULL )
+        return FALSE;
+
+    gboolean handled = FALSE;
+    gboolean has_press = ( binding->press.base.callback != NULL );
+    if ( trigger && has_press )
+        handled = binding->press.base.callback(binding->scope, binding->press.base.user_data);
+    if ( ( binding->release.link == NULL ) && ( binding->release.base.callback != NULL ) && ( handled || ( ! has_press ) ) )
+        binding->release.link = self->on_release = g_list_prepend(self->on_release, binding);
+
+    return ( handled || ( binding->release.link != NULL ) );
+}
+
+static gboolean
+_nk_bindings_try_key_bindings(NkBindings *self, xkb_mod_mask_t effective, xkb_mod_mask_t not_consumed, xkb_keycode_t keycode, xkb_keysym_t keysym, gboolean trigger)
+{
+    GList *scope_;
+    for ( scope_ = self->scopes ; scope_ != NULL ; scope_ = g_list_next(scope_) )
+    {
+        NkBindingsScope *scope = scope_->data;
+        NkBindingsBindingGroup *group;
+        if ( ( group = g_hash_table_lookup(scope->bindings, GUINT_TO_POINTER(effective)) ) != NULL )
+        {
+            if ( _nk_bindings_binding_trigger(self, g_hash_table_lookup(group->keycodes, GUINT_TO_POINTER(keycode)), trigger) )
+                return TRUE;
+        }
+        if ( ( keysym != XKB_KEY_NoSymbol ) && ( ( group = g_hash_table_lookup(scope->bindings, GUINT_TO_POINTER(not_consumed)) ) != NULL ) )
+        {
+            if ( _nk_bindings_binding_trigger(self, g_hash_table_lookup(group->keysyms, GUINT_TO_POINTER(keysym)), trigger) )
+                return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static gboolean
+_nk_bindings_try_button_bindings(NkBindings *self, xkb_mod_mask_t mask, guint button, guint64 timestamp)
+{
+    NkBindingsBindingMouse *mouse_binding = NULL;
+    GList *scope_;
+    for ( scope_ = self->scopes ; scope_ != NULL ; scope_ = g_list_next(scope_) )
+    {
+        NkBindingsScope *scope = scope_->data;
+
+        NkBindingsBindingGroup *group;
+        group = g_hash_table_lookup(scope->bindings, GUINT_TO_POINTER(mask));
+        if ( group == NULL )
+            continue;
+
+        mouse_binding = g_hash_table_lookup(group->buttons, GUINT_TO_POINTER(button));
+        if ( mouse_binding == NULL )
+            continue;
+
+        if ( ( timestamp - mouse_binding->last_timestamp ) < self->double_click_delay )
+        {
+            if ( _nk_bindings_binding_trigger(self, &mouse_binding->dclick, TRUE) )
+                break;
+        }
+        if ( _nk_bindings_binding_trigger(self, &mouse_binding->click, TRUE) )
+            break;
+    }
+    if ( mouse_binding == NULL )
+        return FALSE;
+
+    mouse_binding->last_timestamp = timestamp;
+    return TRUE;
+}
+
+static void
+_nk_bindings_find_modifier(NkBindings *self, NkBindingsModifiers modifier, ...)
+{
+    va_list names;
+    const gchar *name;
+    xkb_mod_index_t i, *m = self->modifiers[modifier];
+    va_start(names, modifier);
+    while ( ( name = va_arg(names, const gchar *) ) != NULL )
+    {
+        i = xkb_keymap_mod_get_index(self->keymap, name);
+        if ( i != XKB_MOD_INVALID )
+            *m++ = i;
+    }
+    *m = XKB_MOD_INVALID;
+    va_end(names);
+}
+
+NkBindings *
+nk_bindings_new(struct xkb_context *context, struct xkb_keymap *keymap, struct xkb_state *state)
+{
+    NkBindings *self;
+
+    self = g_new0(NkBindings, 1);
+    self->context = xkb_context_ref(context);
+    nk_bindings_update_keymap(self, keymap, state);
+
+#ifdef NK_XKBCOMMON_HAS_COMPOSE
+    self->compose.table = xkb_compose_table_new_from_locale(self->context, setlocale(LC_CTYPE, NULL), 0);
+    if ( self->compose.table != NULL )
+        self->compose.state = xkb_compose_state_new(self->compose.table, 0);
+#endif /* NK_XKBCOMMON_HAS_COMPOSE */
+
+    _nk_bindings_find_modifier(self, NK_BINDINGS_MODIFIER_SHIFT, XKB_MOD_NAME_SHIFT, NULL);
+    _nk_bindings_find_modifier(self, NK_BINDINGS_MODIFIER_CONTROL, XKB_MOD_NAME_CTRL, NULL);
+    _nk_bindings_find_modifier(self, NK_BINDINGS_MODIFIER_ALT, XKB_MOD_NAME_ALT, "Alt", "LAlt", "RAlt", "AltGr", "Mod5", "LevelThree", NULL);
+    _nk_bindings_find_modifier(self, NK_BINDINGS_MODIFIER_META, "Meta", NULL);
+    _nk_bindings_find_modifier(self, NK_BINDINGS_MODIFIER_SUPER, XKB_MOD_NAME_LOGO, "Super", NULL);
+    _nk_bindings_find_modifier(self, NK_BINDINGS_MODIFIER_HYPER, "Hyper", NULL);
+
+    self->double_click_delay = 200;
+
+    return self;
+}
+
+static void _nk_bindings_free_on_release(NkBindings *self, gboolean trigger);
+void
+nk_bindings_free(NkBindings *self)
+{
+    if ( self == NULL )
+        return;
+
+    _nk_bindings_free_on_release(self, FALSE);
+
+    g_list_free_full(self->scopes, _nk_bindings_scope_free);
+
+    xkb_keymap_unref(self->keymap);
+    xkb_state_unref(self->state);
+
+    xkb_context_unref(self->context);
+
+    g_free(self);
+}
+
+void
+nk_bindings_update_keymap(NkBindings *self, struct xkb_keymap *keymap, struct xkb_state *state)
+{
+    g_return_if_fail(self != NULL);
+
+    xkb_keymap_unref(self->keymap);
+    xkb_state_unref(self->state);
+
+    self->keymap = xkb_keymap_ref(keymap);
+    self->state = xkb_state_ref(state);
+}
+
+struct xkb_context *
+nk_bindings_get_context(NkBindings *self)
+{
+    return self->context;
+}
+
+
 static void
 _nk_bindings_get_modifiers_masks(NkBindings *self, xkb_keycode_t key, xkb_mod_mask_t *effective, xkb_mod_mask_t *not_consumed)
 {
@@ -582,48 +655,6 @@ _nk_bindings_get_modifiers_masks(NkBindings *self, xkb_keycode_t key, xkb_mod_ma
             break;
         }
     }
-}
-
-static gboolean
-_nk_bindings_binding_trigger(NkBindings *self, NkBindingsBinding *binding, gboolean trigger)
-{
-    if ( binding == NULL )
-        return FALSE;
-
-    gboolean handled = FALSE;
-    gboolean has_press = ( binding->press.base.callback != NULL );
-    if ( trigger && has_press )
-        handled = binding->press.base.callback(binding->scope, binding->press.base.user_data);
-    if ( ( binding->release.link == NULL ) && ( binding->release.base.callback != NULL ) && ( handled || ( ! has_press ) ) )
-        binding->release.link = self->on_release = g_list_prepend(self->on_release, binding);
-
-    return ( handled || ( binding->release.link != NULL ) );
-}
-
-static gboolean
-_nk_bindings_try_key_bindings(NkBindings *self, xkb_keycode_t keycode, xkb_keysym_t keysym, gboolean trigger)
-{
-    xkb_mod_mask_t effective, not_consumed;
-    _nk_bindings_get_modifiers_masks(self, keycode, &effective, &not_consumed);
-
-    GList *scope_;
-    for ( scope_ = self->scopes ; scope_ != NULL ; scope_ = g_list_next(scope_) )
-    {
-        NkBindingsScope *scope = scope_->data;
-        NkBindingsBindingGroup *group;
-        if ( ( group = g_hash_table_lookup(scope->bindings, GUINT_TO_POINTER(effective)) ) != NULL )
-        {
-            if ( _nk_bindings_binding_trigger(self, g_hash_table_lookup(group->keycodes, GUINT_TO_POINTER(keycode)), trigger) )
-                return TRUE;
-        }
-        if ( ( keysym != XKB_KEY_NoSymbol ) && ( ( group = g_hash_table_lookup(scope->bindings, GUINT_TO_POINTER(not_consumed)) ) != NULL ) )
-        {
-            if ( _nk_bindings_binding_trigger(self, g_hash_table_lookup(group->keysyms, GUINT_TO_POINTER(keysym)), trigger) )
-                return TRUE;
-        }
-    }
-
-    return FALSE;
 }
 
 static void
@@ -690,7 +721,10 @@ nk_bindings_handle_key(NkBindings *self, xkb_keycode_t keycode, NkBindingsKeySta
     }
 #endif /* NK_XKBCOMMON_HAS_COMPOSE */
 
-    if ( _nk_bindings_try_key_bindings(self, keycode, keysym, regular_press) )
+    xkb_mod_mask_t effective, not_consumed;
+    _nk_bindings_get_modifiers_masks(self, keycode, &effective, &not_consumed);
+
+    if ( _nk_bindings_try_key_bindings(self, effective, not_consumed, keycode, keysym, regular_press) )
         return NULL;
 
     if ( ! regular_press )
@@ -707,39 +741,6 @@ nk_bindings_handle_key(NkBindings *self, xkb_keycode_t keycode, NkBindingsKeySta
     }
 
     return g_strndup(tmp, length);
-}
-
-static gboolean
-_nk_bindings_try_button_bindings(NkBindings *self, xkb_mod_mask_t mask, guint button, guint64 timestamp)
-{
-    NkBindingsBindingMouse *mouse_binding = NULL;
-    GList *scope_;
-    for ( scope_ = self->scopes ; scope_ != NULL ; scope_ = g_list_next(scope_) )
-    {
-        NkBindingsScope *scope = scope_->data;
-
-        NkBindingsBindingGroup *group;
-        group = g_hash_table_lookup(scope->bindings, GUINT_TO_POINTER(mask));
-        if ( group == NULL )
-            continue;
-
-        mouse_binding = g_hash_table_lookup(group->buttons, GUINT_TO_POINTER(button));
-        if ( mouse_binding == NULL )
-            continue;
-
-        if ( ( timestamp - mouse_binding->last_timestamp ) < self->double_click_delay )
-        {
-            if ( _nk_bindings_binding_trigger(self, &mouse_binding->dclick, TRUE) )
-                break;
-        }
-        if ( _nk_bindings_binding_trigger(self, &mouse_binding->click, TRUE) )
-            break;
-    }
-    if ( mouse_binding == NULL )
-        return FALSE;
-
-    mouse_binding->last_timestamp = timestamp;
-    return TRUE;
 }
 
 gboolean
