@@ -411,7 +411,23 @@ static const struct {
     },
 #ifdef NK_XKBCOMMON_HAS_COMPOSE
     {
-        .testpath = "/nkutils/bindings/compose",
+        .testpath = "/nkutils/bindings/compose/with-binding",
+        .data = {
+            .bindings = {
+                { .binding = "dead_grave", .trigger = 1 },
+                { .binding = NULL }
+            },
+            .keys = {
+                { .key = KEYCODE_TILDE },
+                { .key = KEYCODE_TILDE, .state = NK_BINDINGS_KEY_STATE_RELEASE },
+                { .key = KEYCODE_TILDE, .text = "`" },
+                { .key = KEYCODE_TILDE, .state = NK_BINDINGS_KEY_STATE_RELEASE },
+                { .key = KEYCODE_NONE }
+            },
+        }
+    },
+    {
+        .testpath = "/nkutils/bindings/compose/without-binding",
         .data = {
             .bindings = {
                 { .binding = NULL }
@@ -419,8 +435,8 @@ static const struct {
             .keys = {
                 { .key = KEYCODE_TILDE },
                 { .key = KEYCODE_TILDE, .state = NK_BINDINGS_KEY_STATE_RELEASE },
-                { .key = KEYCODE_SPACE, .text = "`" },
-                { .key = KEYCODE_SPACE, .state = NK_BINDINGS_KEY_STATE_RELEASE },
+                { .key = KEYCODE_TILDE, .text = "`" },
+                { .key = KEYCODE_TILDE, .state = NK_BINDINGS_KEY_STATE_RELEASE },
                 { .key = KEYCODE_NONE }
             },
         }

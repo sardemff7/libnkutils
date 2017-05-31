@@ -729,13 +729,13 @@ nk_bindings_seat_handle_key(NkBindingsSeat *self, xkb_keycode_t keycode, NkBindi
         case XKB_COMPOSE_COMPOSING:
             return NULL;
         case XKB_COMPOSE_COMPOSED:
-            keysym = xkb_compose_state_get_one_sym(self->compose.state);
             length = xkb_compose_state_get_utf8(self->compose.state, NULL, 0);
             if ( length != 0 )
             {
-                tmp = g_newa(gchar, length + 1);
+                tmp = g_new(gchar, length + 1);
                 length = xkb_compose_state_get_utf8(self->compose.state, tmp, length + 1);
             }
+            return tmp;
         case XKB_COMPOSE_NOTHING:
         break;
         }
@@ -756,12 +756,12 @@ nk_bindings_seat_handle_key(NkBindingsSeat *self, xkb_keycode_t keycode, NkBindi
         length = xkb_state_key_get_utf8(self->state, keycode, NULL, 0);
         if ( length != 0 )
         {
-            tmp = g_newa(gchar, length + 1);
+            tmp = g_new(gchar, length + 1);
             length = xkb_state_key_get_utf8(self->state, keycode, tmp, length + 1);
         }
     }
 
-    return g_strndup(tmp, length);
+    return tmp;
 }
 
 gboolean
