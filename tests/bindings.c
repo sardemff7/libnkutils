@@ -453,10 +453,11 @@ _nk_bindings_tests_setup(NkBindingsTestFixture *fixture, G_GNUC_UNUSED gconstpoi
     };
     fixture->bindings = nk_bindings_new();
     fixture->context = xkb_context_new(XKB_CONTEXT_NO_ENVIRONMENT_NAMES);
+    fixture->seat = nk_bindings_seat_new(fixture->bindings, fixture->context);
     fixture->keymap = xkb_keymap_new_from_names(fixture->context, &names, XKB_KEYMAP_COMPILE_NO_FLAGS);
     fixture->master_state = xkb_state_new(fixture->keymap);
     fixture->state = xkb_state_new(fixture->keymap);
-    fixture->seat = nk_bindings_seat_new(fixture->bindings, fixture->context, fixture->keymap, fixture->state);
+    nk_bindings_seat_update_keymap(fixture->seat, fixture->keymap, fixture->state);
 }
 
 static gboolean
