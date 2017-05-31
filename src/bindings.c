@@ -566,11 +566,16 @@ _nk_bindings_try_button_bindings(NkBindings *self, NkBindingsSeat *seat, guint64
 NkBindingsSeat *
 nk_bindings_seat_new(NkBindings *bindings, enum xkb_context_flags flags)
 {
+    struct xkb_context *context;
     NkBindingsSeat *self;
+
+    context = xkb_context_new(flags);
+    if ( context == NULL )
+        return NULL;
 
     self = g_new0(NkBindingsSeat, 1);
     self->bindings = bindings;
-    self->context = xkb_context_new(flags);
+    self->context = context;
 
 #ifdef NK_XKBCOMMON_HAS_COMPOSE
     self->compose.table = xkb_compose_table_new_from_locale(self->context, setlocale(LC_CTYPE, NULL), 0);
@@ -597,6 +602,7 @@ _nk_bindings_seat_free(gpointer data)
 
     g_free(self);
 }
+
 void
 nk_bindings_seat_free(NkBindingsSeat *self)
 {
