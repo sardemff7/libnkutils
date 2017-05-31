@@ -37,11 +37,12 @@
 #define MAX_KEY_SEQUENCE 20
 
 typedef struct {
+    NkBindings *bindings;
     struct xkb_context *context;
     struct xkb_keymap *keymap;
     struct xkb_state *master_state;
     struct xkb_state *state;
-    NkBindings *bindings;
+    NkBindingsSeat *seat;
     guint triggered;
 } NkBindingsTestFixture;
 
@@ -434,11 +435,12 @@ _nk_bindings_tests_setup(NkBindingsTestFixture *fixture, G_GNUC_UNUSED gconstpoi
         .layout = "us",
         .variant = "intl",
     };
+    fixture->bindings = nk_bindings_new();
     fixture->context = xkb_context_new(XKB_CONTEXT_NO_ENVIRONMENT_NAMES);
     fixture->keymap = xkb_keymap_new_from_names(fixture->context, &names, XKB_KEYMAP_COMPILE_NO_FLAGS);
     fixture->master_state = xkb_state_new(fixture->keymap);
     fixture->state = xkb_state_new(fixture->keymap);
-    fixture->bindings = nk_bindings_new(fixture->context, fixture->keymap, fixture->state);
+    fixture->seat = nk_bindings_seat_new(fixture->bindings, fixture->context, fixture->keymap, fixture->state);
 }
 
 static gboolean
@@ -479,11 +481,11 @@ _nk_bindings_tests_func(NkBindingsTestFixture *fixture, gconstpointer user_data)
         g_test_message("%s key %s", ( key->state == NK_BINDINGS_KEY_STATE_RELEASE ) ? "Releasing" : ( key->state == NK_BINDINGS_KEY_STATE_PRESSED ) ? "Already pressed" : "Pressing", _nk_bindings_test_key_names[key->key]);
 
         fixture->triggered = 0;
-        text = nk_bindings_handle_key(fixture->bindings, key->key, key->state);
+        text = nk_bindings_seat_handle_key(fixture->seat, key->key, key->state);
 
         if ( xkb_state_update_key(fixture->master_state, key->key, ( key->state == NK_BINDINGS_KEY_STATE_RELEASE ) ? XKB_KEY_UP : XKB_KEY_DOWN) != 0 )
         {
-            nk_bindings_update_mask(fixture->bindings,
+            nk_bindings_seat_update_mask(fixture->seat,
                 xkb_state_serialize_mods(fixture->master_state, XKB_STATE_MODS_DEPRESSED),
                 xkb_state_serialize_mods(fixture->master_state, XKB_STATE_MODS_LATCHED),
                 xkb_state_serialize_mods(fixture->master_state, XKB_STATE_MODS_LOCKED),
@@ -502,10 +504,11 @@ _nk_bindings_tests_func(NkBindingsTestFixture *fixture, gconstpointer user_data)
 static void
 _nk_bindings_tests_teardown(NkBindingsTestFixture *fixture, G_GNUC_UNUSED gconstpointer user_data)
 {
-    nk_bindings_free(fixture->bindings);
+    nk_bindings_seat_free(fixture->seat);
     xkb_state_unref(fixture->state);
     xkb_keymap_unref(fixture->keymap);
     xkb_context_unref(fixture->context);
+    nk_bindings_free(fixture->bindings);
 }
 
 int

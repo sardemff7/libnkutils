@@ -29,6 +29,7 @@
 #include <xkbcommon/xkbcommon.h>
 
 typedef struct _NkBindings NkBindings;
+typedef struct _NkBindingsSeat NkBindingsSeat;
 
 typedef enum {
     NK_BINDINGS_MODIFIER_SHIFT,
@@ -61,19 +62,21 @@ typedef enum {
 #define NK_BINDINGS_ERROR (nk_bindings_error())
 GQuark nk_bindings_error(void);
 
-NkBindings *nk_bindings_new(struct xkb_context *context, struct xkb_keymap *keymap, struct xkb_state *state);
+NkBindings *nk_bindings_new(void);
 void nk_bindings_free(NkBindings *bindings);
 
 typedef gboolean (*NkBindingsCallback)(guint scope, gpointer user_data);
 gboolean nk_bindings_add_binding(NkBindings *bindings, guint scope, const gchar *string, NkBindingsCallback callback, gpointer user_data, GDestroyNotify notify, GError **error);
 
+NkBindingsSeat *nk_bindings_seat_new(NkBindings *bindings, struct xkb_context *context, struct xkb_keymap *keymap, struct xkb_state *state);
+void nk_bindings_seat_free(NkBindingsSeat *seat);
+void nk_bindings_seat_update_keymap(NkBindingsSeat *seat, struct xkb_keymap *keymap, struct xkb_state *state);
 
-struct xkb_context *nk_bindings_get_context(NkBindings *bindings);
+struct xkb_context *nk_bindings_seat_get_context(NkBindingsSeat *seat);
 
-gchar *nk_bindings_handle_key(NkBindings *bindings, xkb_keycode_t key, NkBindingsKeyState state);
-gboolean nk_bindings_handle_button(NkBindings *bindings, guint button, NkBindingsButtonState state, guint64 timestamp);
-void nk_bindings_update_keymap(NkBindings *self, struct xkb_keymap *keymap, struct xkb_state *state);
-void nk_bindings_update_mask(NkBindings *bindings, xkb_mod_mask_t depressed_mods, xkb_mod_mask_t latched_mods, xkb_mod_mask_t locked_mods, xkb_layout_index_t depressed_layout, xkb_layout_index_t latched_layout, xkb_layout_index_t locked_layout);
-void nk_bindings_reset(NkBindings *bindings);
+gchar *nk_bindings_seat_handle_key(NkBindingsSeat *seat, xkb_keycode_t key, NkBindingsKeyState state);
+gboolean nk_bindings_seat_handle_button(NkBindingsSeat *seat, guint button, NkBindingsButtonState state, guint64 timestamp);
+void nk_bindings_seat_update_mask(NkBindingsSeat *seat, xkb_mod_mask_t depressed_mods, xkb_mod_mask_t latched_mods, xkb_mod_mask_t locked_mods, xkb_layout_index_t depressed_layout, xkb_layout_index_t latched_layout, xkb_layout_index_t locked_layout);
+void nk_bindings_seat_reset(NkBindingsSeat *seat);
 
 #endif /* __NK_UTILS_BINDINGS_H__ */
