@@ -563,23 +563,6 @@ _nk_bindings_try_button_bindings(NkBindings *self, NkBindingsSeat *seat, guint64
     return FALSE;
 }
 
-static void
-_nk_bindings_seat_find_modifier(NkBindingsSeat *self, NkBindingsModifiers modifier, ...)
-{
-    va_list names;
-    const gchar *name;
-    xkb_mod_index_t i, *m = self->modifiers[modifier];
-    va_start(names, modifier);
-    while ( ( name = va_arg(names, const gchar *) ) != NULL )
-    {
-        i = xkb_keymap_mod_get_index(self->keymap, name);
-        if ( i != XKB_MOD_INVALID )
-            *m++ = i;
-    }
-    *m = XKB_MOD_INVALID;
-    va_end(names);
-}
-
 NkBindingsSeat *
 nk_bindings_seat_new(NkBindings *bindings, struct xkb_context *context, struct xkb_keymap *keymap, struct xkb_state *state)
 {
@@ -595,13 +578,6 @@ nk_bindings_seat_new(NkBindings *bindings, struct xkb_context *context, struct x
     if ( self->compose.table != NULL )
         self->compose.state = xkb_compose_state_new(self->compose.table, 0);
 #endif /* NK_XKBCOMMON_HAS_COMPOSE */
-
-    _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_SHIFT, XKB_MOD_NAME_SHIFT, NULL);
-    _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_CONTROL, XKB_MOD_NAME_CTRL, NULL);
-    _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_ALT, XKB_MOD_NAME_ALT, "Alt", "LAlt", "RAlt", "AltGr", "Mod5", "LevelThree", NULL);
-    _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_META, "Meta", NULL);
-    _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_SUPER, XKB_MOD_NAME_LOGO, "Super", NULL);
-    _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_HYPER, "Hyper", NULL);
 
     self->last_timestamps = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL, g_free);
     return self;
@@ -632,6 +608,23 @@ nk_bindings_seat_free(NkBindingsSeat *self)
     _nk_bindings_seat_free(self);
 }
 
+static void
+_nk_bindings_seat_find_modifier(NkBindingsSeat *self, NkBindingsModifiers modifier, ...)
+{
+    va_list names;
+    const gchar *name;
+    xkb_mod_index_t i, *m = self->modifiers[modifier];
+    va_start(names, modifier);
+    while ( ( name = va_arg(names, const gchar *) ) != NULL )
+    {
+        i = xkb_keymap_mod_get_index(self->keymap, name);
+        if ( i != XKB_MOD_INVALID )
+            *m++ = i;
+    }
+    *m = XKB_MOD_INVALID;
+    va_end(names);
+}
+
 void
 nk_bindings_seat_update_keymap(NkBindingsSeat *self, struct xkb_keymap *keymap, struct xkb_state *state)
 {
@@ -642,6 +635,13 @@ nk_bindings_seat_update_keymap(NkBindingsSeat *self, struct xkb_keymap *keymap, 
 
     self->keymap = xkb_keymap_ref(keymap);
     self->state = xkb_state_ref(state);
+
+    _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_SHIFT, XKB_MOD_NAME_SHIFT, NULL);
+    _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_CONTROL, XKB_MOD_NAME_CTRL, NULL);
+    _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_ALT, XKB_MOD_NAME_ALT, "Alt", "LAlt", "RAlt", "AltGr", "Mod5", "LevelThree", NULL);
+    _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_META, "Meta", NULL);
+    _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_SUPER, XKB_MOD_NAME_LOGO, "Super", NULL);
+    _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_HYPER, "Hyper", NULL);
 }
 
 struct xkb_context *
