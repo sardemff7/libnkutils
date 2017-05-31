@@ -73,6 +73,7 @@ struct _NkBindingsSeat {
     } compose;
 #endif /* NK_XKBCOMMON_HAS_COMPOSE */
     GList *on_release;
+    GHashTable *last_timestamps;
 };
 
 typedef struct {
@@ -106,7 +107,6 @@ typedef struct {
 typedef struct {
     NkBindingsBinding click;
     NkBindingsBinding dclick;
-    guint64 last_timestamp;
 } NkBindingsBindingMouse;
 
 static const gchar const *_nk_bindings_modifiers_names[] = {
@@ -534,7 +534,7 @@ _nk_bindings_try_key_bindings(NkBindings *self, NkBindingsSeat *seat, guint64 ke
 }
 
 static gboolean
-_nk_bindings_try_button_bindings(NkBindings *self, NkBindingsSeat *seat, guint64 button, guint64 timestamp)
+_nk_bindings_try_button_bindings(NkBindings *self, NkBindingsSeat *seat, guint64 **button, guint64 time)
 {
     NkBindingsBindingMouse *mouse_binding = NULL;
     GList *scope_;
@@ -542,23 +542,25 @@ _nk_bindings_try_button_bindings(NkBindings *self, NkBindingsSeat *seat, guint64
     {
         NkBindingsScope *scope = scope_->data;
 
-        mouse_binding = g_hash_table_lookup(scope->buttons, &button);
+        mouse_binding = g_hash_table_lookup(scope->buttons, *button);
         if ( mouse_binding == NULL )
             continue;
 
-        if ( ( timestamp - mouse_binding->last_timestamp ) < self->double_click_delay )
+        if ( time < self->double_click_delay )
         {
             if ( _nk_bindings_seat_binding_trigger(seat, &mouse_binding->dclick, TRUE) )
-                break;
+            {
+                *button = &mouse_binding->click.binding;
+                return TRUE;
+            }
         }
         if ( _nk_bindings_seat_binding_trigger(seat, &mouse_binding->click, TRUE) )
-            break;
+        {
+            *button = &mouse_binding->click.binding;
+            return TRUE;
+        }
     }
-    if ( mouse_binding == NULL )
-        return FALSE;
-
-    mouse_binding->last_timestamp = timestamp;
-    return TRUE;
+    return FALSE;
 }
 
 static void
@@ -601,6 +603,7 @@ nk_bindings_seat_new(NkBindings *bindings, struct xkb_context *context, struct x
     _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_SUPER, XKB_MOD_NAME_LOGO, "Super", NULL);
     _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_HYPER, "Hyper", NULL);
 
+    self->last_timestamps = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL, g_free);
     return self;
 }
 
@@ -777,7 +780,19 @@ nk_bindings_seat_handle_button(NkBindingsSeat *self, guint32 button, NkBindingsB
         return TRUE;
     }
 
-    return _nk_bindings_try_button_bindings(self->bindings, self, NK_BUTTON_TO_BINDING(mask, button), timestamp);
+    guint64 binding = NK_BUTTON_TO_BINDING(mask, button), *binding_ = &binding;
+    guint64 *last_timestamp, time = timestamp;
+
+    last_timestamp = g_hash_table_lookup(self->last_timestamps, &binding);
+    if ( last_timestamp != NULL )
+        time -= *last_timestamp;
+    if ( ! _nk_bindings_try_button_bindings(self->bindings, self, &binding_, time) )
+        return FALSE;
+    if ( last_timestamp == NULL )
+        g_hash_table_insert(self->last_timestamps, binding_, g_memdup(&timestamp, sizeof(guint64)));
+    else
+        *last_timestamp = timestamp;
+    return TRUE;
 }
 
 void
