@@ -48,6 +48,11 @@
 
 #define NK_BINDINGS_MAX_ALIASES 8 /* For Alt */
 
+#define _NK_VALUE_TO_BINDING(mask, value) ((guint64)((((guint64)(value)) << NK_BINDINGS_NUM_MODIFIERS) | (guint32)(mask)))
+#define NK_KEYCODE_TO_BINDING(mask, button) _NK_VALUE_TO_BINDING(mask, button)
+#define NK_KEYSYM_TO_BINDING(mask, button) _NK_VALUE_TO_BINDING(mask, button)
+#define NK_BUTTON_TO_BINDING(mask, button) _NK_VALUE_TO_BINDING(mask, button)
+
 struct _NkBindings {
     guint64 double_click_delay;
     GList *scopes;
@@ -72,14 +77,10 @@ struct _NkBindingsSeat {
 
 typedef struct {
     guint64 id;
-    GHashTable *bindings;
-} NkBindingsScope;
-
-typedef struct {
     GHashTable *keycodes;
     GHashTable *keysyms;
     GHashTable *buttons;
-} NkBindingsBindingGroup;
+} NkBindingsScope;
 
 typedef struct {
     NkBindingsCallback callback;
@@ -96,6 +97,7 @@ typedef struct {
 } NkBindingsBindingRelease;
 
 typedef struct {
+    guint64 binding;
     guint64 scope;
     NkBindingsBindingPress press;
     NkBindingsBindingRelease release;
@@ -146,20 +148,11 @@ _nk_bindings_scope_free(gpointer data)
 {
     NkBindingsScope *scope = data;
 
-    g_hash_table_unref(scope->bindings);
+    g_hash_table_unref(scope->keycodes);
+    g_hash_table_unref(scope->keysyms);
+    g_hash_table_unref(scope->buttons);
+
     g_slice_free(NkBindingsScope, scope);
-}
-
-static void
-_nk_bindings_binding_group_free(gpointer data)
-{
-    NkBindingsBindingGroup *group = data;
-
-    g_hash_table_unref(group->keycodes);
-    g_hash_table_unref(group->keysyms);
-    g_hash_table_unref(group->buttons);
-
-    g_slice_free(NkBindingsBindingGroup, group);
 }
 
 NkBindings *
@@ -225,8 +218,8 @@ _nk_bindings_scope_compare(gconstpointer a, gconstpointer b)
     return ( sb->id - sa->id );
 }
 
-static NkBindingsBindingGroup *
-_nk_bindings_get_group(NkBindings *self, guint64 scope_id, xkb_mod_mask_t mask)
+static NkBindingsScope *
+_nk_bindings_get_scope(NkBindings *self, guint64 scope_id)
 {
     GList *link;
     NkBindingsScope *scope, cscope = { .id = scope_id };
@@ -237,22 +230,13 @@ _nk_bindings_get_group(NkBindings *self, guint64 scope_id, xkb_mod_mask_t mask)
     {
         scope = g_slice_new(NkBindingsScope);
         scope->id = scope_id;
-        scope->bindings = g_hash_table_new_full(NULL, NULL, NULL, _nk_bindings_binding_group_free);
+        scope->keycodes = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL, _nk_bindings_binding_free);
+        scope->keysyms = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL, _nk_bindings_binding_free);
+        scope->buttons = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL, _nk_bindings_binding_mouse_free);
         self->scopes = g_list_insert_sorted(self->scopes, scope, _nk_bindings_scope_compare);
     }
 
-    NkBindingsBindingGroup *group;
-    group = g_hash_table_lookup(scope->bindings, GUINT_TO_POINTER(mask));
-    if ( group == NULL )
-    {
-        group = g_slice_new(NkBindingsBindingGroup);
-        group->keycodes = g_hash_table_new_full(NULL, NULL, NULL, _nk_bindings_binding_free);
-        group->keysyms = g_hash_table_new_full(NULL, NULL, NULL, _nk_bindings_binding_free);
-        group->buttons = g_hash_table_new_full(NULL, NULL, NULL, _nk_bindings_binding_mouse_free);
-        g_hash_table_insert(scope->bindings, GUINT_TO_POINTER(mask), group);
-    }
-
-    return group;
+    return scope;
 }
 
 static gboolean
@@ -442,18 +426,21 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
             keysym = xkb_keysym_from_name(s, XKB_KEYSYM_NO_FLAGS);
     }
 
-    NkBindingsBindingGroup *group;
-    group = _nk_bindings_get_group(self, scope_id, mask);
+    NkBindingsScope *scope;
+    scope = _nk_bindings_get_scope(self, scope_id);
 
     NkBindingsBinding *binding = NULL;
     if ( button != 0 )
     {
+        guint64 value = NK_BUTTON_TO_BINDING(mask, button);
         NkBindingsBindingMouse *mouse_binding;
-        mouse_binding = g_hash_table_lookup(group->buttons, GUINT_TO_POINTER(button));
+        mouse_binding = g_hash_table_lookup(scope->buttons, &value);
         if ( mouse_binding == NULL )
         {
             mouse_binding = g_slice_new0(NkBindingsBindingMouse);
-            g_hash_table_insert(group->buttons, GUINT_TO_POINTER(button), mouse_binding);
+            mouse_binding->click.binding = value;
+            mouse_binding->dclick.binding = value;
+            g_hash_table_insert(scope->buttons, &mouse_binding->click.binding, mouse_binding);
         }
 
         if ( double_click )
@@ -463,11 +450,13 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
     }
     else if ( keycode != XKB_KEYCODE_INVALID )
     {
-        binding = g_hash_table_lookup(group->keycodes, GUINT_TO_POINTER(keycode));
+        guint64 value = NK_KEYCODE_TO_BINDING(mask, keycode);
+        binding = g_hash_table_lookup(scope->keycodes, &value);
         if ( binding == NULL )
         {
             binding = g_slice_new0(NkBindingsBinding);
-            g_hash_table_insert(group->keycodes, GUINT_TO_POINTER(keycode), binding);
+            binding->binding = value;
+            g_hash_table_insert(scope->keycodes, &binding->binding, binding);
         }
     }
     else
@@ -482,11 +471,13 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
             keysym = last_keysym;
             mask = last_mask;
         }
-        binding = g_hash_table_lookup(group->keysyms, GUINT_TO_POINTER(keysym));
+        guint64 value = NK_KEYSYM_TO_BINDING(mask, keysym);
+        binding = g_hash_table_lookup(scope->keysyms, &value);
         if ( binding == NULL )
         {
             binding = g_slice_new0(NkBindingsBinding);
-            g_hash_table_insert(group->keysyms, GUINT_TO_POINTER(keysym), binding);
+            binding->binding = value;
+            g_hash_table_insert(scope->keysyms, &binding->binding, binding);
         }
     }
 
@@ -527,30 +518,23 @@ _nk_bindings_seat_binding_trigger(NkBindingsSeat *self, NkBindingsBinding *bindi
 }
 
 static gboolean
-_nk_bindings_try_key_bindings(NkBindings *self, NkBindingsSeat *seat, xkb_mod_mask_t effective, xkb_mod_mask_t not_consumed, xkb_keycode_t keycode, xkb_keysym_t keysym, gboolean trigger)
+_nk_bindings_try_key_bindings(NkBindings *self, NkBindingsSeat *seat, guint64 keycode, guint64 keysym, gboolean trigger)
 {
     GList *scope_;
     for ( scope_ = self->scopes ; scope_ != NULL ; scope_ = g_list_next(scope_) )
     {
         NkBindingsScope *scope = scope_->data;
-        NkBindingsBindingGroup *group;
-        if ( ( group = g_hash_table_lookup(scope->bindings, GUINT_TO_POINTER(effective)) ) != NULL )
-        {
-            if ( _nk_bindings_seat_binding_trigger(seat, g_hash_table_lookup(group->keycodes, GUINT_TO_POINTER(keycode)), trigger) )
-                return TRUE;
-        }
-        if ( ( keysym != XKB_KEY_NoSymbol ) && ( ( group = g_hash_table_lookup(scope->bindings, GUINT_TO_POINTER(not_consumed)) ) != NULL ) )
-        {
-            if ( _nk_bindings_seat_binding_trigger(seat, g_hash_table_lookup(group->keysyms, GUINT_TO_POINTER(keysym)), trigger) )
-                return TRUE;
-        }
+        if ( _nk_bindings_seat_binding_trigger(seat, g_hash_table_lookup(scope->keycodes, &keycode), trigger) )
+            return TRUE;
+        if ( ( keysym != XKB_KEY_NoSymbol ) && _nk_bindings_seat_binding_trigger(seat, g_hash_table_lookup(scope->keysyms, &keysym), trigger) )
+            return TRUE;
     }
 
     return FALSE;
 }
 
 static gboolean
-_nk_bindings_try_button_bindings(NkBindings *self, NkBindingsSeat *seat, xkb_mod_mask_t mask, guint button, guint64 timestamp)
+_nk_bindings_try_button_bindings(NkBindings *self, NkBindingsSeat *seat, guint64 button, guint64 timestamp)
 {
     NkBindingsBindingMouse *mouse_binding = NULL;
     GList *scope_;
@@ -558,12 +542,7 @@ _nk_bindings_try_button_bindings(NkBindings *self, NkBindingsSeat *seat, xkb_mod
     {
         NkBindingsScope *scope = scope_->data;
 
-        NkBindingsBindingGroup *group;
-        group = g_hash_table_lookup(scope->bindings, GUINT_TO_POINTER(mask));
-        if ( group == NULL )
-            continue;
-
-        mouse_binding = g_hash_table_lookup(group->buttons, GUINT_TO_POINTER(button));
+        mouse_binding = g_hash_table_lookup(scope->buttons, &button);
         if ( mouse_binding == NULL )
             continue;
 
@@ -763,7 +742,7 @@ nk_bindings_seat_handle_key(NkBindingsSeat *self, xkb_keycode_t keycode, NkBindi
     xkb_mod_mask_t effective, not_consumed;
     _nk_bindings_seat_get_modifiers_masks(self, keycode, &effective, &not_consumed);
 
-    if ( _nk_bindings_try_key_bindings(self->bindings, self, effective, not_consumed, keycode, keysym, regular_press) )
+    if ( _nk_bindings_try_key_bindings(self->bindings, self, NK_KEYCODE_TO_BINDING(effective, keycode), NK_KEYSYM_TO_BINDING(not_consumed, keysym), regular_press) )
         return NULL;
 
     if ( ! regular_press )
@@ -798,7 +777,7 @@ nk_bindings_seat_handle_button(NkBindingsSeat *self, guint32 button, NkBindingsB
         return TRUE;
     }
 
-    return _nk_bindings_try_button_bindings(self->bindings, self, mask, button, timestamp);
+    return _nk_bindings_try_button_bindings(self->bindings, self, NK_BUTTON_TO_BINDING(mask, button), timestamp);
 }
 
 void

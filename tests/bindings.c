@@ -43,17 +43,17 @@ typedef struct {
     struct xkb_state *master_state;
     struct xkb_state *state;
     NkBindingsSeat *seat;
-    guint triggered;
+    guint64 triggered;
 } NkBindingsTestFixture;
 
 typedef struct {
     const gchar *binding;
-    guint trigger;
+    guint64 trigger;
 } NkBindingsTestBinding;
 
 typedef struct {
     NkBindingsTestFixture *fixture;
-    guint trigger;
+    guint64 trigger;
 } NkBindingsTestBindingSlice;
 
 typedef struct {
@@ -61,7 +61,7 @@ typedef struct {
     NkBindingsKeyState state;
     gboolean fail;
     const gchar *text;
-    guint triggered;
+    guint64 triggered;
 } NkBindingsTestKey;
 
 typedef struct {
