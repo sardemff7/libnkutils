@@ -34,6 +34,8 @@
 
 #include <nkutils-xdg-theme.h>
 
+#define MAX_THEMES 5
+
 static NkXdgThemeContext *context;
 typedef enum {
     TYPE_NONE = 0,
@@ -43,7 +45,7 @@ typedef enum {
 
 typedef struct {
     NkXdgThemeTestType type;
-    const gchar *theme;
+    const gchar *themes[MAX_THEMES];
     const gchar *name;
     const gchar *context;
     gint size;
@@ -62,7 +64,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/Adwaita/symbolic/found",
         .data = {
             .type = TYPE_ICON,
-            .theme = "Adwaita",
+            .themes = { [0] = "Adwaita" },
             .name = "zoom-in-symbolic",
             .size = 48,
             .scale = 1,
@@ -75,7 +77,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/Adwaita/symbolic/not-scalable",
         .data = {
             .type = TYPE_ICON,
-            .theme = "Adwaita",
+            .themes = { [0] = "Adwaita" },
             .name = "zoom-in-symbolic",
             .size = 48,
             .scale = 1,
@@ -88,8 +90,21 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/Adwaita/symbolic/found-no-symbolic",
         .data = {
             .type = TYPE_ICON,
-            .theme = "Adwaita",
+            .themes = { [0] = "Adwaita" },
             .name = "trophy-gold-symbolic",
+            .size = 48,
+            .scale = 1,
+            .svg = TRUE,
+            .result = "/usr/share/icons/Adwaita/48x48/status/trophy-gold.png",
+            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/Adwaita/theme-found/second-choice",
+        .data = {
+            .type = TYPE_ICON,
+            .themes = { [0] = "hopefully-no-theme-has-this-name", [1] = "Adwaita" },
+            .name = "trophy-gold",
             .size = 48,
             .scale = 1,
             .svg = TRUE,
@@ -101,7 +116,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/Adwaita/theme-found/fallback",
         .data = {
             .type = TYPE_ICON,
-            .theme = "Adwaita",
+            .themes = { [0] = "Adwaita" },
             .name = "geany",
             .size = 16,
             .scale = 1,
@@ -114,7 +129,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/Adwaita/context/exist-match/1",
         .data = {
             .type = TYPE_ICON,
-            .theme = "Adwaita",
+            .themes = { [0] = "Adwaita" },
             .name = "network-wireless-signal-ok-symbolic",
             .context = "Status",
             .size = 48,
@@ -128,7 +143,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/Adwaita/context/exist-no-match",
         .data = {
             .type = TYPE_ICON,
-            .theme = "Adwaita",
+            .themes = { [0] = "Adwaita" },
             .name = "network-wireless-signal-ok-symbolic",
             .context = "Applications",
             .size = 48,
@@ -142,7 +157,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/Adwaita/context/exist-match/2",
         .data = {
             .type = TYPE_ICON,
-            .theme = "Adwaita",
+            .themes = { [0] = "Adwaita" },
             .name = "emblem-favorite-symbolic",
             .context = "Emblems",
             .size = 48,
@@ -156,7 +171,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/gnome/symbolic/found",
         .data = {
             .type = TYPE_ICON,
-            .theme = "gnome",
+            .themes = { [0] = "gnome" },
             .name = "zoom-in-symbolic",
             .size = 48,
             .scale = 1,
@@ -169,7 +184,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/gnome/symbolic/not-scalable",
         .data = {
             .type = TYPE_ICON,
-            .theme = "gnome",
+            .themes = { [0] = "gnome" },
             .name = "zoom-in-symbolic",
             .size = 48,
             .scale = 1,
@@ -182,7 +197,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/gnome/symbolic/found-no-symbolic",
         .data = {
             .type = TYPE_ICON,
-            .theme = "gnome",
+            .themes = { [0] = "gnome" },
             .name = "trophy-gold-symbolic",
             .size = 48,
             .scale = 1,
@@ -195,7 +210,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/gnome/theme-found/fallback",
         .data = {
             .type = TYPE_ICON,
-            .theme = "gnome",
+            .themes = { [0] = "gnome" },
             .name = "geany",
             .size = 16,
             .scale = 1,
@@ -208,7 +223,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/gnome/context/exist-match/1",
         .data = {
             .type = TYPE_ICON,
-            .theme = "gnome",
+            .themes = { [0] = "gnome" },
             .name = "network-wireless-signal-ok-symbolic",
             .context = "Status",
             .size = 48,
@@ -222,7 +237,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/gnome/context/exist-no-match",
         .data = {
             .type = TYPE_ICON,
-            .theme = "gnome",
+            .themes = { [0] = "gnome" },
             .name = "network-wireless-signal-ok-symbolic",
             .context = "Applications",
             .size = 48,
@@ -236,7 +251,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/gnome/context/exist-match/2",
         .data = {
             .type = TYPE_ICON,
-            .theme = "gnome",
+            .themes = { [0] = "gnome" },
             .name = "emblem-favorite-symbolic",
             .context = "Emblems",
             .size = 48,
@@ -250,7 +265,6 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/no-theme/threshold/found/1",
         .data = {
             .type = TYPE_ICON,
-            .theme = NULL,
             .name = "geany",
             .size = 18,
             .scale = 1,
@@ -263,7 +277,6 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/no-theme/threshold/found/2",
         .data = {
             .type = TYPE_ICON,
-            .theme = NULL,
             .name = "pidgin",
             .size = 18,
             .scale = 1,
@@ -276,7 +289,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/no-theme/size/fallback/hicolor/1",
         .data = {
             .type = TYPE_ICON,
-            .theme = "Adwaita",
+            .themes = { [0] = "Adwaita" },
             .name = "pidgin",
             .size = 0,
             .scale = 1,
@@ -289,7 +302,6 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/no-theme/size/fallback/pixmaps/1",
         .data = {
             .type = TYPE_ICON,
-            .theme = NULL,
             .name = "htop",
             .size = 19,
             .scale = 1,
@@ -301,7 +313,6 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/no-theme/size/fallback/pixmaps/2",
         .data = {
             .type = TYPE_ICON,
-            .theme = NULL,
             .name = "debian-logo",
             .size = 0,
             .scale = 1,
@@ -313,7 +324,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/Adwaita/size/biggest/fixed",
         .data = {
             .type = TYPE_ICON,
-            .theme = "Adwaita",
+            .themes = { [0] = "Adwaita" },
             .name = "edit-find-symbolic",
             .size = 0,
             .scale = 1,
@@ -326,7 +337,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/Adwaita/size/biggest/svg",
         .data = {
             .type = TYPE_ICON,
-            .theme = "Adwaita",
+            .themes = { [0] = "Adwaita" },
             .name = "edit-find-symbolic",
             .size = 0,
             .scale = 1,
@@ -339,7 +350,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/Adwaita/size/best-distance",
         .data = {
             .type = TYPE_ICON,
-            .theme = "Adwaita",
+            .themes = { [0] = "Adwaita" },
             .name = "edit-find",
             .size = 19,
             .scale = 1,
@@ -352,7 +363,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/gnome/size/biggest/fixed",
         .data = {
             .type = TYPE_ICON,
-            .theme = "gnome",
+            .themes = { [0] = "gnome" },
             .name = "edit-find-symbolic",
             .size = 0,
             .scale = 1,
@@ -365,7 +376,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/gnome/size/biggest/svg",
         .data = {
             .type = TYPE_ICON,
-            .theme = "gnome",
+            .themes = { [0] = "gnome" },
             .name = "edit-find-symbolic",
             .size = 0,
             .scale = 1,
@@ -378,7 +389,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/gnome/size/best-distance",
         .data = {
             .type = TYPE_ICON,
-            .theme = "gnome",
+            .themes = { [0] = "gnome" },
             .name = "edit-find",
             .size = 19,
             .scale = 1,
@@ -391,7 +402,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/wrong-theme/not-found",
         .data = {
             .type = TYPE_ICON,
-            .theme = "do-not-exists-hopefully",
+            .themes = { [0] = "do-not-exists-hopefully" },
             .name = "nothing-on-earth-will-have-that-name",
             .size = 48,
             .scale = 1,
@@ -403,7 +414,6 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/icon/no-theme/not-found",
         .data = {
             .type = TYPE_ICON,
-            .theme = NULL,
             .name = "nothing-on-earth-will-have-that-name",
             .size = 48,
             .scale = 1,
@@ -415,7 +425,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/sound/found/variant",
         .data = {
             .type = TYPE_SOUND,
-            .theme = "freedesktop",
+            .themes = { [0] = "freedesktop" },
             .name = "network-connectivity-established",
             .profile = "stereo",
             .result = "/usr/share/sounds/freedesktop/stereo/network-connectivity-established.oga",
@@ -426,7 +436,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/sound/fallback/variant",
         .data = {
             .type = TYPE_SOUND,
-            .theme = "freedesktop",
+            .themes = { [0] = "freedesktop" },
             .name = "bell-too-specific",
             .profile = "stereo",
             .result = "/usr/share/sounds/freedesktop/stereo/bell.oga",
@@ -437,7 +447,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/sound/fallback/freedesktop",
         .data = {
             .type = TYPE_SOUND,
-            .theme = "non-existing-i-hope",
+            .themes = { [0] = "non-existing-i-hope" },
             .name = "dialog-information",
             .profile = "stereo",
             .result = "/usr/share/sounds/freedesktop/stereo/dialog-information.oga",
@@ -448,7 +458,7 @@ static const struct {
         .testpath = "/nkutils/xdg-theme/sound/fallback/no-index",
         .data = {
             .type = TYPE_SOUND,
-            .theme = "purple",
+            .themes = { [0] = "purple" },
             .name = "logout",
             .profile = "stereo",
             .result = "/usr/share/sounds/purple/logout.wav",
@@ -472,10 +482,10 @@ _nk_uuid_tests_func(gconstpointer user_data)
     switch ( data->type )
     {
     case TYPE_ICON:
-        file = nk_xdg_theme_get_icon(context, data->theme, data->context, data->name, data->size, data->scale, data->svg);
+        file = nk_xdg_theme_get_icon(context, data->themes, data->context, data->name, data->size, data->scale, data->svg);
     break;
     case TYPE_SOUND:
-        file = nk_xdg_theme_get_sound(context, data->theme, data->name, data->profile, NULL);
+        file = nk_xdg_theme_get_sound(context, data->themes, data->name, data->profile, NULL);
     break;
     default:
         g_assert_not_reached();
