@@ -59,7 +59,101 @@ static const struct {
     NkXdgThemeTestData data;
 } _nk_uuid_tests_list[] = {
     {
-        .testpath = "/nkutils/xdg-theme/icon/symbolic/found",
+        .testpath = "/nkutils/xdg-theme/icon/Adwaita/symbolic/found",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "Adwaita",
+            .name = "zoom-in-symbolic",
+            .size = 48,
+            .scale = 1,
+            .svg = TRUE,
+            .result = "/usr/share/icons/Adwaita/scalable/actions/zoom-in-symbolic.svg",
+            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/Adwaita/symbolic/not-scalable",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "Adwaita",
+            .name = "zoom-in-symbolic",
+            .size = 48,
+            .scale = 1,
+            .svg = FALSE,
+            .result = "/usr/share/icons/Adwaita/48x48/actions/zoom-in-symbolic.symbolic.png",
+            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/Adwaita/symbolic/found-no-symbolic",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "Adwaita",
+            .name = "trophy-gold-symbolic",
+            .size = 48,
+            .scale = 1,
+            .svg = TRUE,
+            .result = "/usr/share/icons/Adwaita/48x48/status/trophy-gold.png",
+            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/Adwaita/theme-found/fallback",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "Adwaita",
+            .name = "geany",
+            .size = 16,
+            .scale = 1,
+            .svg = FALSE,
+            .result = "/usr/share/icons/hicolor/16x16/apps/geany.png",
+            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/Adwaita/context/exist-match/1",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "Adwaita",
+            .name = "network-wireless-signal-ok-symbolic",
+            .context = "Status",
+            .size = 48,
+            .scale = 1,
+            .svg = TRUE,
+            .result = "/usr/share/icons/Adwaita/scalable/status/network-wireless-signal-ok-symbolic.svg",
+            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/Adwaita/context/exist-no-match",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "Adwaita",
+            .name = "network-wireless-signal-ok-symbolic",
+            .context = "Applications",
+            .size = 48,
+            .scale = 1,
+            .svg = TRUE,
+            .result = NULL,
+            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/Adwaita/context/exist-match/2",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "Adwaita",
+            .name = "emblem-favorite-symbolic",
+            .context = "Emblems",
+            .size = 48,
+            .scale = 1,
+            .svg = TRUE,
+            .result = "/usr/share/icons/Adwaita/scalable/emblems/emblem-favorite-symbolic.svg",
+            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/gnome/symbolic/found",
         .data = {
             .type = TYPE_ICON,
             .theme = "gnome",
@@ -72,7 +166,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/symbolic/not-scalable",
+        .testpath = "/nkutils/xdg-theme/icon/gnome/symbolic/not-scalable",
         .data = {
             .type = TYPE_ICON,
             .theme = "gnome",
@@ -85,7 +179,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/symbolic/found-no-symbolic",
+        .testpath = "/nkutils/xdg-theme/icon/gnome/symbolic/found-no-symbolic",
         .data = {
             .type = TYPE_ICON,
             .theme = "gnome",
@@ -98,7 +192,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/theme-found/fallback",
+        .testpath = "/nkutils/xdg-theme/icon/gnome/theme-found/fallback",
         .data = {
             .type = TYPE_ICON,
             .theme = "gnome",
@@ -111,7 +205,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/context/exist-match/1",
+        .testpath = "/nkutils/xdg-theme/icon/gnome/context/exist-match/1",
         .data = {
             .type = TYPE_ICON,
             .theme = "gnome",
@@ -125,7 +219,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/context/exist-no-match",
+        .testpath = "/nkutils/xdg-theme/icon/gnome/context/exist-no-match",
         .data = {
             .type = TYPE_ICON,
             .theme = "gnome",
@@ -139,7 +233,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/context/exist-match/2",
+        .testpath = "/nkutils/xdg-theme/icon/gnome/context/exist-match/2",
         .data = {
             .type = TYPE_ICON,
             .theme = "gnome",
@@ -153,7 +247,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/threshold/found/1",
+        .testpath = "/nkutils/xdg-theme/icon/no-theme/threshold/found/1",
         .data = {
             .type = TYPE_ICON,
             .theme = NULL,
@@ -166,7 +260,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/threshold/found/2",
+        .testpath = "/nkutils/xdg-theme/icon/no-theme/threshold/found/2",
         .data = {
             .type = TYPE_ICON,
             .theme = NULL,
@@ -179,20 +273,20 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/size/fallback/hicolor/1",
+        .testpath = "/nkutils/xdg-theme/icon/no-theme/size/fallback/hicolor/1",
         .data = {
             .type = TYPE_ICON,
-            .theme = "gnome",
+            .theme = "Adwaita",
             .name = "pidgin",
             .size = 0,
             .scale = 1,
             .svg = TRUE,
             .result = "/usr/share/icons/hicolor/scalable/apps/pidgin.svg",
-            .theme_test = "/usr/share/icons/gnome/index.theme",
+            .theme_test = "/usr/share/icons/Adwaita/index.theme",
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/size/fallback/pixmaps/1",
+        .testpath = "/nkutils/xdg-theme/icon/no-theme/size/fallback/pixmaps/1",
         .data = {
             .type = TYPE_ICON,
             .theme = NULL,
@@ -204,7 +298,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/size/fallback/pixmaps/2",
+        .testpath = "/nkutils/xdg-theme/icon/no-theme/size/fallback/pixmaps/2",
         .data = {
             .type = TYPE_ICON,
             .theme = NULL,
@@ -216,7 +310,46 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/size/biggest/fixed",
+        .testpath = "/nkutils/xdg-theme/icon/Adwaita/size/biggest/fixed",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "Adwaita",
+            .name = "edit-find-symbolic",
+            .size = 0,
+            .scale = 1,
+            .svg = FALSE,
+            .result = "/usr/share/icons/Adwaita/96x96/actions/edit-find-symbolic.symbolic.png",
+            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/Adwaita/size/biggest/svg",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "Adwaita",
+            .name = "edit-find-symbolic",
+            .size = 0,
+            .scale = 1,
+            .svg = TRUE,
+            .result = "/usr/share/icons/Adwaita/scalable/actions/edit-find-symbolic.svg",
+            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/Adwaita/size/best-distance",
+        .data = {
+            .type = TYPE_ICON,
+            .theme = "Adwaita",
+            .name = "edit-find",
+            .size = 19,
+            .scale = 1,
+            .svg = FALSE,
+            .result = "/usr/share/icons/Adwaita/22x22/actions/edit-find.png",
+            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-theme/icon/gnome/size/biggest/fixed",
         .data = {
             .type = TYPE_ICON,
             .theme = "gnome",
@@ -224,12 +357,12 @@ static const struct {
             .size = 0,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/icons/gnome/256x256/actions/edit-find.png",
+            .result = "/usr/share/icons/gnome/96x96/actions/edit-find-symbolic.symbolic.png",
             .theme_test = "/usr/share/icons/gnome/index.theme",
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/size/biggest/svg",
+        .testpath = "/nkutils/xdg-theme/icon/gnome/size/biggest/svg",
         .data = {
             .type = TYPE_ICON,
             .theme = "gnome",
@@ -242,7 +375,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/size/best-distance",
+        .testpath = "/nkutils/xdg-theme/icon/gnome/size/best-distance",
         .data = {
             .type = TYPE_ICON,
             .theme = "gnome",
@@ -255,7 +388,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/not-found",
+        .testpath = "/nkutils/xdg-theme/icon/wrong-theme/not-found",
         .data = {
             .type = TYPE_ICON,
             .theme = "do-not-exists-hopefully",
@@ -267,7 +400,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/xdg-theme/icon/no-theme",
+        .testpath = "/nkutils/xdg-theme/icon/no-theme/not-found",
         .data = {
             .type = TYPE_ICON,
             .theme = NULL,

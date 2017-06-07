@@ -113,7 +113,7 @@ typedef struct {
     const gchar *context_custom;
     gint size;
     gint scale;
-    gboolean svg;
+    const gchar **extensions;
 } NkXdgThemeIconFindData;
 
 typedef struct {
@@ -155,6 +155,14 @@ static const gchar * const _nk_xdg_theme_sections[] = {
 static const gchar *_nk_xdg_theme_icon_extensions[] = {
     ".svg",
     ".png",
+    ".xpm",
+    NULL
+};
+
+static const gchar *_nk_xdg_theme_icon_symbolic_extensions[] = {
+    ".svg",
+    ".png",
+    ".symbolic.png",
     ".xpm",
     NULL
 };
@@ -654,7 +662,7 @@ _nk_xdg_theme_icon_find_file(NkXdgThemeTheme *self, const gchar *name, gpointer 
         for ( path = subdir->base.paths ; *path != NULL ; ++path )
         {
             gchar *file;
-            if ( _nk_xdg_theme_try_file(*path, name, data->svg ? _nk_xdg_theme_icon_extensions : _nk_xdg_theme_icon_extensions + 1, &file) )
+            if ( _nk_xdg_theme_try_file(*path, name, data->extensions, &file) )
             {
                 if ( try_best )
                 {
@@ -692,13 +700,14 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gc
     g_return_val_if_fail(name != NULL, NULL);
     g_return_val_if_fail(scale > 0, NULL);
 
+    gboolean symbolic = g_str_has_suffix(name, "-symbolic");
     guint64 value;
     NkXdgThemeIconFindData data = {
         .context = ICONDIR_CONTEXT_CUSTOM,
         .context_custom = context_name,
         .size = size * scale,
         .scale = scale,
-        .svg = svg,
+        .extensions = ( symbolic ? _nk_xdg_theme_icon_symbolic_extensions : _nk_xdg_theme_icon_extensions ) + ( svg ? 0 : 1 ),
     };
     if ( nk_enum_parse(context_name, _nk_xdg_theme_icon_dir_context_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_context_names), TRUE, &value) )
         data.context = value;
@@ -714,10 +723,10 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar *theme_name, const gc
     if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
         return file;
 
-    if ( _nk_xdg_theme_try_fallback(self->dirs[TYPE_ICON], G_DIR_SEPARATOR_S "usr" G_DIR_SEPARATOR_S "share" G_DIR_SEPARATOR_S "pixmaps", theme_name, name, svg ? _nk_xdg_theme_icon_extensions : _nk_xdg_theme_icon_extensions + 1, &file) )
+    if ( _nk_xdg_theme_try_fallback(self->dirs[TYPE_ICON], G_DIR_SEPARATOR_S "usr" G_DIR_SEPARATOR_S "share" G_DIR_SEPARATOR_S "pixmaps", theme_name, name, data.extensions, &file) )
         return file;
 
-    if ( g_str_has_suffix(name, "-symbolic") )
+    if ( symbolic )
     {
         gchar *no_symbolic_name;
         gsize l;
