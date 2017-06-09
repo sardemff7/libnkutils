@@ -476,6 +476,7 @@ nk_colour_parse(const gchar *s, NkColour *colour)
         {
         case NK_COLOUR_SYMBOL_BASE_RGBA:
             alpha = TRUE;
+            /* fallthrough */
         case NK_COLOUR_SYMBOL_BASE_RGB:
             if ( g_scanner_get_next_token(_nk_colour_scanner) != G_TOKEN_LEFT_PAREN )
                 return FALSE;
@@ -496,6 +497,7 @@ nk_colour_parse(const gchar *s, NkColour *colour)
         break;
         case NK_COLOUR_SYMBOL_BASE_HSLA:
             alpha = TRUE;
+            /* fallthrough */
         case NK_COLOUR_SYMBOL_BASE_HSL:
         {
             gdouble h, s, l;
@@ -581,10 +583,10 @@ nk_colour_parse(const gchar *s, NkColour *colour)
         else if ( ! _nk_colour_search_named(&colour_, _nk_colour_scanner->value.v_identifier) )
             return FALSE;
     break;
-    break;
     case G_TOKEN_STRING:
         if ( ! _nk_colour_search_named(&colour_, _nk_colour_scanner->value.v_string) )
             return FALSE;
+        /* fallthrough */
     default:
         return FALSE;
     }
