@@ -109,7 +109,7 @@ typedef struct {
     NkBindingsBinding dclick;
 } NkBindingsBindingMouse;
 
-static const gchar const *_nk_bindings_modifiers_names[] = {
+static const gchar * const _nk_bindings_modifiers_names[] = {
     [NK_BINDINGS_MODIFIER_SHIFT   + NK_BINDINGS_NUM_MODIFIERS * 0] = "shift",
     [NK_BINDINGS_MODIFIER_CONTROL + NK_BINDINGS_NUM_MODIFIERS * 0] = "control",
     [NK_BINDINGS_MODIFIER_ALT     + NK_BINDINGS_NUM_MODIFIERS * 0] = "alt",
