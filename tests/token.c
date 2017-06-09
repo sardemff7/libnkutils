@@ -528,7 +528,7 @@ typedef enum {
     _TOKEN_SIZE
 } NkTokenListEnumTokens;
 
-static const gchar const * const _nk_token_list_enum_tests_tokens[_TOKEN_SIZE] = {
+static const gchar * const _nk_token_list_enum_tests_tokens[_TOKEN_SIZE] = {
     [TOKEN_FRUIT]  = "fruit",
     [TOKEN_RECIPE] = "recipe",
 };
