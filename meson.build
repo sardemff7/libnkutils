@@ -101,6 +101,10 @@ if uuid
     nk_sources += 'src/uuid-internal.h'
 endif
 
+if xdg_theme
+    nk_deps += [ dependency('gio-2.0'), dependency('gobject-2.0') ]
+endif
+
 if bindings
     nk_xkbcommon = dependency('xkbcommon', version: '>= 0.4.1')
     nk_deps += nk_xkbcommon

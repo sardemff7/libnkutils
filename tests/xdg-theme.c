@@ -503,6 +503,9 @@ main(int argc, char *argv[])
     g_setenv("HOME", "/var/empty", TRUE);
     g_setenv("XDG_DATA_HOME", "/var/empty", TRUE);
     g_setenv("XDG_DATA_DIRS", "/usr/share/", TRUE);
+    g_setenv("XDG_CURRENT_DESKTOP", "", TRUE);
+    g_setenv("GNOME_DESKTOP_SESSION_ID", "", TRUE);
+    g_setenv("KDE_FULL_SESSION", "", TRUE);
 
     gsize i;
     for ( i = 0 ; i < G_N_ELEMENTS(_nk_uuid_tests_list) ; ++i )

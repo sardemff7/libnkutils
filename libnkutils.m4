@@ -90,6 +90,11 @@ AC_DEFUN([_NK_UUID_CHECK], [
     AS_IF([test x${nk_uuid_libuuid} != xyes -a x${nk_uuid_apr_util} != xyes], [AC_MSG_ERROR([libnkutils: A UUID library is required])])
 ])
 
+AC_DEFUN([_NK_XDG_THEME_CHECK], [
+    PKG_CHECK_MODULES([_NKUTILS_INTERNAL_GLIB], [gio-2.0])
+    PKG_CHECK_MODULES([_NKUTILS_INTERNAL_GOBJECT], [gobject-2.0])
+])
+
 AC_DEFUN([_NK_BINDINGS_CHECK], [
     PKG_CHECK_MODULES([_NKUTILS_INTERNAL_XKBCOMMON], [xkbcommon >= ${nk_xkbcommon_min_version}])
     PKG_CHECK_EXISTS([xkbcommon >= 0.7.0], [

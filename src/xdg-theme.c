@@ -37,6 +37,7 @@
 
 #include <glib.h>
 #include <glib/gprintf.h>
+#include <gio/gio.h>
 
 #include "nkutils-enum.h"
 #include "nkutils-xdg-theme.h"
@@ -47,12 +48,31 @@ typedef enum {
 #define NUM_TYPES 2
 } NkXdgThemeThemeType;
 
+typedef enum {
+    DE_NONE = 0,
+    DE_GNOME,
+    DE_GNOME_CLASSIC,
+    DE_GNOME_FLASHBACK,
+    DE_KDE,
+} NkXdgThemeDE;
+
+static const gchar * const _nk_xdg_theme_de_current_session_names[] = {
+    [DE_NONE] = "X-Generic",
+    [DE_GNOME] = "GNOME",
+    [DE_GNOME_CLASSIC] = "GNOME-Classic",
+    [DE_GNOME_FLASHBACK] = "GNOME-Flashback",
+    [DE_KDE] = "KDE",
+};
+
 typedef struct {
     NkXdgThemeThemeType type;
     gchar **dirs;
     gsize dirs_length;
     const gchar * const *fallback_themes;
     GHashTable *themes;
+    gchar *de_theme;
+    gpointer de_data;
+    GDestroyNotify de_notify;
 } NkXdgThemeTypeContext;
 
 struct _NkXdgThemeContext {
@@ -181,6 +201,97 @@ static const gchar *_nk_xdg_theme_sound_extensions[] = {
     ".wav",
     NULL
 };
+
+static NkXdgThemeDE
+_nk_xdg_theme_de_detect(void)
+{
+    static NkXdgThemeDE _nk_xdg_theme_de = DE_NONE - 1;
+    if ( _nk_xdg_theme_de != (NkXdgThemeDE) ( DE_NONE - 1 ) )
+        return _nk_xdg_theme_de;
+
+    const gchar *var;
+
+    var = g_getenv("XDG_CURRENT_DESKTOP");
+    guint64 value;
+    if ( ( var != NULL ) && nk_enum_parse(var, _nk_xdg_theme_de_current_session_names, G_N_ELEMENTS(_nk_xdg_theme_de_current_session_names), FALSE, &value) )
+    {
+        _nk_xdg_theme_de = value;
+        return _nk_xdg_theme_de;
+    }
+
+    var = g_getenv("GNOME_DESKTOP_SESSION_ID");
+    if ( ( var != NULL ) && ( *var != '\0' ) )
+    {
+        _nk_xdg_theme_de = DE_GNOME;
+        return _nk_xdg_theme_de;
+    }
+
+    var = g_getenv("KDE_FULL_SESSION");
+    if ( ( var != NULL ) && ( *var != '\0' ) )
+    {
+        _nk_xdg_theme_de = DE_KDE;
+        return _nk_xdg_theme_de;
+    }
+
+    _nk_xdg_theme_de = DE_NONE;
+    return _nk_xdg_theme_de;
+}
+
+static void
+_nk_xdg_theme_de_theme_gsettings_update(NkXdgThemeTypeContext *self, G_GNUC_UNUSED gchar *key, GSettings *settings)
+{
+    g_free(self->de_theme);
+    self->de_theme = g_settings_get_string(settings, "icon-theme");
+}
+
+static void
+_nk_xdg_theme_de_theme_hook(NkXdgThemeTypeContext *self)
+{
+    switch ( _nk_xdg_theme_de_detect() )
+    {
+    case DE_NONE:
+    break;
+    case DE_GNOME:
+    case DE_GNOME_CLASSIC:
+    case DE_GNOME_FLASHBACK:
+        self->de_notify = g_object_unref;
+        switch ( self->type )
+        {
+        case TYPE_ICON:
+            self->de_data = g_settings_new("org.gnome.desktop.interface");
+            g_signal_connect_swapped(self->de_data, "changed::icon-theme", G_CALLBACK(_nk_xdg_theme_de_theme_gsettings_update), self);
+            self->de_theme = g_settings_get_string(self->de_data, "icon-theme");
+        break;
+        case TYPE_SOUND:
+            self->de_data = g_settings_new("org.gnome.desktop.sound");
+            g_signal_connect_swapped(self->de_data, "changed::theme-name", G_CALLBACK(_nk_xdg_theme_de_theme_gsettings_update), self);
+            self->de_theme = g_settings_get_string(self->de_data, "theme-name");
+        break;
+        }
+    break;
+    case DE_KDE:
+        switch ( self->type )
+        {
+        case TYPE_ICON:
+        {
+            gchar *path;
+            GKeyFile *kdeglobals;
+
+            path = g_build_filename(g_get_user_config_dir(), "kdeglobals", NULL);
+            kdeglobals = g_key_file_new();
+
+            if ( g_key_file_load_from_file(kdeglobals, path, G_KEY_FILE_NONE, NULL) )
+                self->de_theme = g_key_file_get_string(kdeglobals, "Icons", "Theme", NULL);
+            g_key_file_free(kdeglobals);
+            g_free(path);
+        }
+        break;
+        case TYPE_SOUND:
+        break;
+        }
+    break;
+    }
+}
 
 static void
 _nk_xdg_theme_find_dirs(NkXdgThemeTypeContext *self)
@@ -547,6 +658,7 @@ nk_xdg_theme_context_new(const gchar * const *icon_fallback_themes, const gchar 
         _nk_xdg_theme_find_dirs(self);
         self->themes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, _nk_xdg_theme_theme_free);
         self->fallback_themes = ( fallbacks[self->type] != NULL ) ? fallbacks[self->type] : _nk_xdg_theme_empty_fallback;
+        _nk_xdg_theme_de_theme_hook(self);
     }
 
     return context;
@@ -560,6 +672,9 @@ nk_xdg_theme_context_free(NkXdgThemeContext *context)
     {
         NkXdgThemeTypeContext *self = &context->types[type];
 
+        if ( self->de_notify != NULL )
+            self->de_notify(self->de_data);
+        g_free(self->de_theme);
         g_hash_table_unref(self->themes);
         g_strfreev(self->dirs);
     }
@@ -747,6 +862,13 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *context, const gchar * const *theme_nam
             return file;
     }
 
+    if ( self->de_theme != NULL )
+    {
+        theme = _nk_xdg_theme_get_theme(self, self->de_theme);
+        if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
+            return file;
+    }
+
     for ( theme_name = self->fallback_themes ; *theme_name != NULL ; ++theme_name )
     {
         theme = _nk_xdg_theme_get_theme(self, *theme_name);
@@ -894,6 +1016,13 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *context, const gchar * const *theme_na
     {
         theme = _nk_xdg_theme_get_theme(self, *theme_name);
         if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_sound_find_file, &data, &file) )
+            return file;
+    }
+
+    if ( self->de_theme != NULL )
+    {
+        theme = _nk_xdg_theme_get_theme(self, self->de_theme);
+        if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
             return file;
     }
 
