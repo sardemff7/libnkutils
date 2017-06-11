@@ -44,18 +44,23 @@
 typedef enum {
     TYPE_ICON,
     TYPE_SOUND,
+#define NUM_TYPES 2
 } NkXdgThemeThemeType;
 
+typedef struct {
+    NkXdgThemeThemeType type;
+    gchar **dirs;
+    gsize dirs_length;
+    const gchar * const *fallback_themes;
+    GHashTable *themes;
+} NkXdgThemeTypeContext;
+
 struct _NkXdgThemeContext {
-    gchar **dirs[2];
-    gsize dirs_length[2];
-    GHashTable *icon_themes;
-    GHashTable *sound_themes;
+    NkXdgThemeTypeContext types[NUM_TYPES];
 };
 
 typedef struct {
-    NkXdgThemeContext *context;
-    NkXdgThemeThemeType type;
+    NkXdgThemeTypeContext *context;
     gchar *name;
     GList *subdirs;
     GList *inherits;
@@ -176,9 +181,9 @@ static const gchar *_nk_xdg_theme_sound_extensions[] = {
 };
 
 static void
-_nk_xdg_theme_find_dirs(NkXdgThemeContext *self, NkXdgThemeThemeType type)
+_nk_xdg_theme_find_dirs(NkXdgThemeTypeContext *self)
 {
-    const gchar *subdir = _nk_xdg_theme_subdirs[type];
+    const gchar *subdir = _nk_xdg_theme_subdirs[self->type];
     gchar **dirs;
     gsize length = 0, current = 0;
     const gchar * const *system_dirs;
@@ -213,8 +218,8 @@ _nk_xdg_theme_find_dirs(NkXdgThemeContext *self, NkXdgThemeThemeType type)
         g_free(dirs);
         return;
     }
-    self->dirs[type] = dirs;
-    self->dirs_length[type] = current;
+    self->dirs = dirs;
+    self->dirs_length = current;
 }
 
 static gpointer
@@ -362,12 +367,12 @@ _nk_xdg_theme_subdir_sort(gconstpointer a_, gconstpointer b_)
     return ( b->weight - a->weight );
 }
 
-static gpointer _nk_xdg_theme_get_theme(NkXdgThemeContext *self, NkXdgThemeThemeType type, const gchar *name);
+static gpointer _nk_xdg_theme_get_theme(NkXdgThemeTypeContext *self, const gchar *name);
 static gboolean
 _nk_xdg_theme_find(NkXdgThemeTheme *self)
 {
-    const gchar *section = _nk_xdg_theme_sections[self->type];
-    gchar **dirs = self->context->dirs[self->type];
+    const gchar *section = _nk_xdg_theme_sections[self->context->type];
+    gchar **dirs = self->context->dirs;
     GKeyFile *file;
 
     if ( dirs == NULL )
@@ -398,7 +403,7 @@ _nk_xdg_theme_find(NkXdgThemeTheme *self)
         goto error;
     gpointer (*subdir_new)(GKeyFile *file, const gchar *subdir);
     void (*subdir_free)(gpointer subdir);
-    switch ( self->type )
+    switch ( self->context->type )
     {
     case TYPE_ICON:
         subdir_new = _nk_xdg_theme_icon_subdir_new;
@@ -422,10 +427,10 @@ _nk_xdg_theme_find(NkXdgThemeTheme *self)
                 continue;
 
             gsize i;
-            subdir->paths = g_new(gchar *, self->context->dirs_length[self->type] + 1);
+            subdir->paths = g_new(gchar *, self->context->dirs_length + 1);
 
             gchar **dir_;
-            for ( dir_ = self->context->dirs[self->type], i = 0 ; *dir_ != NULL ; ++dir_ )
+            for ( dir_ = self->context->dirs, i = 0 ; *dir_ != NULL ; ++dir_ )
             {
                 gchar *path;
                 path = g_build_filename(*dir_, self->name, *subdir_path, NULL);
@@ -454,7 +459,7 @@ _nk_xdg_theme_find(NkXdgThemeTheme *self)
         for ( inherit = inherits ; *inherit != NULL ; ++inherit )
         {
             gpointer inherited;
-            inherited = _nk_xdg_theme_get_theme(self->context, self->type, *inherit);
+            inherited = _nk_xdg_theme_get_theme(self->context, *inherit);
             if ( inherited != NULL )
                 self->inherits = g_list_prepend(self->inherits, inherited);
         }
@@ -469,12 +474,11 @@ error:
 }
 
 static void
-_nk_xdg_theme_icon_load_theme(NkXdgThemeContext *context, GHashTable *list, NkXdgThemeThemeType type, const gchar *name)
+_nk_xdg_theme_load_theme(NkXdgThemeTypeContext *context, GHashTable *list, const gchar *name)
 {
     NkXdgThemeTheme *self;
     self = g_new0(NkXdgThemeTheme, 1);
     self->context = context;
-    self->type = type;
     self->name = g_strdup(name);
 
     if ( ! _nk_xdg_theme_find(self) )
@@ -494,7 +498,7 @@ _nk_xdg_theme_theme_free(gpointer data)
         return;
 
     void (*subdir_free)(gpointer subdir);
-    switch ( self->type )
+    switch ( self->context->type )
     {
     case TYPE_ICON:
         subdir_free = _nk_xdg_theme_icon_subdir_free;
@@ -512,51 +516,47 @@ _nk_xdg_theme_theme_free(gpointer data)
 }
 
 static gpointer
-_nk_xdg_theme_get_theme(NkXdgThemeContext *self, NkXdgThemeThemeType type, const gchar *name)
+_nk_xdg_theme_get_theme(NkXdgThemeTypeContext *self, const gchar *name)
 {
     if ( name == NULL )
         return NULL;
 
-    GHashTable *list;
-    switch ( type )
-    {
-    case TYPE_ICON:
-        list = self->icon_themes;
-    break;
-    case TYPE_SOUND:
-        list = self->sound_themes;
-    break;
-    default:
-        g_return_val_if_reached(FALSE);
-    }
-
-    if ( ! g_hash_table_contains(list, name) )
-        _nk_xdg_theme_icon_load_theme(self, list, type, name);
-    return g_hash_table_lookup(list, name);
+    if ( ! g_hash_table_contains(self->themes, name) )
+        _nk_xdg_theme_load_theme(self, self->themes, name);
+    return g_hash_table_lookup(self->themes, name);
 }
 
 NkXdgThemeContext *
 nk_xdg_theme_context_new(void)
 {
-    NkXdgThemeContext *self;
-    self = g_new0(NkXdgThemeContext, 1);
+    NkXdgThemeContext *context;
+    context = g_new0(NkXdgThemeContext, 1);
 
-    _nk_xdg_theme_find_dirs(self, TYPE_ICON);
-    self->icon_themes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, _nk_xdg_theme_theme_free);
-    _nk_xdg_theme_find_dirs(self, TYPE_SOUND);
-    self->sound_themes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, _nk_xdg_theme_theme_free);
+    NkXdgThemeThemeType type;
+    for ( type = 0 ; type < NUM_TYPES ; ++type )
+    {
+        NkXdgThemeTypeContext *self = &context->types[type];
+        self->type = type;
+        _nk_xdg_theme_find_dirs(self);
+        self->themes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, _nk_xdg_theme_theme_free);
+    }
 
-    return self;
+    return context;
 }
 
 void
-nk_xdg_theme_context_free(NkXdgThemeContext *self)
+nk_xdg_theme_context_free(NkXdgThemeContext *context)
 {
-    g_hash_table_unref(self->sound_themes);
-    g_strfreev(self->dirs[TYPE_SOUND]);
-    g_hash_table_unref(self->icon_themes);
-    g_strfreev(self->dirs[TYPE_ICON]);
-    g_free(self);
+    NkXdgThemeThemeType type;
+    for ( type = 0 ; type < NUM_TYPES ; ++type )
+    {
+        NkXdgThemeTypeContext *self = &context->types[type];
+
+        g_hash_table_unref(self->themes);
+        g_strfreev(self->dirs);
+    }
+
+    g_free(context);
 }
 
 static gboolean
@@ -708,11 +708,13 @@ _nk_xdg_theme_icon_find_file(NkXdgThemeTheme *self, const gchar *name, gpointer 
 }
 
 gchar *
-nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar * const *theme_names, const gchar *context_name, const gchar *name, gint size, gint scale, gboolean svg)
+nk_xdg_theme_get_icon(NkXdgThemeContext *context, const gchar * const *theme_names, const gchar *context_name, const gchar *name, gint size, gint scale, gboolean svg)
 {
-    g_return_val_if_fail(self != NULL, NULL);
+    g_return_val_if_fail(context != NULL, NULL);
     g_return_val_if_fail(name != NULL, NULL);
     g_return_val_if_fail(scale > 0, NULL);
+
+    NkXdgThemeTypeContext *self = &context->types[TYPE_ICON];
 
     gboolean symbolic = g_str_has_suffix(name, "-symbolic");
     guint64 value;
@@ -732,16 +734,16 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar * const *theme_names,
     const gchar * const *theme_name;
     for ( theme_name = theme_names ; *theme_name != NULL ; ++theme_name )
     {
-        theme = _nk_xdg_theme_get_theme(self, TYPE_ICON, *theme_name);
+        theme = _nk_xdg_theme_get_theme(self, *theme_name);
         if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
             return file;
     }
 
-    theme = _nk_xdg_theme_get_theme(self, TYPE_ICON, "hicolor");
+    theme = _nk_xdg_theme_get_theme(self, "hicolor");
     if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
         return file;
 
-    if ( _nk_xdg_theme_try_fallback(self->dirs[TYPE_ICON], G_DIR_SEPARATOR_S "usr" G_DIR_SEPARATOR_S "share" G_DIR_SEPARATOR_S "pixmaps", theme_name, name, data.extensions, &file) )
+    if ( _nk_xdg_theme_try_fallback(self->dirs, G_DIR_SEPARATOR_S "usr" G_DIR_SEPARATOR_S "share" G_DIR_SEPARATOR_S "pixmaps", theme_name, name, data.extensions, &file) )
         return file;
 
     if ( symbolic )
@@ -751,7 +753,7 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *self, const gchar * const *theme_names,
         l = strlen(name) - strlen("-symbolic") + 1;
         no_symbolic_name = g_newa(gchar, l);
         g_snprintf(no_symbolic_name, l, "%s", name);
-        return nk_xdg_theme_get_icon(self, theme_names, context_name, no_symbolic_name, size, scale, svg);
+        return nk_xdg_theme_get_icon(context, theme_names, context_name, no_symbolic_name, size, scale, svg);
     }
 
     return NULL;
@@ -794,10 +796,12 @@ _nk_xdg_theme_sound_find_file(NkXdgThemeTheme *self, const gchar *name_, gpointe
 }
 
 gchar *
-nk_xdg_theme_get_sound(NkXdgThemeContext *self, const gchar * const *theme_names, const gchar *name, const gchar *profile, const gchar *locale)
+nk_xdg_theme_get_sound(NkXdgThemeContext *context, const gchar * const *theme_names, const gchar *name, const gchar *profile, const gchar *locale)
 {
-    g_return_val_if_fail(self != NULL, NULL);
+    g_return_val_if_fail(context != NULL, NULL);
     g_return_val_if_fail(name != NULL, NULL);
+
+    NkXdgThemeTypeContext *self = &context->types[TYPE_SOUND];
 
     NkXdgThemeSoundFindData data = {
         .profile = profile,
@@ -873,18 +877,18 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *self, const gchar * const *theme_names
     const gchar * const *theme_name;
     for ( theme_name = theme_names ; *theme_name != NULL ; ++theme_name )
     {
-        theme = _nk_xdg_theme_get_theme(self, TYPE_SOUND, *theme_name);
+        theme = _nk_xdg_theme_get_theme(self, *theme_name);
         if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_sound_find_file, &data, &file) )
             return file;
     }
-    theme = _nk_xdg_theme_get_theme(self, TYPE_SOUND, "freedesktop");
+    theme = _nk_xdg_theme_get_theme(self, "freedesktop");
     if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_sound_find_file, &data, &file) )
         return file;
 
     gchar **subname;
     for ( subname = data.names ; *subname != NULL ; ++subname )
     {
-        if ( _nk_xdg_theme_try_fallback(self->dirs[TYPE_SOUND], NULL, theme_names, *subname, _nk_xdg_theme_sound_extensions, &file) )
+        if ( _nk_xdg_theme_try_fallback(self->dirs, NULL, theme_names, *subname, _nk_xdg_theme_sound_extensions, &file) )
             return file;
     }
 
