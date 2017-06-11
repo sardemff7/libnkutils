@@ -38,7 +38,6 @@
 
 static NkXdgThemeContext *context;
 typedef enum {
-    TYPE_NONE = 0,
     TYPE_ICON,
     TYPE_SOUND,
 } NkXdgThemeTestType;
@@ -478,7 +477,7 @@ _nk_uuid_tests_func(gconstpointer user_data)
         return;
     }
 
-    gchar *file;
+    gchar *file = NULL;
     switch ( data->type )
     {
     case TYPE_ICON:
@@ -487,8 +486,6 @@ _nk_uuid_tests_func(gconstpointer user_data)
     case TYPE_SOUND:
         file = nk_xdg_theme_get_sound(context, data->themes, data->name, data->profile, NULL);
     break;
-    default:
-        g_assert_not_reached();
     }
     g_assert_cmpstr(file, ==, data->result);
     g_free(file);
