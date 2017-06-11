@@ -147,6 +147,8 @@ typedef struct {
     gchar *profile;
 } NkXdgThemeSoundDir;
 
+static const gchar * const _nk_xdg_theme_empty_fallback[] = { NULL };
+
 static const gchar * const _nk_xdg_theme_subdirs[] = {
     [TYPE_ICON] = "icons",
     [TYPE_SOUND] = "sounds",
@@ -527,8 +529,13 @@ _nk_xdg_theme_get_theme(NkXdgThemeTypeContext *self, const gchar *name)
 }
 
 NkXdgThemeContext *
-nk_xdg_theme_context_new(void)
+nk_xdg_theme_context_new(const gchar * const *icon_fallback_themes, const gchar * const *sound_fallback_themes)
 {
+    const gchar * const *fallbacks[NUM_TYPES] = {
+        [TYPE_ICON] = icon_fallback_themes,
+        [TYPE_SOUND] = sound_fallback_themes,
+    };
+
     NkXdgThemeContext *context;
     context = g_new0(NkXdgThemeContext, 1);
 
@@ -539,6 +546,7 @@ nk_xdg_theme_context_new(void)
         self->type = type;
         _nk_xdg_theme_find_dirs(self);
         self->themes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, _nk_xdg_theme_theme_free);
+        self->fallback_themes = ( fallbacks[self->type] != NULL ) ? fallbacks[self->type] : _nk_xdg_theme_empty_fallback;
     }
 
     return context;
@@ -739,6 +747,13 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *context, const gchar * const *theme_nam
             return file;
     }
 
+    for ( theme_name = self->fallback_themes ; *theme_name != NULL ; ++theme_name )
+    {
+        theme = _nk_xdg_theme_get_theme(self, *theme_name);
+        if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
+            return file;
+    }
+
     theme = _nk_xdg_theme_get_theme(self, "hicolor");
     if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
         return file;
@@ -881,6 +896,14 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *context, const gchar * const *theme_na
         if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_sound_find_file, &data, &file) )
             return file;
     }
+
+    for ( theme_name = self->fallback_themes ; *theme_name != NULL ; ++theme_name )
+    {
+        theme = _nk_xdg_theme_get_theme(self, *theme_name);
+        if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
+            return file;
+    }
+
     theme = _nk_xdg_theme_get_theme(self, "freedesktop");
     if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_sound_find_file, &data, &file) )
         return file;

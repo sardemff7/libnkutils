@@ -511,7 +511,7 @@ main(int argc, char *argv[])
     for ( i = 0 ; i < G_N_ELEMENTS(_nk_uuid_tests_list) ; ++i )
         g_test_add_data_func(_nk_uuid_tests_list[i].testpath, &_nk_uuid_tests_list[i].data, _nk_uuid_tests_func);
 
-    context = nk_xdg_theme_context_new();
+    context = nk_xdg_theme_context_new(NULL, NULL);
     int ret = g_test_run();
     nk_xdg_theme_context_free(context);
     return ret;

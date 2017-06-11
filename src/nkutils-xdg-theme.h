@@ -28,7 +28,7 @@
 
 typedef struct _NkXdgThemeContext NkXdgThemeContext;
 
-NkXdgThemeContext *nk_xdg_theme_context_new(void);
+NkXdgThemeContext *nk_xdg_theme_context_new(const gchar * const *icon_fallback_themes, const gchar * const *sound_fallback_themes);
 void nk_xdg_theme_context_free(NkXdgThemeContext *context);
 
 gchar *nk_xdg_theme_get_icon(NkXdgThemeContext *context, const gchar * const *themes, const gchar *context_name, const gchar *name, gint size, gint scale, gboolean svg);
