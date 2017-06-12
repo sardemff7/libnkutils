@@ -213,7 +213,7 @@ _nk_xdg_theme_de_detect(void)
 
     var = g_getenv("XDG_CURRENT_DESKTOP");
     guint64 value;
-    if ( ( var != NULL ) && nk_enum_parse(var, _nk_xdg_theme_de_current_session_names, G_N_ELEMENTS(_nk_xdg_theme_de_current_session_names), FALSE, &value) )
+    if ( ( var != NULL ) && nk_enum_parse(var, _nk_xdg_theme_de_current_session_names, G_N_ELEMENTS(_nk_xdg_theme_de_current_session_names), FALSE, TRUE, &value) )
     {
         _nk_xdg_theme_de = value;
         return _nk_xdg_theme_de;
@@ -367,7 +367,7 @@ _nk_xdg_theme_icon_subdir_new(GKeyFile *file, const gchar *subdir)
     if ( type != NULL )
     {
         guint64 value;
-        if ( nk_enum_parse(type, _nk_xdg_theme_icon_dir_type_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_type_names), TRUE, &value) )
+        if ( nk_enum_parse(type, _nk_xdg_theme_icon_dir_type_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_type_names), TRUE, FALSE, &value) )
             self->type = value;
         g_free(type);
     }
@@ -426,7 +426,7 @@ _nk_xdg_theme_icon_subdir_new(GKeyFile *file, const gchar *subdir)
     if ( context != NULL )
     {
         guint64 value;
-        if ( nk_enum_parse(context, _nk_xdg_theme_icon_dir_context_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_context_names), TRUE, &value) )
+        if ( nk_enum_parse(context, _nk_xdg_theme_icon_dir_context_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_context_names), TRUE, FALSE, &value) )
         {
             self->context = value;
             g_free(context);
@@ -848,7 +848,7 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *context, const gchar * const *theme_nam
         .scale = scale,
         .extensions = ( symbolic ? _nk_xdg_theme_icon_symbolic_extensions : _nk_xdg_theme_icon_extensions ) + ( svg ? 0 : 1 ),
     };
-    if ( nk_enum_parse(context_name, _nk_xdg_theme_icon_dir_context_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_context_names), TRUE, &value) )
+    if ( nk_enum_parse(context_name, _nk_xdg_theme_icon_dir_context_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_context_names), TRUE, FALSE, &value) )
         data.context = value;
 
     NkXdgThemeTheme *theme;

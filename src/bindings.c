@@ -244,7 +244,7 @@ _nk_bindings_parse_modifier(const gchar *string, xkb_mod_mask_t *mask)
 {
     guint64 value;
 
-    if ( ! nk_enum_parse(string, _nk_bindings_modifiers_names, G_N_ELEMENTS(_nk_bindings_modifiers_names), TRUE, &value) )
+    if ( ! nk_enum_parse(string, _nk_bindings_modifiers_names, G_N_ELEMENTS(_nk_bindings_modifiers_names), TRUE, FALSE, &value) )
         return FALSE;
 
     value %= NK_BINDINGS_NUM_MODIFIERS;

@@ -338,7 +338,7 @@ nk_token_list_parse_enum(gchar *string, const gchar * const *tokens, guint64 siz
     {
         if ( self->tokens[i].name == NULL )
             continue;
-        if ( ! nk_enum_parse(self->tokens[i].name, tokens, size, FALSE, &self->tokens[i].value) )
+        if ( ! nk_enum_parse(self->tokens[i].name, tokens, size, FALSE, FALSE, &self->tokens[i].value) )
             goto fail;
         used_tokens |= (1 << self->tokens[i].value);
     }

@@ -39,7 +39,7 @@
 #include "nkutils-enum.h"
 
 static inline gint
-nk_str_equal(gboolean ignore_case, const gchar *token, const gchar *string)
+nk_str_equal(gboolean ignore_case, gboolean prefix, const gchar *token, const gchar *string)
 {
     if ( ( token == NULL ) || ( string == NULL ) || ( token == string ) )
         return ( token == string );
@@ -61,16 +61,16 @@ nk_str_equal(gboolean ignore_case, const gchar *token, const gchar *string)
         wt = g_utf8_get_char(token);
         ws = g_utf8_get_char(string);
     }
-    return ( ws == '\0' );
+    return ( prefix || ( ws == '\0' ) );
 }
 
 gboolean
-nk_enum_parse(const gchar *string, const gchar * const *values, guint64 size, gboolean ignore_case, guint64 *value)
+nk_enum_parse(const gchar *string, const gchar * const *values, guint64 size, gboolean ignore_case, gboolean prefix, guint64 *value)
 {
     guint64 i;
     for ( i = 0 ; i < size ; ++i )
     {
-        if ( nk_str_equal(ignore_case, values[i], string) )
+        if ( nk_str_equal(ignore_case, prefix, values[i], string) )
         {
             *value = i;
             return TRUE;

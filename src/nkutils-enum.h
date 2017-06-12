@@ -26,6 +26,6 @@
 #ifndef __NK_UTILS_ENUM_H__
 #define __NK_UTILS_ENUM_H__
 
-gboolean nk_enum_parse(const gchar *string, const gchar * const *values, guint64 size, gboolean ignore_case, guint64 *value);
+gboolean nk_enum_parse(const gchar *string, const gchar * const *values, guint64 size, gboolean ignore_case, gboolean prefix, guint64 *value);
 
 #endif /* __NK_UTILS_ENUM_H__ */

@@ -47,6 +47,7 @@ static const gchar * const _nk_enum_tests_values[_MAX_VALUES] = {
 typedef struct {
     const gchar *string;
     gboolean ignore_case;
+    gboolean prefix;
     gboolean ret;
     NkEnumTestValues value;
     const gchar * const values[_MAX_VALUES];
@@ -57,30 +58,63 @@ static const struct {
     NkEnumTestData data;
 } _nk_enum_tests_list[] = {
     {
-        .testpath = "/nkutils/enum/exists",
+        .testpath = "/nkutils/enum/full/exists",
         .data = {
             .string = "center",
             .ignore_case = FALSE,
+            .prefix = FALSE,
             .ret = TRUE,
             .value = CENTER,
         }
     },
     {
-        .testpath = "/nkutils/enum/missing",
+        .testpath = "/nkutils/enum/full/missing",
         .data = {
             .string = "Center",
             .ignore_case = FALSE,
+            .prefix = FALSE,
             .ret = FALSE,
             .value = _MAX_VALUES,
         }
     },
     {
-        .testpath = "/nkutils/enum/case",
+        .testpath = "/nkutils/enum/full/case",
         .data = {
             .string = "Center",
             .ignore_case = TRUE,
+            .prefix = FALSE,
             .ret = TRUE,
             .value = CENTER,
+        }
+    },
+    {
+        .testpath = "/nkutils/enum/prefix/full",
+        .data = {
+            .string = "center",
+            .ignore_case = FALSE,
+            .prefix = TRUE,
+            .ret = TRUE,
+            .value = CENTER,
+        }
+    },
+    {
+        .testpath = "/nkutils/enum/prefix/prefix",
+        .data = {
+            .string = "cen",
+            .ignore_case = FALSE,
+            .prefix = TRUE,
+            .ret = FALSE,
+            .value = _MAX_VALUES,
+        }
+    },
+    {
+        .testpath = "/nkutils/enum/prefix/no-prefix",
+        .data = {
+            .string = "cen",
+            .ignore_case = FALSE,
+            .prefix = FALSE,
+            .ret = FALSE,
+            .value = _MAX_VALUES,
         }
     },
 };
@@ -92,8 +126,11 @@ _nk_enum_tests_func(gconstpointer user_data)
 
     guint64 value = _MAX_VALUES;
     gboolean r;
-    r = nk_enum_parse(data->string, _nk_enum_tests_values, _MAX_VALUES, data->ignore_case, &value);
-    g_assert(data->ret == r);
+    r = nk_enum_parse(data->string, _nk_enum_tests_values, _MAX_VALUES, data->ignore_case, data->prefix, &value);
+    if ( data->ret )
+        g_assert_true(r);
+    else
+        g_assert_false(r);
     g_assert_cmpuint(data->value, ==, value);
 }
 
