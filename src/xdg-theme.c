@@ -66,6 +66,12 @@ static const gchar * const _nk_xdg_theme_de_current_session_names[] = {
     [DE_KDE] = "KDE",
 };
 
+static const gchar * const _nk_xdg_theme_de_desktop_session_names[] = {
+    [DE_NONE] = "generic",
+    [DE_GNOME] = "gnome",
+    [DE_KDE] = "kde",
+};
+
 typedef struct {
     NkXdgThemeThemeType type;
     gchar **dirs;
@@ -239,6 +245,13 @@ _nk_xdg_theme_de_detect(void)
     if ( ( var != NULL ) && ( *var != '\0' ) )
     {
         _nk_xdg_theme_de = DE_KDE;
+        return _nk_xdg_theme_de;
+    }
+
+    var = g_getenv("DESKTOP_SESSION");
+    if ( ( var != NULL ) && nk_enum_parse(var, _nk_xdg_theme_de_desktop_session_names, G_N_ELEMENTS(_nk_xdg_theme_de_desktop_session_names), FALSE, FALSE, &value) )
+    {
+        _nk_xdg_theme_de = value;
         return _nk_xdg_theme_de;
     }
 
