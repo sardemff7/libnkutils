@@ -51,16 +51,12 @@ typedef enum {
 typedef enum {
     DE_NONE = 0,
     DE_GNOME,
-    DE_GNOME_CLASSIC,
-    DE_GNOME_FLASHBACK,
     DE_KDE,
 } NkXdgThemeDE;
 
 static const gchar * const _nk_xdg_theme_de_current_session_names[] = {
     [DE_NONE] = "X-Generic",
     [DE_GNOME] = "GNOME",
-    [DE_GNOME_CLASSIC] = "GNOME-Classic",
-    [DE_GNOME_FLASHBACK] = "GNOME-Flashback",
     [DE_KDE] = "KDE",
 };
 
@@ -252,8 +248,6 @@ _nk_xdg_theme_de_theme_hook(NkXdgThemeTypeContext *self)
     case DE_NONE:
     break;
     case DE_GNOME:
-    case DE_GNOME_CLASSIC:
-    case DE_GNOME_FLASHBACK:
         self->de_notify = g_object_unref;
         switch ( self->type )
         {
