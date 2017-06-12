@@ -54,6 +54,12 @@ typedef enum {
     DE_KDE,
 } NkXdgThemeDE;
 
+static const gchar * const _nk_xdg_theme_de_session_desktop_names[] = {
+    [DE_NONE] = "generic",
+    [DE_GNOME] = "GNOME",
+    [DE_KDE] = "KDE",
+};
+
 static const gchar * const _nk_xdg_theme_de_current_session_names[] = {
     [DE_NONE] = "X-Generic",
     [DE_GNOME] = "GNOME",
@@ -206,9 +212,16 @@ _nk_xdg_theme_de_detect(void)
         return _nk_xdg_theme_de;
 
     const gchar *var;
+    guint64 value;
+
+    var = g_getenv("XDG_SESSION_DESKTOP");
+    if ( ( var != NULL ) && nk_enum_parse(var, _nk_xdg_theme_de_session_desktop_names, G_N_ELEMENTS(_nk_xdg_theme_de_session_desktop_names), TRUE, TRUE, &value) )
+    {
+        _nk_xdg_theme_de = value;
+        return _nk_xdg_theme_de;
+    }
 
     var = g_getenv("XDG_CURRENT_DESKTOP");
-    guint64 value;
     if ( ( var != NULL ) && nk_enum_parse(var, _nk_xdg_theme_de_current_session_names, G_N_ELEMENTS(_nk_xdg_theme_de_current_session_names), FALSE, TRUE, &value) )
     {
         _nk_xdg_theme_de = value;
