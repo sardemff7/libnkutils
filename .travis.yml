@@ -9,10 +9,11 @@ compiler:
 addons:
     apt:
         packages:
+            - libglib2.0-dev
             # Workaround
             - libaprutil1-dev
             #- uuid-dev
-            - libglib2.0-dev
+            - libxkbcommon-dev
             - gnome-icon-theme-extras
             - gnome-icon-theme-symbolic
             - sound-theme-freedesktop
