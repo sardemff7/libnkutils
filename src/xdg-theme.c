@@ -1042,14 +1042,14 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *context, const gchar * const *theme_na
     if ( self->de_theme != NULL )
     {
         theme = _nk_xdg_theme_get_theme(self, self->de_theme);
-        if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
+        if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_sound_find_file, &data, &file) )
             return file;
     }
 
     for ( theme_name = self->fallback_themes ; *theme_name != NULL ; ++theme_name )
     {
         theme = _nk_xdg_theme_get_theme(self, *theme_name);
-        if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
+        if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_sound_find_file, &data, &file) )
             return file;
     }
 
