@@ -73,6 +73,25 @@ static const gchar * const _nk_xdg_theme_de_desktop_session_names[] = {
 };
 
 typedef struct {
+    const gchar *schema_id;
+    const gchar *signal_name;
+    const gchar *setting_name;
+} NkXdgThemeGnomeSettings;
+
+static const NkXdgThemeGnomeSettings _nk_xdg_theme_gnome_settings[] = {
+    [TYPE_ICON] = {
+        .schema_id = "org.gnome.desktop.interface",
+        .signal_name = "changed::icon-theme",
+        .setting_name = "icon-theme",
+    },
+    [TYPE_SOUND] = {
+        .schema_id = "org.gnome.desktop.sound",
+        .signal_name = "changed::theme-name",
+        .setting_name = "theme-name",
+    },
+};
+
+typedef struct {
     NkXdgThemeThemeType type;
     gchar **dirs;
     gsize dirs_length;
@@ -274,20 +293,26 @@ _nk_xdg_theme_de_theme_hook(NkXdgThemeTypeContext *self)
     case DE_NONE:
     break;
     case DE_GNOME:
+    {
+        const NkXdgThemeGnomeSettings *settings = &_nk_xdg_theme_gnome_settings[self->type];
+        GSettingsSchemaSource *schema_source;
+        GSettingsSchema *schema;
+
+        schema_source = g_settings_schema_source_get_default();
+        if ( schema_source == NULL )
+            return;
+
+        schema = g_settings_schema_source_lookup(schema_source, settings->schema_id, TRUE);
+        if ( schema == NULL )
+            return;
+
+        self->de_data = g_settings_new_full(schema, NULL, NULL);
+        g_settings_schema_unref(schema);
+
+        g_signal_connect_swapped(self->de_data, settings->signal_name, G_CALLBACK(_nk_xdg_theme_de_theme_gsettings_update), self);
+        self->de_theme = g_settings_get_string(self->de_data, settings->setting_name);
         self->de_notify = g_object_unref;
-        switch ( self->type )
-        {
-        case TYPE_ICON:
-            self->de_data = g_settings_new("org.gnome.desktop.interface");
-            g_signal_connect_swapped(self->de_data, "changed::icon-theme", G_CALLBACK(_nk_xdg_theme_de_theme_gsettings_update), self);
-            self->de_theme = g_settings_get_string(self->de_data, "icon-theme");
-        break;
-        case TYPE_SOUND:
-            self->de_data = g_settings_new("org.gnome.desktop.sound");
-            g_signal_connect_swapped(self->de_data, "changed::theme-name", G_CALLBACK(_nk_xdg_theme_de_theme_gsettings_update), self);
-            self->de_theme = g_settings_get_string(self->de_data, "theme-name");
-        break;
-        }
+    }
     break;
     case DE_KDE:
         switch ( self->type )
