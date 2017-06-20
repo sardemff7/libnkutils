@@ -77,7 +77,7 @@ AC_DEFUN([_NK_MODULE_CHECK_DEPENDENT], [m4_ifdef([$1], m4_map_args_w($1, [[ -o x
 
 AC_DEFUN([_NK_ENABLE_MODULE], [
     m4_if(m4_index(_NK_MODULES, [$1]), [-1], [AC_MSG_ERROR([libnkutils: No ][$1][ module])])
-    m4_ifdef([_NK_]m4_toupper([$1])[_CHECK], [_NK_]m4_toupper([$1])[_CHECK])
+    m4_ifdef([_NK_]AS_TR_CPP([$1])[_CHECK], [_NK_]AS_TR_CPP([$1])[_CHECK])
     [nk_module_]AS_TR_SH([$1])[_enable=yes]
 ])
 
@@ -91,7 +91,7 @@ AC_DEFUN([_NK_UUID_CHECK], [
 ])
 
 AC_DEFUN([_NK_XDG_THEME_CHECK], [
-    PKG_CHECK_MODULES([_NKUTILS_INTERNAL_GLIB], [gio-2.0])
+    PKG_CHECK_MODULES([_NKUTILS_INTERNAL_GIO], [gio-2.0])
     PKG_CHECK_MODULES([_NKUTILS_INTERNAL_GOBJECT], [gobject-2.0])
 ])
 
