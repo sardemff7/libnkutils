@@ -666,8 +666,7 @@ _nk_bindings_seat_get_modifiers_masks(NkBindingsSeat *self, xkb_keycode_t key, x
     xkb_mod_index_t *i;
     for ( mod = 0 ; mod < NK_BINDINGS_NUM_MODIFIERS ; ++mod )
     {
-        gboolean found = FALSE;
-        for ( i = self->modifiers[mod] ; ! found && ( *i != XKB_MOD_INVALID ) ; ++i )
+        for ( i = self->modifiers[mod] ; *i != XKB_MOD_INVALID ; ++i )
         {
             if ( ! xkb_state_mod_index_is_active(self->state, *i, XKB_STATE_MODS_EFFECTIVE) )
                 continue;
