@@ -703,7 +703,7 @@ _nk_bindings_seat_free_on_release(NkBindingsSeat *self, gboolean trigger)
 gchar *
 nk_bindings_seat_handle_key(NkBindingsSeat *self, xkb_keycode_t keycode, NkBindingsKeyState state)
 {
-    g_return_val_if_fail(self != NULL, FALSE);
+    g_return_val_if_fail(self != NULL, NULL);
 
     xkb_keysym_t keysym;
     gchar *tmp = NULL;
