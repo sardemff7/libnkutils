@@ -768,6 +768,31 @@ nk_bindings_seat_handle_key(NkBindingsSeat *self, xkb_keycode_t keycode, NkBindi
     return tmp;
 }
 
+gchar *
+nk_bindings_seat_handle_key_with_modmask(NkBindingsSeat *self, xkb_mod_mask_t modmask, xkb_keycode_t keycode, NkBindingsKeyState state)
+{
+    xkb_mod_mask_t effective_mods, depressed_mods, latched_mods, locked_mods;
+    xkb_layout_index_t depressed_layout, latched_layout, locked_layout;
+    gchar *ret;
+
+    effective_mods = xkb_state_serialize_mods(self->state, XKB_STATE_MODS_EFFECTIVE);
+    depressed_mods = xkb_state_serialize_mods(self->state, XKB_STATE_MODS_DEPRESSED);
+    latched_mods = xkb_state_serialize_mods(self->state, XKB_STATE_MODS_LATCHED);
+    locked_mods = xkb_state_serialize_mods(self->state, XKB_STATE_MODS_LOCKED);
+    depressed_layout = xkb_state_serialize_layout(self->state, XKB_STATE_LAYOUT_DEPRESSED);
+    latched_layout = xkb_state_serialize_layout(self->state, XKB_STATE_LAYOUT_LATCHED);
+    locked_layout = xkb_state_serialize_layout(self->state, XKB_STATE_LAYOUT_LOCKED);
+
+    if ( effective_mods == modmask )
+        return nk_bindings_seat_handle_key(self, keycode, state);
+
+    xkb_state_update_mask(self->state, modmask, 0, 0, 0, 0, locked_layout);
+    ret = nk_bindings_seat_handle_key(self, keycode, state);
+    xkb_state_update_mask(self->state, depressed_mods, latched_mods, locked_mods, depressed_layout, latched_layout, locked_layout);
+
+    return ret;
+}
+
 gboolean
 nk_bindings_seat_handle_button(NkBindingsSeat *self, guint32 button, NkBindingsButtonState state, guint64 timestamp)
 {

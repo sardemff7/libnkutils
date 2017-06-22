@@ -75,6 +75,7 @@ void nk_bindings_seat_update_keymap(NkBindingsSeat *seat, struct xkb_keymap *key
 struct xkb_context *nk_bindings_seat_get_context(NkBindingsSeat *seat);
 
 gchar *nk_bindings_seat_handle_key(NkBindingsSeat *seat, xkb_keycode_t key, NkBindingsKeyState state);
+gchar *nk_bindings_seat_handle_key_with_modmask(NkBindingsSeat *self, xkb_mod_mask_t modmask, xkb_keycode_t keycode, NkBindingsKeyState state);
 gboolean nk_bindings_seat_handle_button(NkBindingsSeat *seat, guint32 button, NkBindingsButtonState state, guint64 timestamp);
 void nk_bindings_seat_update_mask(NkBindingsSeat *seat, xkb_mod_mask_t depressed_mods, xkb_mod_mask_t latched_mods, xkb_mod_mask_t locked_mods, xkb_layout_index_t depressed_layout, xkb_layout_index_t latched_layout, xkb_layout_index_t locked_layout);
 void nk_bindings_seat_reset(NkBindingsSeat *seat);
