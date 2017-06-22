@@ -80,6 +80,7 @@ typedef struct {
 #define KEYCODE_SHIFT_L   50
 #define KEYCODE_ALT_L     64
 #define KEYCODE_SPACE     65
+#define KEYCODE_ALT_GR    108
 #define KEYCODE_SUPER_L   133
 
 #define _NK_BINDINGS_KEYCODE_TO_STRING(s) #s
@@ -96,6 +97,7 @@ static const gchar *_nk_bindings_test_key_names[] = {
     [KEYCODE_SHIFT_L] = "Shift_L",
     [KEYCODE_ALT_L] = "Alt_L",
     [KEYCODE_SPACE] = "Space",
+    [KEYCODE_ALT_GR] = "AltGr/ISO_Level3_Shift",
     [KEYCODE_SUPER_L] = "Super_L",
 };
 
@@ -500,6 +502,7 @@ _nk_bindings_tests_func(NkBindingsTestFixture *fixture, gconstpointer user_data)
 
         if ( xkb_state_update_key(fixture->master_state, key->key, ( key->state == NK_BINDINGS_KEY_STATE_RELEASE ) ? XKB_KEY_UP : XKB_KEY_DOWN) != 0 )
         {
+            g_test_message("New state is 0x%x", xkb_state_serialize_mods(fixture->master_state, XKB_STATE_MODS_DEPRESSED));
             nk_bindings_seat_update_mask(fixture->seat,
                 xkb_state_serialize_mods(fixture->master_state, XKB_STATE_MODS_DEPRESSED),
                 xkb_state_serialize_mods(fixture->master_state, XKB_STATE_MODS_LATCHED),
