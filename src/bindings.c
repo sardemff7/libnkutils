@@ -46,7 +46,7 @@
 #include "nkutils-enum.h"
 #include "nkutils-bindings.h"
 
-#define NK_BINDINGS_MAX_ALIASES 8 /* For Alt */
+#define NK_BINDINGS_MAX_ALIASES 4 /* For Alt */
 
 #define _NK_VALUE_TO_BINDING(mask, value) ((guint64)((((guint64)(value)) << NK_BINDINGS_NUM_MODIFIERS) | (guint32)(mask)))
 #define NK_KEYCODE_TO_BINDING(mask, button) _NK_VALUE_TO_BINDING(mask, button)
@@ -643,7 +643,7 @@ nk_bindings_seat_update_keymap(NkBindingsSeat *self, struct xkb_keymap *keymap, 
 
     _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_SHIFT, XKB_MOD_NAME_SHIFT, NULL);
     _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_CONTROL, XKB_MOD_NAME_CTRL, NULL);
-    _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_ALT, XKB_MOD_NAME_ALT, "Alt", "LAlt", "RAlt", "AltGr", "Mod5", "LevelThree", NULL);
+    _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_ALT, XKB_MOD_NAME_ALT, "Alt", "LAlt", "RAlt", NULL);
     _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_META, "Meta", NULL);
     _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_SUPER, XKB_MOD_NAME_LOGO, "Super", NULL);
     _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_HYPER, "Hyper", NULL);
