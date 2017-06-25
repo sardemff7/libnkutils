@@ -113,6 +113,16 @@ typedef struct {
     GList *inherits;
 } NkXdgThemeTheme;
 
+typedef gboolean (*NkXdgThemeForeachCallback)(NkXdgThemeTheme *theme, gconstpointer user_data, gpointer *ret);
+
+typedef gboolean (*NkXdgThemeFindFileCallback)(NkXdgThemeTheme *self, const gchar * const *names, gconstpointer data, gchar **ret);
+
+typedef struct {
+    const gchar **names;
+    NkXdgThemeFindFileCallback find_file;
+    gconstpointer user_data;
+} NkXdgThemeSearchThemeData;
+
 typedef enum {
     ICONDIR_TYPE_THRESHOLD = 0,
     ICONDIR_TYPE_FIXED,
@@ -159,8 +169,6 @@ static const gchar * const _nk_xdg_theme_icon_dir_context_names[] = {
     [ICONDIR_CONTEXT_STATUS]        = "Status",
     [ICONDIR_CONTEXT_STOCK]         = "Stock",
 };
-
-typedef gboolean (*NkXdgThemeFindFileCallback)(NkXdgThemeTheme *self, const gchar * const *names, gconstpointer data, gchar **ret);
 
 typedef struct {
     NkXdgThemeIconDirContext context;
@@ -760,39 +768,62 @@ _nk_xdg_theme_get_file(NkXdgThemeTheme *self, const gchar **names, NkXdgThemeFin
     return FALSE;
 }
 
-static gchar *
-_nk_xdg_theme_search_themes(NkXdgThemeTypeContext *self, const gchar **names, const gchar * const *theme_names, const gchar *fallback_theme, NkXdgThemeFindFileCallback find_file, gconstpointer data)
+static gboolean
+_nk_xdg_theme_foreach_theme(NkXdgThemeTypeContext *self, const gchar * const *theme_names, const gchar *fallback_theme,  NkXdgThemeForeachCallback callback, gconstpointer data, gpointer *ret)
 {
     NkXdgThemeTheme *theme;
-    gchar *file;
 
     const gchar * const *theme_name;
     for ( theme_name = theme_names ; *theme_name != NULL ; ++theme_name )
     {
         theme = _nk_xdg_theme_get_theme(self, *theme_name);
-        if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, names, find_file, data, &file) )
-            return file;
+        if ( ( theme != NULL ) && callback(theme, data, ret) )
+            return TRUE;
     }
 
     if ( self->de_theme != NULL )
     {
         theme = _nk_xdg_theme_get_theme(self, self->de_theme);
-        if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, names, find_file, data, &file) )
-            return file;
+        if ( ( theme != NULL ) && callback(theme, data, ret) )
+            return TRUE;
     }
 
     for ( theme_name = self->fallback_themes ; *theme_name != NULL ; ++theme_name )
     {
         theme = _nk_xdg_theme_get_theme(self, *theme_name);
-        if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, names, find_file, data, &file) )
-            return file;
+        if ( ( theme != NULL ) && callback(theme, data, ret) )
+            return TRUE;
     }
 
     theme = _nk_xdg_theme_get_theme(self, fallback_theme);
-    if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, names, find_file, data, &file) )
-        return file;
+    if ( ( theme != NULL ) && callback(theme, data, ret) )
+        return TRUE;
 
-    return NULL;
+    return FALSE;
+}
+
+static gboolean
+_nk_xdg_theme_search_theme(NkXdgThemeTheme *theme, gconstpointer user_data, gpointer *ret)
+{
+    const NkXdgThemeSearchThemeData *data = user_data;
+
+    return _nk_xdg_theme_get_file(theme, data->names, data->find_file, data->user_data, (gchar **) ret);
+}
+
+static gchar *
+_nk_xdg_theme_search_themes(NkXdgThemeTypeContext *self, const gchar **names, const gchar * const *theme_names, const gchar *fallback_theme, NkXdgThemeFindFileCallback find_file, gconstpointer user_data)
+{
+    NkXdgThemeSearchThemeData data = {
+        .names = names,
+        .find_file = find_file,
+        .user_data = user_data,
+    };
+
+    gchar *file = NULL;
+
+    _nk_xdg_theme_foreach_theme(self, theme_names, fallback_theme, _nk_xdg_theme_search_theme, &data, (gpointer *) &file);
+
+    return file;
 }
 
 static gboolean
@@ -872,7 +903,6 @@ _nk_xdg_theme_search_file(NkXdgThemeTypeContext *self, const gchar **names, cons
     }
     return NULL;
 }
-
 
 static gint
 _nk_xdg_theme_icon_subdir_compute_distance(NkXdgThemeIconDir *self, gint size)
