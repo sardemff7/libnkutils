@@ -48,6 +48,9 @@ typedef enum {
 #define NUM_TYPES 2
 } NkXdgThemeThemeType;
 
+#define NK_XDG_THEME_ICON_FALLBACK_THEME "hicolor"
+#define NK_XDG_THEME_SOUND_FALLBACK_THEME "freedesktop"
+
 typedef enum {
     DE_NONE = 0,
     DE_GNOME,
@@ -999,7 +1002,7 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *context, const gchar * const *theme_nam
     gchar *file;
     const gchar *names[] = { name, NULL };
 
-    file = _nk_xdg_theme_search_file(self, names, theme_names, "hicolor", _nk_xdg_theme_icon_find_file, &data, data.extensions);
+    file = _nk_xdg_theme_search_file(self, names, theme_names, NK_XDG_THEME_ICON_FALLBACK_THEME, _nk_xdg_theme_icon_find_file, &data, data.extensions);
     if ( file != NULL )
         return file;
 
@@ -1123,5 +1126,5 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *context, const gchar * const *theme_na
         }
     }
 
-    return _nk_xdg_theme_search_file(self, names, theme_names, "freedesktop", _nk_xdg_theme_sound_find_file, profile, _nk_xdg_theme_sound_extensions);
+    return _nk_xdg_theme_search_file(self, names, theme_names, NK_XDG_THEME_SOUND_FALLBACK_THEME, _nk_xdg_theme_sound_find_file, profile, _nk_xdg_theme_sound_extensions);
 }
