@@ -907,6 +907,22 @@ _nk_xdg_theme_search_file(NkXdgThemeTypeContext *self, const gchar **names, cons
     return NULL;
 }
 
+static gboolean
+_nk_xdg_theme_foreach_noop(G_GNUC_UNUSED NkXdgThemeTheme *theme, G_GNUC_UNUSED gconstpointer user_data, G_GNUC_UNUSED gpointer *ret)
+{
+    return FALSE;
+}
+
+void
+nk_xdg_theme_preload_themes_icon(NkXdgThemeContext *context, const gchar * const *theme_names)
+{
+    g_return_if_fail(context != NULL);
+
+    NkXdgThemeTypeContext *self = &context->types[TYPE_ICON];
+
+    _nk_xdg_theme_foreach_theme(self, theme_names, NK_XDG_THEME_ICON_FALLBACK_THEME, _nk_xdg_theme_foreach_noop, NULL, NULL);
+}
+
 static gint
 _nk_xdg_theme_icon_subdir_compute_distance(NkXdgThemeIconDir *self, gint size)
 {
@@ -1049,6 +1065,16 @@ _nk_xdg_theme_sound_find_file(NkXdgThemeTheme *self, const gchar * const *names,
         return _nk_xdg_theme_sound_find_file(self, names, NULL, ret);
 
     return _nk_xdg_theme_sound_find_file(self, names, "stereo", ret);
+}
+
+void
+nk_xdg_theme_preload_themes_sound(NkXdgThemeContext *context, const gchar * const *theme_names)
+{
+    g_return_if_fail(context != NULL);
+
+    NkXdgThemeTypeContext *self = &context->types[TYPE_SOUND];
+
+    _nk_xdg_theme_foreach_theme(self, theme_names, NK_XDG_THEME_SOUND_FALLBACK_THEME, _nk_xdg_theme_foreach_noop, NULL, NULL);
 }
 
 gchar *
