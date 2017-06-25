@@ -351,6 +351,14 @@ _nk_xdg_theme_find_dirs(NkXdgThemeTypeContext *self)
 
     while ( system_dirs[length] != NULL ) ++length;
     ++length; /* user dir */
+    switch ( self->type )
+    {
+    case TYPE_ICON:
+        ++length; /* pixmaps */
+    break;
+    case TYPE_SOUND:
+    break;
+    }
     ++length; /* NULL */
 
     dirs = g_new(gchar *, length);
@@ -368,6 +376,15 @@ _nk_xdg_theme_find_dirs(NkXdgThemeTypeContext *self)
     const gchar * const *system_dir;
     for ( system_dir = system_dirs ; *system_dir != NULL ; ++system_dir )
         try_dir(*system_dir);
+    switch ( self->type )
+    {
+    case TYPE_ICON:
+        if ( g_file_test(G_DIR_SEPARATOR_S "usr" G_DIR_SEPARATOR_S "share" G_DIR_SEPARATOR_S "pixmaps", G_FILE_TEST_IS_DIR) ) \
+            dirs[current++] = g_strdup(G_DIR_SEPARATOR_S "usr" G_DIR_SEPARATOR_S "share" G_DIR_SEPARATOR_S "pixmaps");\
+    break;
+    case TYPE_SOUND:
+    break;
+    }
 
     dirs[current] = NULL;
 
@@ -802,24 +819,21 @@ _nk_xdg_theme_try_file(const gchar *dir, const gchar *name, const gchar **extens
 }
 
 static gboolean
-_nk_xdg_theme_try_fallback_internal(gchar **dir, const gchar *extra_dir, const gchar *name, const gchar **extensions, gchar **ret)
+_nk_xdg_theme_try_fallback_internal(gchar **dir, const gchar *name, const gchar **extensions, gchar **ret)
 {
-    if ( dir != NULL )
+    if ( dir == NULL )
+        return FALSE;
+
     for ( ; *dir != NULL ; ++dir )
     {
         if ( _nk_xdg_theme_try_file(*dir, name, extensions, ret) )
             return TRUE;
     }
-    if ( extra_dir == NULL )
-        return FALSE;
-
-    if ( _nk_xdg_theme_try_file(extra_dir, name, extensions, ret) )
-        return TRUE;
     return FALSE;
 }
 
 static gboolean
-_nk_xdg_theme_try_fallback(gchar **dirs, const gchar *extra_dir, const gchar * const *theme_names, const gchar *name, const gchar **extensions, gchar **ret)
+_nk_xdg_theme_try_fallback(gchar **dirs, const gchar * const *theme_names, const gchar *name, const gchar **extensions, gchar **ret)
 {
     if ( theme_names != NULL )
     {
@@ -838,12 +852,12 @@ _nk_xdg_theme_try_fallback(gchar **dirs, const gchar *extra_dir, const gchar * c
         for ( theme_name = theme_names ; *theme_name != NULL ; ++theme_name )
         {
             g_snprintf(themed_name, l, "%s%c%s", *theme_name, G_DIR_SEPARATOR, name);
-            if ( _nk_xdg_theme_try_fallback_internal(dirs, extra_dir, themed_name, extensions, ret) )
+            if ( _nk_xdg_theme_try_fallback_internal(dirs, themed_name, extensions, ret) )
                 return TRUE;
         }
     }
 
-    return _nk_xdg_theme_try_fallback_internal(dirs, extra_dir, name, extensions, ret);
+    return _nk_xdg_theme_try_fallback_internal(dirs, name, extensions, ret);
 }
 
 static gint
@@ -943,7 +957,7 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *context, const gchar * const *theme_nam
     if ( file != NULL )
         return file;
 
-    if ( _nk_xdg_theme_try_fallback(self->dirs, G_DIR_SEPARATOR_S "usr" G_DIR_SEPARATOR_S "share" G_DIR_SEPARATOR_S "pixmaps", theme_names, name, data.extensions, &file) )
+    if ( _nk_xdg_theme_try_fallback(self->dirs, theme_names, name, data.extensions, &file) )
         return file;
 
     if ( symbolic )
@@ -1081,7 +1095,7 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *context, const gchar * const *theme_na
     gchar **subname;
     for ( subname = data.names ; *subname != NULL ; ++subname )
     {
-        if ( _nk_xdg_theme_try_fallback(self->dirs, NULL, theme_names, *subname, _nk_xdg_theme_sound_extensions, &file) )
+        if ( _nk_xdg_theme_try_fallback(self->dirs, theme_names, *subname, _nk_xdg_theme_sound_extensions, &file) )
             return file;
     }
 
