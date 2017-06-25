@@ -929,7 +929,7 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *context, const gchar * const *theme_nam
     if ( ( theme != NULL ) && _nk_xdg_theme_get_file(theme, name, _nk_xdg_theme_icon_find_file, &data, &file) )
         return file;
 
-    if ( _nk_xdg_theme_try_fallback(self->dirs, G_DIR_SEPARATOR_S "usr" G_DIR_SEPARATOR_S "share" G_DIR_SEPARATOR_S "pixmaps", theme_name, name, data.extensions, &file) )
+    if ( _nk_xdg_theme_try_fallback(self->dirs, G_DIR_SEPARATOR_S "usr" G_DIR_SEPARATOR_S "share" G_DIR_SEPARATOR_S "pixmaps", theme_names, name, data.extensions, &file) )
         return file;
 
     if ( symbolic )
