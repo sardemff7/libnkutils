@@ -631,7 +631,7 @@ error:
     return found;
 }
 
-static void
+static NkXdgThemeTheme *
 _nk_xdg_theme_load_theme(NkXdgThemeTypeContext *context, const gchar *name)
 {
     NkXdgThemeTheme *self;
@@ -643,9 +643,11 @@ _nk_xdg_theme_load_theme(NkXdgThemeTypeContext *context, const gchar *name)
     {
         g_hash_table_insert(context->themes, self->name, NULL);
         g_free(self);
+        return NULL;
     }
-    else
-        g_hash_table_insert(context->themes, self->name, self);
+
+    g_hash_table_insert(context->themes, self->name, self);
+    return self;
 }
 
 static void
@@ -679,9 +681,11 @@ _nk_xdg_theme_get_theme(NkXdgThemeTypeContext *self, const gchar *name)
     if ( name == NULL )
         return NULL;
 
-    if ( ! g_hash_table_contains(self->themes, name) )
-        _nk_xdg_theme_load_theme(self, name);
-    return g_hash_table_lookup(self->themes, name);
+    NkXdgThemeTheme *theme;
+    if ( g_hash_table_lookup_extended(self->themes, name, NULL, (gpointer *) &theme) )
+        return theme;
+
+    return _nk_xdg_theme_load_theme(self, name);
 }
 
 NkXdgThemeContext *
