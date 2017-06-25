@@ -796,7 +796,7 @@ _nk_xdg_theme_search_themes(NkXdgThemeTypeContext *self, const gchar **names, co
 }
 
 static gboolean
-_nk_xdg_theme_try_file(const gchar *dir, const gchar *name, const gchar **extensions, gchar **ret)
+_nk_xdg_theme_try_file(const gchar *dir, const gchar *name, const gchar * const *extensions, gchar **ret)
 {
     gsize i;
     for ( i = 0 ; extensions[i] != NULL ; ++i )
@@ -814,7 +814,7 @@ _nk_xdg_theme_try_file(const gchar *dir, const gchar *name, const gchar **extens
 }
 
 static gboolean
-_nk_xdg_theme_try_fallback_internal(gchar **dir, const gchar *name, const gchar **extensions, gchar **ret)
+_nk_xdg_theme_try_fallback_internal(gchar **dir, const gchar *name, const gchar * const *extensions, gchar **ret)
 {
     if ( dir == NULL )
         return FALSE;
@@ -828,7 +828,7 @@ _nk_xdg_theme_try_fallback_internal(gchar **dir, const gchar *name, const gchar 
 }
 
 static gboolean
-_nk_xdg_theme_try_fallback(gchar **dirs, const gchar * const *theme_names, const gchar *name, const gchar **extensions, gchar **ret)
+_nk_xdg_theme_try_fallback(gchar **dirs, const gchar * const *theme_names, const gchar *name, const gchar * const *extensions, gchar **ret)
 {
     if ( theme_names != NULL )
     {
@@ -854,6 +854,25 @@ _nk_xdg_theme_try_fallback(gchar **dirs, const gchar * const *theme_names, const
 
     return _nk_xdg_theme_try_fallback_internal(dirs, name, extensions, ret);
 }
+
+static gchar *
+_nk_xdg_theme_search_file(NkXdgThemeTypeContext *self, const gchar **names, const gchar * const *theme_names, const gchar *fallback_theme, NkXdgThemeFindFileCallback find_file, gconstpointer data, const gchar * const *extensions)
+{
+    gchar *file;
+
+    file = _nk_xdg_theme_search_themes(self, names, theme_names, fallback_theme, find_file, data);
+    if ( file != NULL )
+        return file;
+
+    const gchar * const *subname;
+    for ( subname = names ; *subname != NULL ; ++subname )
+    {
+        if ( _nk_xdg_theme_try_fallback(self->dirs, theme_names, *subname, extensions, &file) )
+            return file;
+    }
+    return NULL;
+}
+
 
 static gint
 _nk_xdg_theme_icon_subdir_compute_distance(NkXdgThemeIconDir *self, gint size)
@@ -950,11 +969,8 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *context, const gchar * const *theme_nam
     gchar *file;
     const gchar *names[] = { name, NULL };
 
-    file = _nk_xdg_theme_search_themes(self, names, theme_names, "hicolor", _nk_xdg_theme_icon_find_file, &data);
+    file = _nk_xdg_theme_search_file(self, names, theme_names, "hicolor", _nk_xdg_theme_icon_find_file, &data, data.extensions);
     if ( file != NULL )
-        return file;
-
-    if ( _nk_xdg_theme_try_fallback(self->dirs, theme_names, name, data.extensions, &file) )
         return file;
 
     if ( symbolic )
@@ -1077,18 +1093,5 @@ nk_xdg_theme_get_sound(NkXdgThemeContext *context, const gchar * const *theme_na
         }
     }
 
-    gchar *file;
-
-    file = _nk_xdg_theme_search_themes(self, names, theme_names, "freedesktop", _nk_xdg_theme_sound_find_file, profile);
-    if ( file != NULL )
-        return file;
-
-    const gchar * const *subname;
-    for ( subname = names ; *subname != NULL ; ++subname )
-    {
-        if ( _nk_xdg_theme_try_fallback(self->dirs, theme_names, *subname, _nk_xdg_theme_sound_extensions, &file) )
-            return file;
-    }
-
-    return NULL;
+    return _nk_xdg_theme_search_file(self, names, theme_names, "freedesktop", _nk_xdg_theme_sound_find_file, profile, _nk_xdg_theme_sound_extensions);
 }
