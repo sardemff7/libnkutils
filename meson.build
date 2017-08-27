@@ -126,6 +126,10 @@ if token
     executable('nk-token-replace', [ 'src/token-example.c' ], dependencies: libnkutils)
 endif
 
+if xdg_theme
+    executable('nk-xdg-theme-lookup', [ 'src/xdg-theme-example.c' ], dependencies: libnkutils)
+endif
+
 foreach m : nk_modules
     if get_variable(m.underscorify())
         nk_test = executable('nk-@0@.test'.format(m), 'tests/@0@.c'.format(m), c_args: nk_args, dependencies: libnkutils)
