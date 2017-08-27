@@ -30,7 +30,7 @@
 #ifdef G_LOG_DOMAIN
 #undef G_LOG_DOMAIN
 #endif /* G_LOG_DOMAIN */
-#define G_LOG_DOMAIN "nktoken-replace"
+#define G_LOG_DOMAIN "nk-token-replace"
 
 #include <string.h>
 #include <errno.h>
@@ -45,7 +45,7 @@ typedef struct {
 } Args;
 
 static const gchar *
-_nktoken_replace_callback(const gchar *token, G_GNUC_UNUSED guint64 value, G_GNUC_UNUSED const gchar *key, G_GNUC_UNUSED gint64 index, gpointer user_data)
+_nk_token_replace_callback(const gchar *token, G_GNUC_UNUSED guint64 value, G_GNUC_UNUSED const gchar *key, G_GNUC_UNUSED gint64 index, gpointer user_data)
 {
     Args *args = user_data;
     int i;
@@ -94,7 +94,7 @@ main(int argc, char *argv[])
         g_clear_error(&error);
         return 2;
     }
-    result = nk_token_list_replace(template, _nktoken_replace_callback, &args);
+    result = nk_token_list_replace(template, _nk_token_replace_callback, &args);
 
     g_print("%s\n", result);
 

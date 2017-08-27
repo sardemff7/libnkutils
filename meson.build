@@ -123,7 +123,7 @@ libnkutils = declare_dependency(link_with: nk_lib, include_directories: nk_inc, 
 
 
 if token
-    executable('nktoken-replace', [ 'src/token-example.c' ], dependencies: libnkutils)
+    executable('nk-token-replace', [ 'src/token-example.c' ], dependencies: libnkutils)
 endif
 
 foreach m : nk_modules
