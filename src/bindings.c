@@ -48,9 +48,9 @@
 
 #define NK_BINDINGS_MAX_ALIASES 4 /* For Alt */
 
-#define _NK_VALUE_TO_BINDING(mask, value) ((guint64)((((guint64)(value)) << NK_BINDINGS_NUM_MODIFIERS) | (guint32)(mask)))
-#define NK_KEYCODE_TO_BINDING(mask, button) _NK_VALUE_TO_BINDING(mask, button)
-#define NK_KEYSYM_TO_BINDING(mask, button) _NK_VALUE_TO_BINDING(mask, button)
+#define _NK_VALUE_TO_BINDING(mask, value) ((guint64)((((guint64)(mask)) << 32) | (guint32)(value)))
+#define NK_KEYCODE_TO_BINDING(mask, keycode) _NK_VALUE_TO_BINDING(mask, keycode)
+#define NK_KEYSYM_TO_BINDING(mask, keysym) _NK_VALUE_TO_BINDING(mask, keysym)
 #define NK_BUTTON_TO_BINDING(mask, button) _NK_VALUE_TO_BINDING(mask, button)
 
 struct _NkBindings {
