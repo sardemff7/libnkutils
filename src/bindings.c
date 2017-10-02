@@ -65,7 +65,7 @@ struct _NkBindingsSeat {
     struct xkb_context *context;
     struct xkb_keymap  *keymap;
     struct xkb_state   *state;
-    xkb_mod_index_t     modifiers[NK_BINDINGS_NUM_MODIFIERS][NK_BINDINGS_MAX_ALIASES];
+    xkb_mod_index_t     modifiers[NK_BINDINGS_NUM_MODIFIERS][NK_BINDINGS_MAX_ALIASES + 1];
 #ifdef NK_XKBCOMMON_HAS_COMPOSE
     struct {
         struct xkb_compose_table *table;
