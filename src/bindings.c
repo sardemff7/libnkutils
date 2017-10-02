@@ -508,7 +508,7 @@ _nk_bindings_seat_binding_trigger(NkBindingsSeat *self, NkBindingsBinding *bindi
     gboolean on_release_waiting = ( g_list_find(self->on_release, binding) != NULL );
     if ( trigger && has_press )
         handled = binding->press.base.callback(binding->scope, binding->press.base.user_data);
-    if ( ( ! on_release_waiting ) && ( binding->release.base.callback != NULL ) && ( handled || ( ! has_press ) ) )
+    if ( ( ! on_release_waiting ) && ( binding->release.base.callback != NULL ) && ( handled || ( ! trigger ) || ( ! has_press ) ) )
     {
         self->on_release = g_list_prepend(self->on_release, binding);
         on_release_waiting = TRUE;
