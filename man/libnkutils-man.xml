@@ -185,4 +185,14 @@
             </varlistentry>
         </variablelist>
     </refsect2>
+
+    <refsect2 id="nk-bindings-type-description">
+        <title>Binding strings</title>
+
+        <para>
+            The <type>binding string</type> format supports two (and a half) notations. It can be either <literal><replaceable>Modifier</replaceable>-<replaceable>Modifier</replaceable>-<replaceable>Bind</replaceable></literal>
+            or the <ulink url="https://developer.gnome.org/gtk3/stable/gtk3-Keyboard-Accelerators.html#gtk-accelerator-parse">GTK+ accelerator format</ulink>.
+            The bind can either be a keysym name, a keycode in square brackets (e.g. <literal>[10]</literal>) or a mouse button specification (e.g. <literal>Mouse1</literal> or <literal>MouseD1</literal> for double click).
+        </para>
+    </refsect2>
 </refentry>
