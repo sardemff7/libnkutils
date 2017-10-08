@@ -37,6 +37,7 @@ nk_options = []
 nk_modules = [
     'uuid',
     'token',
+    'xdg-de',
     'xdg-theme',
     'enum',
     'colour',
@@ -44,7 +45,9 @@ nk_modules = [
 ]
 nk_dependencies = [
     [ 'token', 'enum' ],
+    [ 'xdg-de', 'enum' ],
     [ 'xdg-theme', 'enum' ],
+    [ 'xdg-theme', 'xdg-de' ],
     [ 'bindings', 'enum' ],
 ]
 

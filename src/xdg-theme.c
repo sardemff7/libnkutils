@@ -40,6 +40,7 @@
 #include <gio/gio.h>
 
 #include "nkutils-enum.h"
+#include "nkutils-xdg-de.h"
 #include "nkutils-xdg-theme.h"
 
 typedef enum {
@@ -50,30 +51,6 @@ typedef enum {
 
 #define NK_XDG_THEME_ICON_FALLBACK_THEME "hicolor"
 #define NK_XDG_THEME_SOUND_FALLBACK_THEME "freedesktop"
-
-typedef enum {
-    DE_NONE = 0,
-    DE_GNOME,
-    DE_KDE,
-} NkXdgThemeDE;
-
-static const gchar * const _nk_xdg_theme_de_session_desktop_names[] = {
-    [DE_NONE] = "generic",
-    [DE_GNOME] = "GNOME",
-    [DE_KDE] = "KDE",
-};
-
-static const gchar * const _nk_xdg_theme_de_current_session_names[] = {
-    [DE_NONE] = "X-Generic",
-    [DE_GNOME] = "GNOME",
-    [DE_KDE] = "KDE",
-};
-
-static const gchar * const _nk_xdg_theme_de_desktop_session_names[] = {
-    [DE_NONE] = "generic",
-    [DE_GNOME] = "gnome",
-    [DE_KDE] = "kde",
-};
 
 typedef struct {
     const gchar *schema_id;
@@ -237,55 +214,6 @@ static const gchar *_nk_xdg_theme_sound_extensions[] = {
     NULL
 };
 
-static NkXdgThemeDE
-_nk_xdg_theme_de_detect(void)
-{
-    static NkXdgThemeDE _nk_xdg_theme_de = DE_NONE - 1;
-    if ( _nk_xdg_theme_de != (NkXdgThemeDE) ( DE_NONE - 1 ) )
-        return _nk_xdg_theme_de;
-
-    const gchar *var;
-    guint64 value;
-
-    var = g_getenv("XDG_SESSION_DESKTOP");
-    if ( ( var != NULL ) && nk_enum_parse(var, _nk_xdg_theme_de_session_desktop_names, G_N_ELEMENTS(_nk_xdg_theme_de_session_desktop_names), TRUE, TRUE, &value) )
-    {
-        _nk_xdg_theme_de = value;
-        return _nk_xdg_theme_de;
-    }
-
-    var = g_getenv("XDG_CURRENT_DESKTOP");
-    if ( ( var != NULL ) && nk_enum_parse(var, _nk_xdg_theme_de_current_session_names, G_N_ELEMENTS(_nk_xdg_theme_de_current_session_names), FALSE, TRUE, &value) )
-    {
-        _nk_xdg_theme_de = value;
-        return _nk_xdg_theme_de;
-    }
-
-    var = g_getenv("GNOME_DESKTOP_SESSION_ID");
-    if ( ( var != NULL ) && ( *var != '\0' ) )
-    {
-        _nk_xdg_theme_de = DE_GNOME;
-        return _nk_xdg_theme_de;
-    }
-
-    var = g_getenv("KDE_FULL_SESSION");
-    if ( ( var != NULL ) && ( *var != '\0' ) )
-    {
-        _nk_xdg_theme_de = DE_KDE;
-        return _nk_xdg_theme_de;
-    }
-
-    var = g_getenv("DESKTOP_SESSION");
-    if ( ( var != NULL ) && nk_enum_parse(var, _nk_xdg_theme_de_desktop_session_names, G_N_ELEMENTS(_nk_xdg_theme_de_desktop_session_names), FALSE, FALSE, &value) )
-    {
-        _nk_xdg_theme_de = value;
-        return _nk_xdg_theme_de;
-    }
-
-    _nk_xdg_theme_de = DE_NONE;
-    return _nk_xdg_theme_de;
-}
-
 static void
 _nk_xdg_theme_de_theme_gsettings_update(NkXdgThemeTypeContext *self, G_GNUC_UNUSED gchar *key, GSettings *settings)
 {
@@ -296,11 +224,11 @@ _nk_xdg_theme_de_theme_gsettings_update(NkXdgThemeTypeContext *self, G_GNUC_UNUS
 static void
 _nk_xdg_theme_de_theme_hook(NkXdgThemeTypeContext *self)
 {
-    switch ( _nk_xdg_theme_de_detect() )
+    switch ( nk_xdg_de_detect() )
     {
-    case DE_NONE:
+    case NK_DE_NONE:
     break;
-    case DE_GNOME:
+    case NK_DE_GNOME:
     {
         const NkXdgThemeGnomeSettings *settings = &_nk_xdg_theme_gnome_settings[self->type];
         GSettingsSchemaSource *schema_source;
@@ -322,7 +250,7 @@ _nk_xdg_theme_de_theme_hook(NkXdgThemeTypeContext *self)
         self->de_notify = g_object_unref;
     }
     break;
-    case DE_KDE:
+    case NK_DE_KDE:
         switch ( self->type )
         {
         case TYPE_ICON:

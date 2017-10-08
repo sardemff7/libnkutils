@@ -1,5 +1,6 @@
 option('uuid', type: 'boolean', value: false, description: 'nkutils uuid module')
 option('token', type: 'boolean', value: false, description: 'nkutils token module')
+option('xdg-de', type: 'boolean', value: false, description: 'nkutils xdg-de module')
 option('xdg-theme', type: 'boolean', value: false, description: 'nkutils xdg-theme module')
 option('enum', type: 'boolean', value: false, description: 'nkutils enum module')
 option('colour', type: 'boolean', value: false, description: 'nkutils colour module')
