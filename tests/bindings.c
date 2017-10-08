@@ -452,7 +452,7 @@ _nk_bindings_tests_setup(NkBindingsTestFixture *fixture, G_GNUC_UNUSED gconstpoi
         .layout = "us",
         .variant = "intl",
     };
-    fixture->bindings = nk_bindings_new();
+    fixture->bindings = nk_bindings_new(-1);
     fixture->seat = nk_bindings_seat_new(fixture->bindings, XKB_CONTEXT_NO_ENVIRONMENT_NAMES);
     fixture->keymap = xkb_keymap_new_from_names(nk_bindings_seat_get_context(fixture->seat), &names, XKB_KEYMAP_COMPILE_NO_FLAGS);
     fixture->master_state = xkb_state_new(fixture->keymap);

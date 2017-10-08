@@ -46,6 +46,8 @@
 #include "nkutils-enum.h"
 #include "nkutils-bindings.h"
 
+#define NK_BINDINGS_DEFAULT_DOUBLE_CLICK_DELAY 200
+
 #define NK_BINDINGS_MAX_ALIASES 4 /* For Alt */
 
 #define _NK_VALUE_TO_BINDING(mask, value) ((guint64)((((guint64)(mask)) << 32) | (guint32)(value)))
@@ -156,13 +158,14 @@ _nk_bindings_scope_free(gpointer data)
 }
 
 NkBindings *
-nk_bindings_new(void)
+nk_bindings_new(gint64 double_click_delay)
 {
-    NkBindings *self;
+    double_click_delay = ( double_click_delay < 0 ) ? NK_BINDINGS_DEFAULT_DOUBLE_CLICK_DELAY : double_click_delay;
 
+    NkBindings *self;
     self = g_new0(NkBindings, 1);
 
-    self->double_click_delay = 200;
+    self->double_click_delay = double_click_delay;
 
     return self;
 }
