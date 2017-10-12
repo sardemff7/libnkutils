@@ -127,6 +127,7 @@ _libnkutils_sources += \
 	%D%/src/nkutils-xdg-theme.h
 
 _NKUTILS_INTERNAL_CFLAGS += \
+	-DSYSCONFDIR=\"$(sysconfdir)\" \
 	-DDATADIR=\"$(datadir)\"
 
 _libnkutils_tests += \

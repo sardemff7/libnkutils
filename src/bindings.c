@@ -43,6 +43,7 @@
 #include <xkbcommon/xkbcommon-compose.h>
 #endif /* NK_XKBCOMMON_HAS_COMPOSE */
 
+#include "nkutils-xdg-de.h"
 #include "nkutils-enum.h"
 #include "nkutils-bindings.h"
 
@@ -157,6 +158,74 @@ _nk_bindings_scope_free(gpointer data)
     g_slice_free(NkBindingsScope, scope);
 }
 
+static gboolean
+_nk_bindings_try_gtk_settings_dir(NkBindings *self, const gchar *dir)
+{
+    struct {
+        const gchar *gtk_ver;
+        const gchar *file;
+        const gchar *group;
+        const gchar *key;
+    } versions[] = {
+        {
+            .gtk_ver = "gtk-3.0",
+            .file = "settings.ini",
+            .group = "Settings",
+            .key = "gtk-double-click-time",
+        },
+        {
+            .gtk_ver = "gtk-4.0",
+            .file = "settings.ini",
+            .group = "Settings",
+            .key = "gtk-double-click-time",
+        },
+        { .gtk_ver = NULL }
+    }, *version;
+
+    gboolean found = FALSE;
+    for ( version = versions ; ( ! found ) && ( version->gtk_ver != NULL ) ; ++version )
+    {
+        gchar *path;
+        GKeyFile *settings;
+
+        path = g_build_filename(dir, version->gtk_ver, version->file, NULL);
+        settings = g_key_file_new();
+
+        if ( g_key_file_load_from_file(settings, path, G_KEY_FILE_NONE, NULL) )
+        {
+            guint64 value;
+            GError *error = NULL;
+            value = g_key_file_get_uint64(settings, version->group, version->key, &error);
+            if ( error == NULL )
+            {
+                self->double_click_delay = value;
+                found = TRUE;
+            }
+            else
+                g_error_free(error);
+        }
+        g_key_file_free(settings);
+        g_free(path);
+    }
+
+    return found;
+}
+
+static gint64
+_nk_bindings_try_gtk_settings(NkBindings *self)
+{
+    if ( _nk_bindings_try_gtk_settings_dir(self, g_get_user_config_dir()) )
+        return TRUE;
+    const gchar * const *dir;
+    dir = g_get_system_config_dirs();
+    for ( ; *dir != NULL ; ++dir )
+    {
+        if ( _nk_bindings_try_gtk_settings_dir(self, *dir) )
+            return TRUE;
+    }
+    return _nk_bindings_try_gtk_settings_dir(self, SYSCONFDIR);
+}
+
 NkBindings *
 nk_bindings_new(gint64 double_click_delay)
 {
@@ -165,7 +234,41 @@ nk_bindings_new(gint64 double_click_delay)
     NkBindings *self;
     self = g_new0(NkBindings, 1);
 
-    self->double_click_delay = double_click_delay;
+    switch ( nk_xdg_de_detect() )
+    {
+    case NK_DE_NONE:
+        self->double_click_delay = double_click_delay;
+    break;
+    case NK_DE_GNOME:
+        if ( ! _nk_bindings_try_gtk_settings(self) )
+            self->double_click_delay = double_click_delay;
+    break;
+    case NK_DE_KDE:
+    {
+        gchar *path;
+        GKeyFile *settings;
+
+        path = g_build_filename(g_get_user_config_dir(), "kcminputrc", NULL);
+        settings = g_key_file_new();
+
+        if ( g_key_file_load_from_file(settings, path, G_KEY_FILE_NONE, NULL) )
+        {
+            guint64 value;
+            GError *error = NULL;
+            value = g_key_file_get_uint64(settings, "KDE", "DoubleClickInterval", &error);
+            if ( error == NULL )
+                self->double_click_delay = value;
+            else
+            {
+                g_error_free(error);
+                self->double_click_delay = double_click_delay;
+            }
+        }
+        g_key_file_free(settings);
+        g_free(path);
+    }
+    break;
+    }
 
     return self;
 }
