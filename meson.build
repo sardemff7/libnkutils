@@ -78,34 +78,34 @@ endforeach
 
 foreach m : nk_modules
     if get_variable(m.underscorify())
-        nk_sources += [
+        nk_sources += files(
             'src/@0@.c'.format(m),
             'src/nkutils-@0@.h'.format(m),
-        ]
+        )
     endif
 endforeach
 
 if uuid
     nk_libuuid = dependency('uuid', required: false)
     if nk_libuuid.found()
-        nk_sources += 'src/uuid-libuuid.c'
+        nk_sources += files('src/uuid-libuuid.c')
         nk_deps += nk_libuuid
     else
         nk_apr_util_1 = dependency('apr-util-1', required: false)
         if nk_apr_util_1.found()
-            nk_sources += 'src/uuid-apr-util.c'
+            nk_sources += files('src/uuid-apr-util.c')
             nk_deps += nk_apr_util_1
         else
             nk_apr_util = dependency('apr-util', required: false)
             if nk_apr_util.found()
-                nk_sources += 'src/uuid-apr-util.c'
+                nk_sources += files('src/uuid-apr-util.c')
                 nk_deps += nk_apr_util
             else
                 error('libnkutils: A UUID library is required')
             endif
         endif
     endif
-    nk_sources += 'src/uuid-internal.h'
+    nk_sources += files('src/uuid-internal.h')
 endif
 
 if xdg_theme
@@ -130,16 +130,16 @@ libnkutils = declare_dependency(link_with: nk_lib, include_directories: nk_inc, 
 
 
 if token
-    executable('nk-token-replace', [ 'src/token-example.c' ], dependencies: libnkutils)
+    executable('nk-token-replace', files('src/token-example.c'), dependencies: libnkutils)
 endif
 
 if xdg_theme
-    executable('nk-xdg-theme-lookup', [ 'src/xdg-theme-example.c' ], dependencies: libnkutils)
+    executable('nk-xdg-theme-lookup', files('src/xdg-theme-example.c'), dependencies: libnkutils)
 endif
 
 foreach m : nk_modules
     if get_variable(m.underscorify())
-        nk_test = executable('nk-@0@.test'.format(m), 'tests/@0@.c'.format(m), c_args: nk_args, dependencies: libnkutils)
+        nk_test = executable('nk-@0@.test'.format(m), files('tests/@0@.c'.format(m)), c_args: nk_args, dependencies: libnkutils)
         test('libnkutils @0@ module tests'.format(m), nk_test)
     endif
 endforeach
