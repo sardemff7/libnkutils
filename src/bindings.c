@@ -604,7 +604,7 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
 }
 
 static gboolean
-_nk_bindings_seat_binding_trigger(NkBindingsSeat *self, NkBindingsBinding *binding, gboolean trigger)
+_nk_bindings_seat_binding_trigger(NkBindingsSeat *self, NkBindingsBinding *binding, gpointer target, gboolean trigger)
 {
     if ( binding == NULL )
         return FALSE;
@@ -613,7 +613,7 @@ _nk_bindings_seat_binding_trigger(NkBindingsSeat *self, NkBindingsBinding *bindi
     gboolean has_press = ( binding->press.base.callback != NULL );
     gboolean on_release_waiting = ( g_list_find(self->on_release, binding) != NULL );
     if ( trigger && has_press )
-        handled = binding->press.base.callback(binding->scope, binding->press.base.user_data);
+        handled = binding->press.base.callback(binding->scope, target, binding->press.base.user_data);
     if ( ( ! on_release_waiting ) && ( binding->release.base.callback != NULL ) && ( handled || ( ! trigger ) || ( ! has_press ) ) )
     {
         self->on_release = g_list_prepend(self->on_release, binding);
@@ -624,15 +624,15 @@ _nk_bindings_seat_binding_trigger(NkBindingsSeat *self, NkBindingsBinding *bindi
 }
 
 static gboolean
-_nk_bindings_try_key_bindings(NkBindings *self, NkBindingsSeat *seat, guint64 keycode, guint64 keysym, gboolean trigger)
+_nk_bindings_try_key_bindings(NkBindings *self, NkBindingsSeat *seat, gpointer target, guint64 keycode, guint64 keysym, gboolean trigger)
 {
     GList *scope_;
     for ( scope_ = self->scopes ; scope_ != NULL ; scope_ = g_list_next(scope_) )
     {
         NkBindingsScope *scope = scope_->data;
-        if ( _nk_bindings_seat_binding_trigger(seat, g_hash_table_lookup(scope->keycodes, &keycode), trigger) )
+        if ( _nk_bindings_seat_binding_trigger(seat, g_hash_table_lookup(scope->keycodes, &keycode), target, trigger) )
             return TRUE;
-        if ( ( keysym != XKB_KEY_NoSymbol ) && _nk_bindings_seat_binding_trigger(seat, g_hash_table_lookup(scope->keysyms, &keysym), trigger) )
+        if ( ( keysym != XKB_KEY_NoSymbol ) && _nk_bindings_seat_binding_trigger(seat, g_hash_table_lookup(scope->keysyms, &keysym), target, trigger) )
             return TRUE;
     }
 
@@ -640,7 +640,7 @@ _nk_bindings_try_key_bindings(NkBindings *self, NkBindingsSeat *seat, guint64 ke
 }
 
 static gboolean
-_nk_bindings_try_button_bindings(NkBindings *self, NkBindingsSeat *seat, guint64 **button, guint64 time)
+_nk_bindings_try_button_bindings(NkBindings *self, NkBindingsSeat *seat, gpointer target, guint64 **button, guint64 time)
 {
     NkBindingsBindingMouse *mouse_binding = NULL;
     GList *scope_;
@@ -654,13 +654,13 @@ _nk_bindings_try_button_bindings(NkBindings *self, NkBindingsSeat *seat, guint64
 
         if ( time < self->double_click_delay )
         {
-            if ( _nk_bindings_seat_binding_trigger(seat, &mouse_binding->dclick, TRUE) )
+            if ( _nk_bindings_seat_binding_trigger(seat, &mouse_binding->dclick, target, TRUE) )
             {
                 *button = &mouse_binding->click.binding;
                 return TRUE;
             }
         }
-        if ( _nk_bindings_seat_binding_trigger(seat, &mouse_binding->click, TRUE) )
+        if ( _nk_bindings_seat_binding_trigger(seat, &mouse_binding->click, target, TRUE) )
         {
             *button = &mouse_binding->click.binding;
             return TRUE;
@@ -693,13 +693,13 @@ nk_bindings_seat_new(NkBindings *bindings, enum xkb_context_flags flags)
     return self;
 }
 
-static void _nk_bindings_seat_free_on_release(NkBindingsSeat *self, gboolean trigger);
+static void _nk_bindings_seat_free_on_release(NkBindingsSeat *self, gpointer target, gboolean trigger);
 static void
 _nk_bindings_seat_free(gpointer data)
 {
     NkBindingsSeat *self = data;
 
-    _nk_bindings_seat_free_on_release(self, FALSE);
+    _nk_bindings_seat_free_on_release(self, NULL, FALSE);
 
     xkb_keymap_unref(self->keymap);
     xkb_state_unref(self->state);
@@ -790,7 +790,7 @@ _nk_bindings_seat_get_modifiers_masks(NkBindingsSeat *self, xkb_keycode_t key, x
 }
 
 static void
-_nk_bindings_seat_free_on_release(NkBindingsSeat *self, gboolean trigger)
+_nk_bindings_seat_free_on_release(NkBindingsSeat *self, gpointer target, gboolean trigger)
 {
     if ( self->on_release == NULL )
         return;
@@ -800,14 +800,14 @@ _nk_bindings_seat_free_on_release(NkBindingsSeat *self, gboolean trigger)
     {
         NkBindingsBinding *binding = link->data;
         if ( trigger )
-            binding->release.base.callback(binding->scope, binding->release.base.user_data);
+            binding->release.base.callback(binding->scope, target, binding->release.base.user_data);
         g_list_free_1(link);
     }
     self->on_release = NULL;
 }
 
 gchar *
-nk_bindings_seat_handle_key(NkBindingsSeat *self, xkb_keycode_t keycode, NkBindingsKeyState state)
+nk_bindings_seat_handle_key(NkBindingsSeat *self, gpointer target, xkb_keycode_t keycode, NkBindingsKeyState state)
 {
     g_return_val_if_fail(self != NULL, NULL);
 
@@ -820,7 +820,7 @@ nk_bindings_seat_handle_key(NkBindingsSeat *self, xkb_keycode_t keycode, NkBindi
         xkb_mod_mask_t dummy, mask;
         _nk_bindings_seat_get_modifiers_masks(self, 0, &dummy, &mask);
         if ( mask == 0 )
-            _nk_bindings_seat_free_on_release(self, TRUE);
+            _nk_bindings_seat_free_on_release(self, target, TRUE);
         return NULL;
     }
 
@@ -855,7 +855,7 @@ nk_bindings_seat_handle_key(NkBindingsSeat *self, xkb_keycode_t keycode, NkBindi
     xkb_mod_mask_t effective, not_consumed;
     _nk_bindings_seat_get_modifiers_masks(self, keycode, &effective, &not_consumed);
 
-    if ( _nk_bindings_try_key_bindings(self->bindings, self, NK_KEYCODE_TO_BINDING(effective, keycode), NK_KEYSYM_TO_BINDING(not_consumed, keysym), regular_press) )
+    if ( _nk_bindings_try_key_bindings(self->bindings, self, target, NK_KEYCODE_TO_BINDING(effective, keycode), NK_KEYSYM_TO_BINDING(not_consumed, keysym), regular_press) )
         return NULL;
 
     if ( ! regular_press )
@@ -875,7 +875,7 @@ nk_bindings_seat_handle_key(NkBindingsSeat *self, xkb_keycode_t keycode, NkBindi
 }
 
 gchar *
-nk_bindings_seat_handle_key_with_modmask(NkBindingsSeat *self, xkb_mod_mask_t modmask, xkb_keycode_t keycode, NkBindingsKeyState state)
+nk_bindings_seat_handle_key_with_modmask(NkBindingsSeat *self, gpointer target, xkb_mod_mask_t modmask, xkb_keycode_t keycode, NkBindingsKeyState state)
 {
     xkb_mod_mask_t effective_mods, depressed_mods, latched_mods, locked_mods;
     xkb_layout_index_t depressed_layout, latched_layout, locked_layout;
@@ -890,17 +890,17 @@ nk_bindings_seat_handle_key_with_modmask(NkBindingsSeat *self, xkb_mod_mask_t mo
     locked_layout = xkb_state_serialize_layout(self->state, XKB_STATE_LAYOUT_LOCKED);
 
     if ( effective_mods == modmask )
-        return nk_bindings_seat_handle_key(self, keycode, state);
+        return nk_bindings_seat_handle_key(self, target, keycode, state);
 
     xkb_state_update_mask(self->state, modmask, 0, 0, 0, 0, locked_layout);
-    ret = nk_bindings_seat_handle_key(self, keycode, state);
+    ret = nk_bindings_seat_handle_key(self, target, keycode, state);
     xkb_state_update_mask(self->state, depressed_mods, latched_mods, locked_mods, depressed_layout, latched_layout, locked_layout);
 
     return ret;
 }
 
 gboolean
-nk_bindings_seat_handle_button(NkBindingsSeat *self, guint32 button, NkBindingsButtonState state, guint64 timestamp)
+nk_bindings_seat_handle_button(NkBindingsSeat *self, gpointer target, guint32 button, NkBindingsButtonState state, guint64 timestamp)
 {
     g_return_val_if_fail(self != NULL, FALSE);
 
@@ -911,7 +911,7 @@ nk_bindings_seat_handle_button(NkBindingsSeat *self, guint32 button, NkBindingsB
     if ( state == NK_BINDINGS_BUTTON_STATE_RELEASE )
     {
         if ( mask == 0 )
-            _nk_bindings_seat_free_on_release(self, TRUE);
+            _nk_bindings_seat_free_on_release(self, target, TRUE);
         return TRUE;
     }
 
@@ -921,7 +921,7 @@ nk_bindings_seat_handle_button(NkBindingsSeat *self, guint32 button, NkBindingsB
     last_timestamp = g_hash_table_lookup(self->last_timestamps, &binding);
     if ( last_timestamp != NULL )
         time -= *last_timestamp;
-    if ( ! _nk_bindings_try_button_bindings(self->bindings, self, &binding_, time) )
+    if ( ! _nk_bindings_try_button_bindings(self->bindings, self, target, &binding_, time) )
         return FALSE;
     if ( last_timestamp == NULL )
         g_hash_table_insert(self->last_timestamps, binding_, g_memdup(&timestamp, sizeof(guint64)));
@@ -931,7 +931,7 @@ nk_bindings_seat_handle_button(NkBindingsSeat *self, guint32 button, NkBindingsB
 }
 
 void
-nk_bindings_seat_update_mask(NkBindingsSeat *self, xkb_mod_mask_t depressed_mods, xkb_mod_mask_t latched_mods, xkb_mod_mask_t locked_mods, xkb_layout_index_t depressed_layout, xkb_layout_index_t latched_layout, xkb_layout_index_t locked_layout)
+nk_bindings_seat_update_mask(NkBindingsSeat *self, gpointer target, xkb_mod_mask_t depressed_mods, xkb_mod_mask_t latched_mods, xkb_mod_mask_t locked_mods, xkb_layout_index_t depressed_layout, xkb_layout_index_t latched_layout, xkb_layout_index_t locked_layout)
 {
     g_return_if_fail(self != NULL);
 
@@ -944,7 +944,7 @@ nk_bindings_seat_update_mask(NkBindingsSeat *self, xkb_mod_mask_t depressed_mods
         xkb_mod_mask_t dummy, mask;
         _nk_bindings_seat_get_modifiers_masks(self, 0, &dummy, &mask);
         if ( mask == 0 )
-            _nk_bindings_seat_free_on_release(self, TRUE);
+            _nk_bindings_seat_free_on_release(self, target, TRUE);
     }
 }
 
@@ -953,5 +953,5 @@ nk_bindings_seat_reset(NkBindingsSeat *self)
 {
     g_return_if_fail(self != NULL);
 
-    _nk_bindings_seat_free_on_release(self, FALSE);
+    _nk_bindings_seat_free_on_release(self, NULL, FALSE);
 }

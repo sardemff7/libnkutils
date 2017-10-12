@@ -461,10 +461,11 @@ _nk_bindings_tests_setup(NkBindingsTestFixture *fixture, G_GNUC_UNUSED gconstpoi
 }
 
 static gboolean
-_nk_bindings_tests_callback(guint64 scope, gpointer user_data)
+_nk_bindings_tests_callback(guint64 scope, gpointer target, gpointer user_data)
 {
     NkBindingsTestBindingSlice *slice = user_data;
     g_assert_cmpuint(scope, ==, 0);
+    g_assert_null(target);
 
     slice->fixture->triggered = slice->trigger;
     return TRUE;
@@ -498,12 +499,12 @@ _nk_bindings_tests_func(NkBindingsTestFixture *fixture, gconstpointer user_data)
         g_test_message("%s key %s", ( key->state == NK_BINDINGS_KEY_STATE_RELEASE ) ? "Releasing" : ( key->state == NK_BINDINGS_KEY_STATE_PRESSED ) ? "Already pressed" : "Pressing", _nk_bindings_test_key_names[key->key]);
 
         fixture->triggered = 0;
-        text = nk_bindings_seat_handle_key(fixture->seat, key->key, key->state);
+        text = nk_bindings_seat_handle_key(fixture->seat, NULL, key->key, key->state);
 
         if ( xkb_state_update_key(fixture->master_state, key->key, ( key->state == NK_BINDINGS_KEY_STATE_RELEASE ) ? XKB_KEY_UP : XKB_KEY_DOWN) != 0 )
         {
             g_test_message("New state is 0x%x", xkb_state_serialize_mods(fixture->master_state, XKB_STATE_MODS_DEPRESSED));
-            nk_bindings_seat_update_mask(fixture->seat,
+            nk_bindings_seat_update_mask(fixture->seat, NULL,
                 xkb_state_serialize_mods(fixture->master_state, XKB_STATE_MODS_DEPRESSED),
                 xkb_state_serialize_mods(fixture->master_state, XKB_STATE_MODS_LATCHED),
                 xkb_state_serialize_mods(fixture->master_state, XKB_STATE_MODS_LOCKED),
