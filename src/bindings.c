@@ -747,9 +747,21 @@ void
 nk_bindings_seat_update_keymap(NkBindingsSeat *self, struct xkb_keymap *keymap, struct xkb_state *state)
 {
     g_return_if_fail(self != NULL);
+    g_return_if_fail((keymap != NULL && state != NULL) || (keymap == NULL && state == NULL));
 
     xkb_keymap_unref(self->keymap);
     xkb_state_unref(self->state);
+
+    if ( keymap == NULL )
+    {
+        nk_bindings_seat_reset(self);
+        self->keymap = NULL;
+        self->state = NULL;
+        gsize i;
+        for ( i = 0 ; i < NK_BINDINGS_NUM_MODIFIERS ; ++i )
+            self->modifiers[i][0] = XKB_MOD_INVALID;
+        return;
+    }
 
     self->keymap = xkb_keymap_ref(keymap);
     self->state = xkb_state_ref(state);
