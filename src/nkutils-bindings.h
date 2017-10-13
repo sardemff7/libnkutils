@@ -67,6 +67,7 @@ void nk_bindings_free(NkBindings *bindings);
 
 typedef gboolean (*NkBindingsCallback)(guint64 scope, gpointer target, gpointer user_data);
 gboolean nk_bindings_add_binding(NkBindings *bindings, guint64 scope, const gchar *string, NkBindingsCallback callback, gpointer user_data, GDestroyNotify notify, GError **error);
+void nk_bindings_reset_bindings(NkBindings *bindings);
 
 NkBindingsSeat *nk_bindings_seat_new(NkBindings *bindings, enum xkb_context_flags flags);
 void nk_bindings_seat_free(NkBindingsSeat *seat);

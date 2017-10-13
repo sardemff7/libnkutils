@@ -282,7 +282,7 @@ nk_bindings_free(NkBindings *self)
 
     g_list_free_full(self->seats, _nk_bindings_seat_free);
 
-    g_list_free_full(self->scopes, _nk_bindings_scope_free);
+    nk_bindings_reset_bindings(self);
 
     g_free(self);
 }
@@ -601,6 +601,13 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
     base->notify = notify;
 
     return TRUE;
+}
+
+void
+nk_bindings_reset_bindings(NkBindings *self)
+{
+    g_list_free_full(self->scopes, _nk_bindings_scope_free);
+    self->scopes = NULL;
 }
 
 static gboolean
