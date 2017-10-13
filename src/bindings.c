@@ -775,6 +775,9 @@ _nk_bindings_seat_get_modifiers_masks(NkBindingsSeat *self, xkb_keycode_t key, x
     *effective = 0;
     *not_consumed = 0;
 
+    if ( self->state == NULL )
+        return;
+
     NkBindingsModifiers mod;
     xkb_mod_index_t *i;
     for ( mod = 0 ; mod < NK_BINDINGS_NUM_MODIFIERS ; ++mod )
@@ -817,6 +820,8 @@ gchar *
 nk_bindings_seat_handle_key(NkBindingsSeat *self, gpointer target, xkb_keycode_t keycode, NkBindingsKeyState state)
 {
     g_return_val_if_fail(self != NULL, NULL);
+    g_return_val_if_fail(self->keymap != NULL, NULL);
+    g_return_val_if_fail(self->state != NULL, NULL);
 
     xkb_keysym_t keysym;
     gchar *tmp = NULL;
@@ -884,6 +889,10 @@ nk_bindings_seat_handle_key(NkBindingsSeat *self, gpointer target, xkb_keycode_t
 gchar *
 nk_bindings_seat_handle_key_with_modmask(NkBindingsSeat *self, gpointer target, xkb_mod_mask_t modmask, xkb_keycode_t keycode, NkBindingsKeyState state)
 {
+    g_return_val_if_fail(self != NULL, NULL);
+    g_return_val_if_fail(self->keymap != NULL, NULL);
+    g_return_val_if_fail(self->state != NULL, NULL);
+
     xkb_mod_mask_t effective_mods, depressed_mods, latched_mods, locked_mods;
     xkb_layout_index_t depressed_layout, latched_layout, locked_layout;
     gchar *ret;
@@ -941,6 +950,8 @@ void
 nk_bindings_seat_update_mask(NkBindingsSeat *self, gpointer target, xkb_mod_mask_t depressed_mods, xkb_mod_mask_t latched_mods, xkb_mod_mask_t locked_mods, xkb_layout_index_t depressed_layout, xkb_layout_index_t latched_layout, xkb_layout_index_t locked_layout)
 {
     g_return_if_fail(self != NULL);
+    g_return_if_fail(self->state != NULL);
+    g_return_if_fail(self->keymap != NULL);
 
     enum xkb_state_component changed;
 
