@@ -59,8 +59,9 @@ nk_args = [
 ]
 nk_deps = [ dependency('glib-2.0', version: '>= @0@'.format(nk_glib_min_version)) ]
 
-nkutils_xsltpath = join_paths(meson.current_source_dir(), 'man')
+nkutils_xsltpaths = [ join_paths(meson.current_source_dir(), 'man'), meson.current_build_dir() ]
 nkutils_manfiles = files('man/libnkutils-man.xml')
+nkutils_mandepends = []
 nkutils_docbook_conditions = []
 
 foreach m : nk_modules
@@ -124,9 +125,39 @@ if bindings
 endif
 
 nk_lib = static_library('nkutils', nk_sources, c_args: nk_args, dependencies: nk_deps)
-nk_inc = include_directories('src')
+nk_inc = include_directories('.', 'src')
+nk_src = []
 
-libnkutils = declare_dependency(link_with: nk_lib, include_directories: nk_inc, dependencies: nk_deps)
+if meson.is_subproject()
+    nk_git_work_tree = get_option('git-work-tree')
+else
+    nk_git_work_tree = meson.source_root()
+endif
+
+if nk_git_work_tree != ''
+    nk_options += 'git-work-tree=@0@'.format(nk_git_work_tree)
+    nk_git = find_program('git', required: false)
+    if not nk_git.found()
+        nk_git = ''
+    endif
+
+    nk_git_version = executable('nk-git-version', files('src/git-version.c'), dependencies: dependency('glib-2.0', native: true), native: true)
+    nk_src += custom_target('nkutils-git-version.h',
+        output: 'nkutils-git-version.h',
+        command: [ nk_git_version, 'header', '@OUTPUT@', nk_git_work_tree, join_paths(nk_git_work_tree, '.git'), nk_git ],
+        build_always: true,
+        build_by_default: not meson.is_subproject(),
+    )
+
+    nkutils_mandepends += custom_target('nkutils-git-version.ent',
+        output: 'nkutils-git-version.ent',
+        command: [ nk_git_version, 'entity', '@OUTPUT@', nk_git_work_tree, join_paths(nk_git_work_tree, '.git'), nk_git ],
+        build_always: true,
+        build_by_default: not meson.is_subproject(),
+    )
+endif
+
+libnkutils = declare_dependency(link_with: nk_lib, include_directories: nk_inc, dependencies: nk_deps, sources: nk_src)
 
 
 if token
