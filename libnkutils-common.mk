@@ -40,7 +40,10 @@ NKUTILS_CFLAGS = \
 	$(_NKUTILS_INTERNAL_GOBJECT_CFLAGS) \
 	$(_NKUTILS_INTERNAL_GLIB_CFLAGS)
 
-_NKUTILS_INTERNAL_CFLAGS =
+_NKUTILS_INTERNAL_CFLAGS = \
+	-DSYSCONFDIR=\"$(sysconfdir)\" \
+	-DDATADIR=\"$(datadir)\" \
+	$(null)
 
 NKUTILS_LIBS = \
 	$(_libnkutils_library) \
@@ -121,14 +124,19 @@ _libnkutils_tests += \
 	%D%/tests/colour.test
 endif
 
+if NK_ENABLE_XDG_DE
+_libnkutils_sources += \
+	%D%/src/xdg-de.c \
+	%D%/src/nkutils-xdg-de.h
+
+_libnkutils_tests += \
+	%D%/tests/xdg-de.test
+endif
+
 if NK_ENABLE_XDG_THEME
 _libnkutils_sources += \
 	%D%/src/xdg-theme.c \
 	%D%/src/nkutils-xdg-theme.h
-
-_NKUTILS_INTERNAL_CFLAGS += \
-	-DSYSCONFDIR=\"$(sysconfdir)\" \
-	-DDATADIR=\"$(datadir)\"
 
 _libnkutils_tests += \
 	%D%/tests/xdg-theme.test
