@@ -9,17 +9,16 @@ compiler:
 addons:
     apt:
         packages:
+            - python3-pip
             - libglib2.0-dev
-            # Workaround
-            - libaprutil1-dev
-            #- uuid-dev
+            - uuid-dev
             - libxkbcommon-dev
             - gnome-icon-theme-extras
             - gnome-icon-theme-symbolic
             - sound-theme-freedesktop
             - pidgin-data
 install:
-    - pip3 install meson
+    - pip3 install --user meson
     - wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip
     - unzip ninja-linux.zip
     - export PATH=$(pwd):$PATH
