@@ -43,7 +43,7 @@
 
 typedef struct {
     GRegex *regex;
-    const gchar *replacement;
+    NkTokenList *replacement;
 } NkTokenRegex;
 
 typedef struct {
@@ -52,8 +52,8 @@ typedef struct {
     const gchar *key;
     gint64 index;
     guint64 value;
-    const gchar *fallback;
-    const gchar *substitute;
+    NkTokenList *fallback;
+    NkTokenList *substitute;
     NkTokenRegex *replace;
     gboolean no_data;
 } NkToken;
@@ -213,17 +213,25 @@ nk_token_list_parse(gchar *string, GError **error)
             case ':':
             {
                 gchar *m = w++;
+                *e = '\0';
+
                 switch ( g_utf8_get_char(w) )
                 {
                 case '-':
-                    token.fallback = ++w;
+                    token.fallback = nk_token_list_parse(++w, error);
+                    if ( token.fallback == NULL )
+                        goto fail;
                 break;
                 case '+':
-                    token.substitute = ++w;
+                    token.substitute = nk_token_list_parse(++w, error);
+                    if ( token.substitute == NULL )
+                        goto fail;
                 break;
                 case '!':
                     token.no_data = TRUE;
-                    token.fallback = ++w;
+                    token.fallback = nk_token_list_parse(++w, error);
+                    if ( token.fallback == NULL )
+                        goto fail;
                 break;
                 default:
                     /* Just fail on malformed string */
@@ -261,7 +269,9 @@ nk_token_list_parse(gchar *string, GError **error)
                     }
 
                     w = w + strlen(w) + 1;
-                    token.replace[c].replacement = ( w > e ) ? "" : w;
+                    token.replace[c].replacement = nk_token_list_parse(( w > e ) ? "" : w, error);
+                    if ( token.replace[c].replacement == NULL )
+                        goto fail;
                     w += strlen(w);
                     ++c;
                 } while ( w < e );
@@ -362,6 +372,34 @@ nk_token_list_ref(NkTokenList *self)
     return self;
 }
 
+static void
+_nk_token_list_free(NkTokenList *self)
+{
+
+    gsize i;
+    for ( i = 0 ; i < self->size ; ++i )
+    {
+        if ( self->tokens[i].substitute != NULL)
+            _nk_token_list_free(self->tokens[i].substitute);
+        else if ( self->tokens[i].replace != NULL )
+        {
+            NkTokenRegex *regex;
+            for ( regex = self->tokens[i].replace ; regex->regex != NULL ; ++regex )
+            {
+                g_regex_unref(regex->regex);
+                _nk_token_list_free(regex->replacement);
+            }
+            g_free(self->tokens[i].replace);
+        }
+        else if ( self->tokens[i].fallback != NULL )
+            _nk_token_list_free(self->tokens[i].fallback);
+    }
+
+    g_free(self->tokens);
+
+    g_free(self);
+}
+
 void
 nk_token_list_unref(NkTokenList *self)
 {
@@ -369,34 +407,14 @@ nk_token_list_unref(NkTokenList *self)
     if ( --self->ref_count > 0 )
         return;
 
-    gsize i;
-    for ( i = 0 ; i < self->size ; ++i )
-    {
-        if ( self->tokens[i].replace != NULL )
-        {
-            NkTokenRegex *regex;
-            for ( regex = self->tokens[i].replace ; regex->regex != NULL ; ++regex )
-                g_regex_unref(regex->regex);
-            g_free(self->tokens[i].replace);
-        }
-    }
-
-    g_free(self->tokens);
-
     g_free(self->string);
 
-    g_free(self);
+    _nk_token_list_free(self);
 }
 
-gchar *
-nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callback, gpointer user_data)
+static void
+_nk_token_list_replace(GString *string, const NkTokenList *self, NkTokenListReplaceCallback callback, gpointer user_data)
 {
-    g_return_val_if_fail(self != NULL, NULL);
-    g_return_val_if_fail(callback != NULL, NULL);
-
-    GString *string;
-    string = g_string_sized_new(self->length);
-
     gsize i;
     for ( i = 0 ; i < self->size ; ++i )
     {
@@ -411,7 +429,7 @@ nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callba
         if ( data != NULL )
         {
             if ( self->tokens[i].substitute != NULL)
-                g_string_append(string, self->tokens[i].substitute);
+                _nk_token_list_replace(string, self->tokens[i].substitute, callback, user_data);
             else if ( self->tokens[i].replace != NULL )
             {
                 NkTokenRegex *regex;
@@ -419,7 +437,10 @@ nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callba
                 for ( regex = self->tokens[i].replace ; regex->regex != NULL ; ++regex )
                 {
                     gchar *tmp = n;
-                    n = g_regex_replace(regex->regex, data, -1, 0, regex->replacement, 0, NULL);
+                    gchar *replacement;
+                    replacement = nk_token_list_replace(regex->replacement, callback, user_data);
+                    n = g_regex_replace(regex->regex, data, -1, 0, replacement, 0, NULL);
+                    g_free(replacement);
                     g_free(tmp);
                     if ( n == NULL )
                         break;
@@ -433,8 +454,20 @@ nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callba
                 g_string_append(string, data);
         }
         else if ( self->tokens[i].fallback != NULL )
-            g_string_append(string, self->tokens[i].fallback);
+            _nk_token_list_replace(string, self->tokens[i].fallback, callback, user_data);
     }
+}
+
+gchar *
+nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callback, gpointer user_data)
+{
+    g_return_val_if_fail(self != NULL, NULL);
+    g_return_val_if_fail(callback != NULL, NULL);
+
+    GString *string;
+    string = g_string_sized_new(self->length);
+
+    _nk_token_list_replace(string, self, callback, user_data);
 
     return g_string_free(string, FALSE);
 }

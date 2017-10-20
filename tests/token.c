@@ -223,6 +223,17 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/fallback/recurse",
+        .data = {
+            .source = "I want to eat ${fruit:-${vegetable}}.",
+            .data = {
+                { .token = "vegetable", .content = "a zucchini" },
+                { .token = NULL }
+            },
+            .result = "I want to eat a zucchini."
+        }
+    },
+    {
         .testpath = "/nkutils/token/substitute/with",
         .data = {
             .source = "You can make a ${adjective:+(}${adjective}${adjective:+) }${recipe} with ${fruit}${addition:+ and }${addition}.",
@@ -455,6 +466,18 @@ static const struct {
                 { .token = NULL }
             },
             .result = "}"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/replace/recurse/with",
+        .data = {
+            .source = "I want to eat ${recipe/an apple/${fruit}}.",
+            .data = {
+                { .token = "recipe", .content = "an apple pie" },
+                { .token = "fruit", .content = "a blackberry" },
+                { .token = NULL }
+            },
+            .result = "I want to eat a blackberry pie."
         }
     },
     {
