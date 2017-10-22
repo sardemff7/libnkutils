@@ -208,6 +208,19 @@ endif
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)
 
+# xdg-de
+%C%_tests_xdg_de_test_SOURCES = \
+	%D%/tests/xdg-de.c
+
+%C%_tests_xdg_de_test_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(NKUTILS_CFLAGS) \
+	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
+
+%C%_tests_xdg_de_test_LDADD = \
+	$(NKUTILS_LIBS) \
+	$(_NKUTILS_INTERNAL_TEST_LIBS)
+
 # xdg-theme
 %C%_tests_xdg_theme_test_SOURCES = \
 	%D%/tests/xdg-theme.c
