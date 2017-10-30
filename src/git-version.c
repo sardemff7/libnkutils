@@ -183,6 +183,26 @@ _nk_git_version_make_entity(NkGitVersionInfo *info)
     return g_string_free(string, FALSE);
 }
 
+static gchar *
+_nk_git_version_make_simple(NkGitVersionInfo *info)
+{
+    GString *string;
+
+    string = g_string_sized_new(100);
+
+    if ( info->commit == NULL )
+        g_string_append(string, "\n");
+    else
+        g_string_append_printf(string, "%s\n", info->commit);
+
+    if ( info->branch == NULL )
+        g_string_append(string, "\n");
+    else
+        g_string_append_printf(string, "%s\n", info->branch);
+
+    return g_string_free(string, FALSE);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -204,7 +224,9 @@ main(int argc, char *argv[])
         .commit = NULL,
     };
 
-    if ( g_file_test(out_file, G_FILE_TEST_IS_REGULAR) )
+    if ( g_strcmp0(out_file, "-") == 0 )
+        out_file = NULL;
+    else if ( g_file_test(out_file, G_FILE_TEST_IS_REGULAR) )
     {
         if ( ! g_file_get_contents(out_file, &old_contents, NULL, &error) )
         {
@@ -249,6 +271,9 @@ main(int argc, char *argv[])
     case 'e':
         new_contents = _nk_git_version_make_entity(&info);
     break;
+    case 's':
+        new_contents = _nk_git_version_make_simple(&info);
+    break;
     default:
         ret = 5;
         g_warning("Wrong output type: %s", out_type);
@@ -257,7 +282,9 @@ main(int argc, char *argv[])
 
     if ( g_strcmp0(old_contents, new_contents) != 0 )
     {
-        if ( ! g_file_set_contents(out_file, new_contents, -1, &error) )
+        if ( out_file == NULL )
+            g_print(new_contents);
+        else if ( ! g_file_set_contents(out_file, new_contents, -1, &error) )
         {
             g_warning("Could not write new git version file: %s", error->message);
             ret = 11;
