@@ -27,6 +27,8 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include <locale.h>
+
 #ifdef G_LOG_DOMAIN
 #undef G_LOG_DOMAIN
 #endif /* G_LOG_DOMAIN */
@@ -39,6 +41,27 @@
 int
 main(int argc, char *argv[])
 {
+    setlocale(LC_ALL, "");
+
+    gint size = 0;
+    GOptionEntry entries[] =
+    {
+        { "size", 's', 0, G_OPTION_ARG_INT,     &size,  "Icon size", NULL },
+        { .long_name = NULL }
+    };
+
+    GError *error = NULL;
+    GOptionContext *option_context;
+
+    option_context = g_option_context_new("<icon name> [<theme name>…] - example utilise for libnkutils xdg-theme module");
+    g_option_context_add_main_entries(option_context, entries, NULL);
+    if ( ! g_option_context_parse(option_context, &argc, &argv, &error) )
+    {
+        g_warning("Option parsing failed: %s\n", error->message);
+        return 1;
+    }
+    g_option_context_free(option_context);
+
     if ( argc < 2 )
     {
         g_warning("You must provide an icon name");
@@ -50,7 +73,7 @@ main(int argc, char *argv[])
     gchar *icon;
 
     context = nk_xdg_theme_context_new(NULL, NULL);
-    icon = nk_xdg_theme_get_icon(context, themes, NULL, argv[1], 0, 1, TRUE);
+    icon = nk_xdg_theme_get_icon(context, themes, NULL, argv[1], size, 1, TRUE);
 
     g_print("%s\n", icon);
 
