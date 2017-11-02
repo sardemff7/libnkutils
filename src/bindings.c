@@ -168,15 +168,8 @@ nk_bindings_new(guint64 double_click_delay)
     switch ( nk_xdg_de_detect() )
     {
     case NK_XDG_DE_NONE:
-    break;
     case NK_XDG_DE_GNOME:
-    {
-        const gchar *gtk_settings_keys[NK_GTK_SETTINGS_NUM_VERSION] = {
-            "gtk-double-click-time",
-            "gtk-double-click-time",
-        };
-        nk_gtk_settings_get_uint64(&self->double_click_delay, gtk_settings_keys);
-    }
+        /* Just use the GTK+ settings fallback */
     break;
     case NK_XDG_DE_KDE:
     {
@@ -193,6 +186,14 @@ nk_bindings_new(guint64 double_click_delay)
     }
     break;
     }
+
+    /* Always fallback to the GTK+ settings */
+    const gchar *gtk_settings_keys[NK_GTK_SETTINGS_NUM_VERSION] = {
+        "gtk-double-click-time",
+        "gtk-double-click-time",
+    };
+    if ( self->double_click_delay < 1 )
+        nk_gtk_settings_get_uint64(&self->double_click_delay, gtk_settings_keys);
 
     /* If nothing better, use the application value */
     if ( self->double_click_delay < 1 )
