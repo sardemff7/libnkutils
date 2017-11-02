@@ -57,7 +57,7 @@ nk_dependencies = [
 
 nk_sources = []
 nk_args = [
-    '-DSRCDIR="@0@"'.format(meson.source_root()),
+    '-DSRCDIR="@0@"'.format(meson.current_source_dir()),
     '-DSYSCONFDIR="@0@"'.format(join_paths(get_option('prefix'), get_option('sysconfdir'))),
     '-DDATADIR="@0@"'.format(join_paths(get_option('prefix'), get_option('datadir'))),
 ]
