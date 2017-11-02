@@ -61,7 +61,7 @@ m4_define([_NK_MODULES], [uuid enum token colour gtk-settings xdg-de xdg-theme b
 
 # auto-enable
 m4_define([_nk_dependent_enum], [token xdg-de xdg-theme bindings])
-m4_define([_nk_dependent_gtk_settings], [bindings])
+m4_define([_nk_dependent_gtk_settings], [xdg-theme bindings])
 m4_define([_nk_dependent_xdg_de], [xdg-theme bindings])
 
 

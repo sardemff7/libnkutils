@@ -48,6 +48,7 @@ nk_dependencies = [
     [ 'token', 'enum' ],
     [ 'xdg-de', 'enum' ],
     [ 'xdg-theme', 'enum' ],
+    [ 'xdg-theme', 'gtk-settings' ],
     [ 'xdg-theme', 'xdg-de' ],
     [ 'bindings', 'enum' ],
     [ 'bindings', 'gtk-settings' ],

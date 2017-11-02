@@ -40,6 +40,7 @@
 #include <gio/gio.h>
 
 #include "nkutils-enum.h"
+#include "nkutils-gtk-settings.h"
 #include "nkutils-xdg-de.h"
 #include "nkutils-xdg-theme.h"
 
@@ -80,6 +81,7 @@ typedef struct {
     gchar *de_theme;
     gpointer de_data;
     GDestroyNotify de_notify;
+    gchar *gtk_theme;
 } NkXdgThemeTypeContext;
 
 struct _NkXdgThemeContext {
@@ -272,6 +274,12 @@ _nk_xdg_theme_de_theme_hook(NkXdgThemeTypeContext *self)
         }
     break;
     }
+
+    const gchar *gtk_settings_keys[NK_GTK_SETTINGS_NUM_VERSION] = {
+        "gtk-icon-theme-name",
+        "gtk-icon-theme-name",
+    };
+    nk_gtk_settings_get_string(&self->gtk_theme, gtk_settings_keys);
 }
 
 static void
@@ -674,6 +682,7 @@ nk_xdg_theme_context_free(NkXdgThemeContext *context)
     {
         NkXdgThemeTypeContext *self = &context->types[type];
 
+        g_free(self->gtk_theme);
         if ( self->de_notify != NULL )
             self->de_notify(self->de_data);
         g_free(self->de_theme);
@@ -715,6 +724,13 @@ _nk_xdg_theme_foreach_theme(NkXdgThemeTypeContext *self, const gchar * const *th
     if ( self->de_theme != NULL )
     {
         theme = _nk_xdg_theme_get_theme(self, self->de_theme);
+        if ( ( theme != NULL ) && callback(theme, data, ret) )
+            return TRUE;
+    }
+
+    if ( self->gtk_theme != NULL )
+    {
+        theme = _nk_xdg_theme_get_theme(self, self->gtk_theme);
         if ( ( theme != NULL ) && callback(theme, data, ret) )
             return TRUE;
     }
