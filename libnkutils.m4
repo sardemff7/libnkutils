@@ -56,11 +56,12 @@ AC_DEFUN([NK_ENABLE_MODULES], [
     m4_map_args_w([$1], [_NK_ENABLE_MODULE(], [)])
 ])
 
-m4_define([_NK_MODULES], [uuid enum token colour xdg-de xdg-theme bindings])
+m4_define([_NK_MODULES], [uuid enum token colour gtk-settings xdg-de xdg-theme bindings])
 
 
 # auto-enable
 m4_define([_nk_dependent_enum], [token xdg-de xdg-theme bindings])
+m4_define([_nk_dependent_gtk_settings], [bindings])
 m4_define([_nk_dependent_xdg_de], [xdg-theme bindings])
 
 

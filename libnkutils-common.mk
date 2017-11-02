@@ -41,6 +41,7 @@ NKUTILS_CFLAGS = \
 	$(_NKUTILS_INTERNAL_GLIB_CFLAGS)
 
 _NKUTILS_INTERNAL_CFLAGS = \
+	-DSRCDIR=\"$(srcdir)/%D%\" \
 	-DSYSCONFDIR=\"$(sysconfdir)\" \
 	-DDATADIR=\"$(datadir)\" \
 	$(null)
@@ -124,6 +125,15 @@ _libnkutils_tests += \
 	%D%/tests/colour.test
 endif
 
+if NK_ENABLE_GTK_SETTINGS
+_libnkutils_sources += \
+	%D%/src/gtk-settings.c \
+	%D%/src/nkutils-gtk-settings.h
+
+_libnkutils_tests += \
+	%D%/tests/gtk-settings.test
+endif
+
 if NK_ENABLE_XDG_DE
 _libnkutils_sources += \
 	%D%/src/xdg-de.c \
@@ -205,6 +215,19 @@ endif
 	$(_NKUTILS_INTERNAL_CFLAGS)
 
 %C%_tests_uuid_test_LDADD = \
+	$(NKUTILS_LIBS) \
+	$(_NKUTILS_INTERNAL_TEST_LIBS)
+
+# gtk-settings
+%C%_tests_gtk_settings_test_SOURCES = \
+	%D%/tests/gtk-settings.c
+
+%C%_tests_gtk_settings_test_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(NKUTILS_CFLAGS) \
+	$(_NKUTILS_INTERNAL_CFLAGS)
+
+%C%_tests_gtk_settings_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)
 

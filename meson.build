@@ -37,6 +37,7 @@ nk_options = []
 nk_modules = [
     'uuid',
     'token',
+    'gtk-settings',
     'xdg-de',
     'xdg-theme',
     'enum',
@@ -49,11 +50,13 @@ nk_dependencies = [
     [ 'xdg-theme', 'enum' ],
     [ 'xdg-theme', 'xdg-de' ],
     [ 'bindings', 'enum' ],
+    [ 'bindings', 'gtk-settings' ],
     [ 'bindings', 'xdg-de' ],
 ]
 
 nk_sources = []
 nk_args = [
+    '-DSRCDIR="@0@"'.format(meson.source_root()),
     '-DSYSCONFDIR="@0@"'.format(join_paths(get_option('prefix'), get_option('sysconfdir'))),
     '-DDATADIR="@0@"'.format(join_paths(get_option('prefix'), get_option('datadir'))),
 ]
