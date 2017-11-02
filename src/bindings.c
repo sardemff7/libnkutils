@@ -169,6 +169,7 @@ nk_bindings_new(guint64 double_click_delay)
     {
     case NK_XDG_DE_NONE:
     case NK_XDG_DE_GNOME:
+    case NK_XDG_DE_I3:
         /* Just use the GTK+ settings fallback */
     break;
     case NK_XDG_DE_KDE:

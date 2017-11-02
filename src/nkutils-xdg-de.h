@@ -30,6 +30,7 @@ typedef enum {
     NK_XDG_DE_NONE = 0,
     NK_XDG_DE_GNOME,
     NK_XDG_DE_KDE,
+    NK_XDG_DE_I3,
 } NkXdgDe;
 
 NkXdgDe nk_xdg_de_detect(void);

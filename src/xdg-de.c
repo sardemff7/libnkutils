@@ -41,18 +41,21 @@ static const gchar * const _nk_xdg_de_session_desktop_names[] = {
     [NK_XDG_DE_NONE] = "generic",
     [NK_XDG_DE_GNOME] = "GNOME",
     [NK_XDG_DE_KDE] = "KDE",
+    [NK_XDG_DE_I3] = "i3",
 };
 
 static const gchar * const _nk_xdg_de_current_session_names[] = {
     [NK_XDG_DE_NONE] = "X-Generic",
     [NK_XDG_DE_GNOME] = "GNOME",
     [NK_XDG_DE_KDE] = "KDE",
+    [NK_XDG_DE_I3] = "i3",
 };
 
 static const gchar * const _nk_xdg_de_desktop_session_names[] = {
     [NK_XDG_DE_NONE] = "generic",
     [NK_XDG_DE_GNOME] = "gnome",
     [NK_XDG_DE_KDE] = "kde",
+    [NK_XDG_DE_I3] = "i3",
 };
 
 NkXdgDe

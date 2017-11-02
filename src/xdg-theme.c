@@ -229,6 +229,7 @@ _nk_xdg_theme_de_theme_hook(NkXdgThemeTypeContext *self)
     switch ( nk_xdg_de_detect() )
     {
     case NK_XDG_DE_NONE:
+    case NK_XDG_DE_I3:
     break;
     case NK_XDG_DE_GNOME:
     {
