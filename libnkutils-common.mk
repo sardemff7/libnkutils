@@ -163,7 +163,7 @@ endif
 %C%_tests_enum_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
-	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
+	$(_NKUTILS_INTERNAL_CFLAGS)
 
 %C%_tests_enum_test_LDADD = \
 	$(NKUTILS_LIBS) \
@@ -176,7 +176,7 @@ endif
 %C%_tests_token_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
-	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
+	$(_NKUTILS_INTERNAL_CFLAGS)
 
 %C%_tests_token_test_LDADD = \
 	$(NKUTILS_LIBS) \
@@ -189,7 +189,7 @@ endif
 %C%_tests_colour_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
-	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
+	$(_NKUTILS_INTERNAL_CFLAGS)
 
 %C%_tests_colour_test_LDADD = \
 	$(NKUTILS_LIBS) \
@@ -202,7 +202,7 @@ endif
 %C%_tests_uuid_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
-	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
+	$(_NKUTILS_INTERNAL_CFLAGS)
 
 %C%_tests_uuid_test_LDADD = \
 	$(NKUTILS_LIBS) \
@@ -215,7 +215,7 @@ endif
 %C%_tests_xdg_de_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
-	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
+	$(_NKUTILS_INTERNAL_CFLAGS)
 
 %C%_tests_xdg_de_test_LDADD = \
 	$(NKUTILS_LIBS) \
@@ -228,7 +228,7 @@ endif
 %C%_tests_xdg_theme_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
-	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
+	$(_NKUTILS_INTERNAL_CFLAGS)
 
 %C%_tests_xdg_theme_test_LDADD = \
 	$(NKUTILS_LIBS) \
@@ -241,7 +241,7 @@ endif
 %C%_tests_bindings_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
-	$(_NKUTILS_INTERNAL_TEST_CFLAGS)
+	$(_NKUTILS_INTERNAL_CFLAGS)
 
 %C%_tests_bindings_test_LDADD = \
 	$(NKUTILS_LIBS) \
