@@ -229,19 +229,15 @@ _nk_bindings_try_gtk_settings(NkBindings *self)
 NkBindings *
 nk_bindings_new(guint64 double_click_delay)
 {
-    double_click_delay = ( double_click_delay < 1 ) ? NK_BINDINGS_DEFAULT_DOUBLE_CLICK_DELAY : double_click_delay;
-
     NkBindings *self;
     self = g_new0(NkBindings, 1);
 
     switch ( nk_xdg_de_detect() )
     {
     case NK_XDG_DE_NONE:
-        self->double_click_delay = double_click_delay;
     break;
     case NK_XDG_DE_GNOME:
-        if ( ! _nk_bindings_try_gtk_settings(self) )
-            self->double_click_delay = double_click_delay;
+        _nk_bindings_try_gtk_settings(self) )
     break;
     case NK_XDG_DE_KDE:
     {
@@ -252,23 +248,20 @@ nk_bindings_new(guint64 double_click_delay)
         settings = g_key_file_new();
 
         if ( g_key_file_load_from_file(settings, path, G_KEY_FILE_NONE, NULL) )
-        {
-            guint64 value;
-            GError *error = NULL;
-            value = g_key_file_get_uint64(settings, "KDE", "DoubleClickInterval", &error);
-            if ( error == NULL )
-                self->double_click_delay = value;
-            else
-            {
-                g_error_free(error);
-                self->double_click_delay = double_click_delay;
-            }
-        }
+            self->double_click_delay = g_key_file_get_uint64(settings, "KDE", "DoubleClickInterval", NULL);
         g_key_file_free(settings);
         g_free(path);
     }
     break;
     }
+
+    /* If nothing better, use the application value */
+    if ( self->double_click_delay < 1 )
+        self->double_click_delay = double_click_delay;
+
+    /* If nothing better, use the application value */
+    if ( self->double_click_delay < 1 )
+        self->double_click_delay = NK_BINDINGS_DEFAULT_DOUBLE_CLICK_DELAY;
 
     return self;
 }
