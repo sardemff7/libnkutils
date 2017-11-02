@@ -1,5 +1,5 @@
 /*
- * libnkutils/xdg-de - Miscellaneous utilities, XDG «DE module
+ * libnkutils/xdg-de - Miscellaneous utilities, XDG DE module
  *
  * Copyright © 2011-2017 Quentin "Sardem FF7" Glidic
  *
@@ -23,15 +23,15 @@
  *
  */
 
-#ifndef __NK_UTILS_DE_H__
-#define __NK_UTILS_DE_H__
+#ifndef __NK_UTILS_XDG_DE_H__
+#define __NK_UTILS_XDG_DE_H__
 
 typedef enum {
-    NK_DE_NONE = 0,
-    NK_DE_GNOME,
-    NK_DE_KDE,
-} NkXdgDE;
+    NK_XDG_DE_NONE = 0,
+    NK_XDG_DE_GNOME,
+    NK_XDG_DE_KDE,
+} NkXdgDe;
 
-NkXdgDE nk_xdg_de_detect(void);
+NkXdgDe nk_xdg_de_detect(void);
 
-#endif /* __NK_UTILS_DE_H__ */
+#endif /* __NK_UTILS_XDG_DE_H__ */

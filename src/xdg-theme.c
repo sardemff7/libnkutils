@@ -226,9 +226,9 @@ _nk_xdg_theme_de_theme_hook(NkXdgThemeTypeContext *self)
 {
     switch ( nk_xdg_de_detect() )
     {
-    case NK_DE_NONE:
+    case NK_XDG_DE_NONE:
     break;
-    case NK_DE_GNOME:
+    case NK_XDG_DE_GNOME:
     {
         const NkXdgThemeGnomeSettings *settings = &_nk_xdg_theme_gnome_settings[self->type];
         GSettingsSchemaSource *schema_source;
@@ -250,7 +250,7 @@ _nk_xdg_theme_de_theme_hook(NkXdgThemeTypeContext *self)
         self->de_notify = g_object_unref;
     }
     break;
-    case NK_DE_KDE:
+    case NK_XDG_DE_KDE:
         switch ( self->type )
         {
         case TYPE_ICON:

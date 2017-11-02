@@ -236,14 +236,14 @@ nk_bindings_new(gint64 double_click_delay)
 
     switch ( nk_xdg_de_detect() )
     {
-    case NK_DE_NONE:
+    case NK_XDG_DE_NONE:
         self->double_click_delay = double_click_delay;
     break;
-    case NK_DE_GNOME:
+    case NK_XDG_DE_GNOME:
         if ( ! _nk_bindings_try_gtk_settings(self) )
             self->double_click_delay = double_click_delay;
     break;
-    case NK_DE_KDE:
+    case NK_XDG_DE_KDE:
     {
         gchar *path;
         GKeyFile *settings;

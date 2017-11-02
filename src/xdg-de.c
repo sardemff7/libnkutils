@@ -30,7 +30,7 @@
 #ifdef G_LOG_DOMAIN
 #undef G_LOG_DOMAIN
 #endif /* G_LOG_DOMAIN */
-#define G_LOG_DOMAIN "libnkutils-de"
+#define G_LOG_DOMAIN "libnkutils-xdg-de"
 
 #include <glib.h>
 
@@ -38,28 +38,28 @@
 #include "nkutils-xdg-de.h"
 
 static const gchar * const _nk_xdg_de_session_desktop_names[] = {
-    [NK_DE_NONE] = "generic",
-    [NK_DE_GNOME] = "GNOME",
-    [NK_DE_KDE] = "KDE",
+    [NK_XDG_DE_NONE] = "generic",
+    [NK_XDG_DE_GNOME] = "GNOME",
+    [NK_XDG_DE_KDE] = "KDE",
 };
 
 static const gchar * const _nk_xdg_de_current_session_names[] = {
-    [NK_DE_NONE] = "X-Generic",
-    [NK_DE_GNOME] = "GNOME",
-    [NK_DE_KDE] = "KDE",
+    [NK_XDG_DE_NONE] = "X-Generic",
+    [NK_XDG_DE_GNOME] = "GNOME",
+    [NK_XDG_DE_KDE] = "KDE",
 };
 
 static const gchar * const _nk_xdg_de_desktop_session_names[] = {
-    [NK_DE_NONE] = "generic",
-    [NK_DE_GNOME] = "gnome",
-    [NK_DE_KDE] = "kde",
+    [NK_XDG_DE_NONE] = "generic",
+    [NK_XDG_DE_GNOME] = "gnome",
+    [NK_XDG_DE_KDE] = "kde",
 };
 
-NkXdgDE
+NkXdgDe
 nk_xdg_de_detect(void)
 {
-    static NkXdgDE _nk_xdg_de = NK_DE_NONE - 1;
-    if ( _nk_xdg_de != (NkXdgDE) ( NK_DE_NONE - 1 ) )
+    static NkXdgDe _nk_xdg_de = NK_XDG_DE_NONE - 1;
+    if ( _nk_xdg_de != (NkXdgDe) ( NK_XDG_DE_NONE - 1 ) )
         return _nk_xdg_de;
 
     const gchar *var;
@@ -82,14 +82,14 @@ nk_xdg_de_detect(void)
     var = g_getenv("GNOME_DESKTOP_SESSION_ID");
     if ( ( var != NULL ) && ( *var != '\0' ) )
     {
-        _nk_xdg_de = NK_DE_GNOME;
+        _nk_xdg_de = NK_XDG_DE_GNOME;
         return _nk_xdg_de;
     }
 
     var = g_getenv("KDE_FULL_SESSION");
     if ( ( var != NULL ) && ( *var != '\0' ) )
     {
-        _nk_xdg_de = NK_DE_KDE;
+        _nk_xdg_de = NK_XDG_DE_KDE;
         return _nk_xdg_de;
     }
 
@@ -100,6 +100,6 @@ nk_xdg_de_detect(void)
         return _nk_xdg_de;
     }
 
-    _nk_xdg_de = NK_DE_NONE;
+    _nk_xdg_de = NK_XDG_DE_NONE;
     return _nk_xdg_de;
 }

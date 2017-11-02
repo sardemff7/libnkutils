@@ -36,19 +36,19 @@
 typedef struct {
     const gchar *var;
     const gchar *value;
-    NkXdgDE de;
-} NkXdgDETestData;
+    NkXdgDe de;
+} NkXdgDeTestData;
 
 static const struct {
     const gchar *testpath;
-    NkXdgDETestData data;
+    NkXdgDeTestData data;
 } _nk_xdg_de_tests_list[] = {
     {
         .testpath = "/nkutils/xdg-de/XDG_SESSION_DESKTOP/generic",
         .data = {
             .var = "XDG_SESSION_DESKTOP",
             .value = "generic",
-            .de = NK_DE_NONE,
+            .de = NK_XDG_DE_NONE,
         }
     },
     {
@@ -56,7 +56,7 @@ static const struct {
         .data = {
             .var = "XDG_SESSION_DESKTOP",
             .value = "GNOME",
-            .de = NK_DE_GNOME,
+            .de = NK_XDG_DE_GNOME,
         }
     },
     {
@@ -64,7 +64,7 @@ static const struct {
         .data = {
             .var = "XDG_SESSION_DESKTOP",
             .value = "gnome",
-            .de = NK_DE_GNOME,
+            .de = NK_XDG_DE_GNOME,
         }
     },
     {
@@ -72,7 +72,7 @@ static const struct {
         .data = {
             .var = "XDG_SESSION_DESKTOP",
             .value = "GNOME Flashback",
-            .de = NK_DE_GNOME,
+            .de = NK_XDG_DE_GNOME,
         }
     },
     {
@@ -80,7 +80,7 @@ static const struct {
         .data = {
             .var = "XDG_SESSION_DESKTOP",
             .value = "KDE",
-            .de = NK_DE_KDE,
+            .de = NK_XDG_DE_KDE,
         }
     },
     {
@@ -88,7 +88,7 @@ static const struct {
         .data = {
             .var = "XDG_SESSION_DESKTOP",
             .value = "WeirdDE",
-            .de = NK_DE_NONE,
+            .de = NK_XDG_DE_NONE,
         }
     },
     {
@@ -96,7 +96,7 @@ static const struct {
         .data = {
             .var = "XDG_CURRENT_DESKTOP",
             .value = "X-Generic",
-            .de = NK_DE_NONE,
+            .de = NK_XDG_DE_NONE,
         }
     },
     {
@@ -104,7 +104,7 @@ static const struct {
         .data = {
             .var = "XDG_CURRENT_DESKTOP",
             .value = "GNOME",
-            .de = NK_DE_GNOME,
+            .de = NK_XDG_DE_GNOME,
         }
     },
     {
@@ -112,7 +112,7 @@ static const struct {
         .data = {
             .var = "XDG_CURRENT_DESKTOP",
             .value = "gnome",
-            .de = NK_DE_NONE,
+            .de = NK_XDG_DE_NONE,
         }
     },
     {
@@ -120,7 +120,7 @@ static const struct {
         .data = {
             .var = "XDG_CURRENT_DESKTOP",
             .value = "KDE",
-            .de = NK_DE_KDE,
+            .de = NK_XDG_DE_KDE,
         }
     },
     {
@@ -128,7 +128,7 @@ static const struct {
         .data = {
             .var = "XDG_CURRENT_DESKTOP",
             .value = "WeirdDE",
-            .de = NK_DE_NONE,
+            .de = NK_XDG_DE_NONE,
         }
     },
     {
@@ -136,7 +136,7 @@ static const struct {
         .data = {
             .var = "GNOME_DESKTOP_SESSION_ID",
             .value = "1",
-            .de = NK_DE_GNOME,
+            .de = NK_XDG_DE_GNOME,
         }
     },
     {
@@ -144,7 +144,7 @@ static const struct {
         .data = {
             .var = "KDE_FULL_SESSION",
             .value = "1",
-            .de = NK_DE_KDE,
+            .de = NK_XDG_DE_KDE,
         }
     },
     {
@@ -152,7 +152,7 @@ static const struct {
         .data = {
             .var = "DESKTOP_SESSION",
             .value = "generic",
-            .de = NK_DE_NONE,
+            .de = NK_XDG_DE_NONE,
         }
     },
     {
@@ -160,7 +160,7 @@ static const struct {
         .data = {
             .var = "DESKTOP_SESSION",
             .value = "gnome",
-            .de = NK_DE_GNOME,
+            .de = NK_XDG_DE_GNOME,
         }
     },
     {
@@ -168,7 +168,7 @@ static const struct {
         .data = {
             .var = "DESKTOP_SESSION",
             .value = "GNOME",
-            .de = NK_DE_NONE,
+            .de = NK_XDG_DE_NONE,
         }
     },
     {
@@ -176,7 +176,7 @@ static const struct {
         .data = {
             .var = "DESKTOP_SESSION",
             .value = "kde",
-            .de = NK_DE_KDE,
+            .de = NK_XDG_DE_KDE,
         }
     },
     {
@@ -184,7 +184,7 @@ static const struct {
         .data = {
             .var = "DESKTOP_SESSION",
             .value = "weirdde",
-            .de = NK_DE_NONE,
+            .de = NK_XDG_DE_NONE,
         }
     },
 };
@@ -192,11 +192,11 @@ static const struct {
 static void
 _nk_xdg_de_tests_func(gconstpointer user_data)
 {
-    const NkXdgDETestData *data = user_data;
+    const NkXdgDeTestData *data = user_data;
 
     if ( g_test_subprocess() )
     {
-        NkXdgDE de;
+        NkXdgDe de;
         g_setenv(data->var, data->value, TRUE);
         de = nk_xdg_de_detect();
         g_assert_cmpint(de, ==, data->de);
