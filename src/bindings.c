@@ -227,9 +227,9 @@ _nk_bindings_try_gtk_settings(NkBindings *self)
 }
 
 NkBindings *
-nk_bindings_new(gint64 double_click_delay)
+nk_bindings_new(guint64 double_click_delay)
 {
-    double_click_delay = ( double_click_delay < 0 ) ? NK_BINDINGS_DEFAULT_DOUBLE_CLICK_DELAY : double_click_delay;
+    double_click_delay = ( double_click_delay < 1 ) ? NK_BINDINGS_DEFAULT_DOUBLE_CLICK_DELAY : double_click_delay;
 
     NkBindings *self;
     self = g_new0(NkBindings, 1);

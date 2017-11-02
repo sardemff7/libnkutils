@@ -62,7 +62,7 @@ typedef enum {
 #define NK_BINDINGS_ERROR (nk_bindings_error())
 GQuark nk_bindings_error(void);
 
-NkBindings *nk_bindings_new(gint64 double_click_delay);
+NkBindings *nk_bindings_new(guint64 double_click_delay);
 void nk_bindings_free(NkBindings *bindings);
 
 typedef gboolean (*NkBindingsCallback)(guint64 scope, gpointer target, gpointer user_data);
