@@ -44,6 +44,54 @@ static const struct {
     NkXdgDeTestData data;
 } _nk_xdg_de_tests_list[] = {
     {
+        .testpath = "/nkutils/xdg-de/XDG_CURRENT_DESKTOP/generic",
+        .data = {
+            .var = "XDG_CURRENT_DESKTOP",
+            .value = "X-Generic",
+            .de = NK_XDG_DE_NONE,
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-de/XDG_CURRENT_DESKTOP/gnome/case-match",
+        .data = {
+            .var = "XDG_CURRENT_DESKTOP",
+            .value = "GNOME",
+            .de = NK_XDG_DE_GNOME,
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-de/XDG_CURRENT_DESKTOP/gnome/multi-names",
+        .data = {
+            .var = "XDG_CURRENT_DESKTOP",
+            .value = "GNOME:GNOME-Flashback",
+            .de = NK_XDG_DE_GNOME,
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-de/XDG_CURRENT_DESKTOP/gnome/case-not-match",
+        .data = {
+            .var = "XDG_CURRENT_DESKTOP",
+            .value = "gnome",
+            .de = NK_XDG_DE_NONE,
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-de/XDG_CURRENT_DESKTOP/kde",
+        .data = {
+            .var = "XDG_CURRENT_DESKTOP",
+            .value = "KDE",
+            .de = NK_XDG_DE_KDE,
+        }
+    },
+    {
+        .testpath = "/nkutils/xdg-de/XDG_CURRENT_DESKTOP/unknown",
+        .data = {
+            .var = "XDG_CURRENT_DESKTOP",
+            .value = "WeirdDE",
+            .de = NK_XDG_DE_NONE,
+        }
+    },
+    {
         .testpath = "/nkutils/xdg-de/XDG_SESSION_DESKTOP/generic",
         .data = {
             .var = "XDG_SESSION_DESKTOP",
@@ -71,7 +119,7 @@ static const struct {
         .testpath = "/nkutils/xdg-de/XDG_SESSION_DESKTOP/gnome/flashback",
         .data = {
             .var = "XDG_SESSION_DESKTOP",
-            .value = "GNOME Flashback",
+            .value = "GNOME-Flashback",
             .de = NK_XDG_DE_GNOME,
         }
     },
@@ -87,46 +135,6 @@ static const struct {
         .testpath = "/nkutils/xdg-de/XDG_SESSION_DESKTOP/unknown",
         .data = {
             .var = "XDG_SESSION_DESKTOP",
-            .value = "WeirdDE",
-            .de = NK_XDG_DE_NONE,
-        }
-    },
-    {
-        .testpath = "/nkutils/xdg-de/XDG_CURRENT_DESKTOP/generic",
-        .data = {
-            .var = "XDG_CURRENT_DESKTOP",
-            .value = "X-Generic",
-            .de = NK_XDG_DE_NONE,
-        }
-    },
-    {
-        .testpath = "/nkutils/xdg-de/XDG_CURRENT_DESKTOP/gnome/case-match",
-        .data = {
-            .var = "XDG_CURRENT_DESKTOP",
-            .value = "GNOME",
-            .de = NK_XDG_DE_GNOME,
-        }
-    },
-    {
-        .testpath = "/nkutils/xdg-de/XDG_CURRENT_DESKTOP/gnome/case-not-match",
-        .data = {
-            .var = "XDG_CURRENT_DESKTOP",
-            .value = "gnome",
-            .de = NK_XDG_DE_NONE,
-        }
-    },
-    {
-        .testpath = "/nkutils/xdg-de/XDG_CURRENT_DESKTOP/kde",
-        .data = {
-            .var = "XDG_CURRENT_DESKTOP",
-            .value = "KDE",
-            .de = NK_XDG_DE_KDE,
-        }
-    },
-    {
-        .testpath = "/nkutils/xdg-de/XDG_CURRENT_DESKTOP/unknown",
-        .data = {
-            .var = "XDG_CURRENT_DESKTOP",
             .value = "WeirdDE",
             .de = NK_XDG_DE_NONE,
         }
