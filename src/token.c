@@ -143,25 +143,26 @@ nk_token_list_parse(gchar *string, GError **error)
     while ( ( w = g_utf8_strchr(w, self->length - ( w - self->string ), '$') ) != NULL )
     {
         gchar *b = w;
-        w = g_utf8_next_char(w);
-        if ( g_utf8_get_char(w) == '$' )
-        {
-            *w = '\0';
-            if ( *string != '\0' )
-            {
-                NkToken token = {
-                    .string = string
-                };
-                ++self->size;
-                self->tokens = g_renew(NkToken, self->tokens, self->size);
-                self->tokens[self->size - 1] = token;
-            }
-            string = ++w;
-            continue;
-        }
 
-        if ( g_utf8_get_char(w) != '{' )
-            continue;
+            w = g_utf8_next_char(w);
+            if ( g_utf8_get_char(w) == '$' )
+            {
+                *w = '\0';
+                if ( *string != '\0' )
+                {
+                    NkToken token = {
+                        .string = string
+                    };
+                    ++self->size;
+                    self->tokens = g_renew(NkToken, self->tokens, self->size);
+                    self->tokens[self->size - 1] = token;
+                }
+                string = ++w;
+                continue;
+            }
+
+            if ( g_utf8_get_char(w) != '{' )
+                continue;
 
         w = g_utf8_next_char(w);
         gchar *e;
