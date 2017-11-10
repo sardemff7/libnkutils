@@ -581,6 +581,18 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/enum/nested",
+        .data = {
+            .source = "I want to eat ${recipe:+${fruit} ${recipe}}.",
+            .data = {
+                [TOKEN_FRUIT]  = "an apple",
+                [TOKEN_RECIPE] = "pie",
+            },
+            .used_tokens = (1 << TOKEN_FRUIT) | (1 << TOKEN_RECIPE),
+            .result = "I want to eat an apple pie."
+        }
+    },
+    {
         .testpath = "/nkutils/token/enum/wrong/regex",
         .data = {
             .source = "You can make a ${recipe/[} with ${fruit}.",
