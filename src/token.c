@@ -146,6 +146,20 @@ nk_token_list_parse(gchar *string, GError **error)
         w = g_utf8_next_char(w);
         switch ( g_utf8_get_char(w) )
         {
+        case '$':
+        {
+            *w = '\0';
+            if ( *string != '\0' )
+            {
+                NkToken token = {
+                    .string = string
+                };
+                ++self->size;
+                self->tokens = g_renew(NkToken, self->tokens, self->size);
+                self->tokens[self->size - 1] = token;
+            }
+            string = ++w;
+        }
         case '{':
         {
             w = g_utf8_next_char(w);
@@ -299,20 +313,6 @@ nk_token_list_parse(gchar *string, GError **error)
 
             string = w = e + 1;
             break;
-        }
-        case '$':
-        {
-            *w = '\0';
-            if ( *string != '\0' )
-            {
-                NkToken token = {
-                    .string = string
-                };
-                ++self->size;
-                self->tokens = g_renew(NkToken, self->tokens, self->size);
-                self->tokens[self->size - 1] = token;
-            }
-            string = ++w;
         }
         default:
         break;
