@@ -162,157 +162,157 @@ nk_token_list_parse(gchar *string, GError **error)
         }
         case '{':
         {
+        w = g_utf8_next_char(w);
+        gchar *e;
+        NkToken token = {
+            .name = w
+        };
+
+        /* References are alpha/-/_ only */
+        while ( g_unichar_isalpha(g_utf8_get_char(w)) || ( g_utf8_get_char(w) == '-' ) || ( g_utf8_get_char(w) == '_' ) )
             w = g_utf8_next_char(w);
-            gchar *e;
-            NkToken token = {
-                .name = w
-            };
-
-            /* References are alpha/-/_ only */
-            while ( g_unichar_isalpha(g_utf8_get_char(w)) || ( g_utf8_get_char(w) == '-' ) || ( g_utf8_get_char(w) == '_' ) )
-                w = g_utf8_next_char(w);
 
 
-            e = _nk_token_strchr_escape(w, self->length - ( w - self->string ), '}', '{');
-            if ( e == NULL )
-                continue;
+        e = _nk_token_strchr_escape(w, self->length - ( w - self->string ), '}', '{');
+        if ( e == NULL )
+            continue;
 
-            if ( ( w != e ) && ( g_utf8_get_char(w) == '[' ) )
+        if ( ( w != e ) && ( g_utf8_get_char(w) == '[' ) )
+        {
+            gchar *ss = w;
+            const gchar *key = ++w;
+            gint64 index = 0;
+            if ( g_unichar_isdigit(g_utf8_get_char(w)) )
             {
-                gchar *ss = w;
-                const gchar *key = ++w;
-                gint64 index = 0;
-                if ( g_unichar_isdigit(g_utf8_get_char(w)) )
+                gchar *ie;
+                errno = 0;
+                key = "";
+                index = g_ascii_strtoll(w, &ie, 10);
+                if ( ( errno != 0 ) || ( w == ie ) )
                 {
-                    gchar *ie;
-                    errno = 0;
-                    key = "";
-                    index = g_ascii_strtoll(w, &ie, 10);
-                    if ( ( errno != 0 ) || ( w == ie ) )
-                    {
-                        g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_KEY, "Could not parse index value: %s", ss);
-                        goto fail;
-                    }
-                    w = ie;
-                }
-                else if ( g_unichar_isalpha(g_utf8_get_char(w)) )
-                {
-                    while ( g_unichar_isalpha(g_utf8_get_char(w)) || ( g_utf8_get_char(w) == '-' ) || ( g_utf8_get_char(w) == '_' ) )
-                        w = g_utf8_next_char(w);
-                }
-                else if ( g_utf8_get_char(w) == '@' )
-                {
-                    /* We consider the rest as a join token */
-                    while ( g_utf8_get_char(w) != ']' )
-                        w = g_utf8_next_char(w);
-                }
-                else
-                    w = ss;
-
-                if ( g_utf8_get_char(w) != ']' )
-                {
-                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_KEY, "Wrong key value: %s", ss);
+                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_KEY, "Could not parse index value: %s", ss);
                     goto fail;
                 }
+                w = ie;
+            }
+            else if ( g_unichar_isalpha(g_utf8_get_char(w)) )
+            {
+                while ( g_unichar_isalpha(g_utf8_get_char(w)) || ( g_utf8_get_char(w) == '-' ) || ( g_utf8_get_char(w) == '_' ) )
+                    w = g_utf8_next_char(w);
+            }
+            else if ( g_utf8_get_char(w) == '@' )
+            {
+                /* We consider the rest as a join token */
+                while ( g_utf8_get_char(w) != ']' )
+                    w = g_utf8_next_char(w);
+            }
+            else
+                w = ss;
 
-                *ss = '\0';
-                *w++ = '\0';
-                token.key = key;
-                token.index = index;
+            if ( g_utf8_get_char(w) != ']' )
+            {
+                g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_KEY, "Wrong key value: %s", ss);
+                goto fail;
             }
 
-            if ( w != e )
+            *ss = '\0';
+            *w++ = '\0';
+            token.key = key;
+            token.index = index;
+        }
+
+        if ( w != e )
+        switch ( g_utf8_get_char(w) )
+        {
+        case ':':
+        {
+            gchar *m = w++;
+            *e = '\0';
+
             switch ( g_utf8_get_char(w) )
             {
-            case ':':
-            {
-                gchar *m = w++;
-                *e = '\0';
-
-                switch ( g_utf8_get_char(w) )
-                {
-                case '-':
-                    token.fallback = nk_token_list_parse(++w, error);
-                    if ( token.fallback == NULL )
-                        goto fail;
-                break;
-                case '+':
-                    token.substitute = nk_token_list_parse(++w, error);
-                    if ( token.substitute == NULL )
-                        goto fail;
-                break;
-                case '!':
-                    token.no_data = TRUE;
-                    token.fallback = nk_token_list_parse(++w, error);
-                    if ( token.fallback == NULL )
-                        goto fail;
-                break;
-                default:
-                    /* Just fail on malformed string */
-                    *g_utf8_next_char(w) = '\0';
-                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_UNKNOWN_MODIFIER, "Wrong modifier value: %s", w);
+            case '-':
+                token.fallback = nk_token_list_parse(++w, error);
+                if ( token.fallback == NULL )
                     goto fail;
-                }
-                *m = '\0';
-            }
             break;
-            case '/':
-            {
-                gchar *m = w;
-                *e = '\0';
-
-                gsize c = 0;
-                do
-                {
-                    ++c;
-                    *m = '\0';
-                } while ( ( m = _nk_token_strchr_escape(m, e - m, '/', '\0') ) != NULL );
-                c = ( c + 1 ) / 2 + 1;
-
-                token.replace = g_new(NkTokenRegex, c);
-                c = 0;
-                do
-                {
-                    GError *_inner_error_ = NULL;
-                    token.replace[c].regex = g_regex_new(++w, G_REGEX_OPTIMIZE, 0, &_inner_error_);
-                    if ( token.replace[c].regex == NULL )
-                    {
-                        g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_REGEX, "Wrong regex: %s", _inner_error_->message);
-                        g_clear_error(&_inner_error_);
-                        goto fail;
-                    }
-
-                    w = w + strlen(w) + 1;
-                    token.replace[c].replacement = nk_token_list_parse(( w > e ) ? "" : w, error);
-                    if ( token.replace[c].replacement == NULL )
-                        goto fail;
-                    w += strlen(w);
-                    ++c;
-                } while ( w < e );
-                token.replace[c].regex = NULL;
-            }
+            case '+':
+                token.substitute = nk_token_list_parse(++w, error);
+                if ( token.substitute == NULL )
+                    goto fail;
+            break;
+            case '!':
+                token.no_data = TRUE;
+                token.fallback = nk_token_list_parse(++w, error);
+                if ( token.fallback == NULL )
+                    goto fail;
             break;
             default:
-                continue;
+                /* Just fail on malformed string */
+                *g_utf8_next_char(w) = '\0';
+                g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_UNKNOWN_MODIFIER, "Wrong modifier value: %s", w);
+                goto fail;
             }
+            *m = '\0';
+        }
+        break;
+        case '/':
+        {
+            gchar *m = w;
+            *e = '\0';
 
-            *e = *b = '\0';
-
-            ++self->size;
-            if ( *string != '\0' )
-                ++self->size;
-            self->tokens = g_renew(NkToken, self->tokens, self->size);
-            if ( *string != '\0' )
+            gsize c = 0;
+            do
             {
-                NkToken stoken = {
-                    .string = string
-                };
-                self->tokens[self->size - 2] = stoken;
-            }
-            self->tokens[self->size - 1] = token;
+                ++c;
+                *m = '\0';
+            } while ( ( m = _nk_token_strchr_escape(m, e - m, '/', '\0') ) != NULL );
+            c = ( c + 1 ) / 2 + 1;
 
-            string = w = e + 1;
-            break;
+            token.replace = g_new(NkTokenRegex, c);
+            c = 0;
+            do
+            {
+                GError *_inner_error_ = NULL;
+                token.replace[c].regex = g_regex_new(++w, G_REGEX_OPTIMIZE, 0, &_inner_error_);
+                if ( token.replace[c].regex == NULL )
+                {
+                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_REGEX, "Wrong regex: %s", _inner_error_->message);
+                    g_clear_error(&_inner_error_);
+                    goto fail;
+                }
+
+                w = w + strlen(w) + 1;
+                token.replace[c].replacement = nk_token_list_parse(( w > e ) ? "" : w, error);
+                if ( token.replace[c].replacement == NULL )
+                    goto fail;
+                w += strlen(w);
+                ++c;
+            } while ( w < e );
+            token.replace[c].regex = NULL;
+        }
+        break;
+        default:
+            continue;
+        }
+
+        *e = *b = '\0';
+
+        ++self->size;
+        if ( *string != '\0' )
+            ++self->size;
+        self->tokens = g_renew(NkToken, self->tokens, self->size);
+        if ( *string != '\0' )
+        {
+            NkToken stoken = {
+                .string = string
+            };
+            self->tokens[self->size - 2] = stoken;
+        }
+        self->tokens[self->size - 1] = token;
+
+        string = w = e + 1;
+        break;
         }
         default:
         break;
