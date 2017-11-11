@@ -41,8 +41,8 @@ typedef const gchar *(*NkTokenListReplaceCallback)(const gchar *token, guint64 v
 GQuark nk_token_error_quark(void);
 #define NK_TOKEN_ERROR (nk_token_error_quark())
 
-NkTokenList *nk_token_list_parse(gchar *string, GError **error);
-NkTokenList *nk_token_list_parse_enum(gchar *string, const gchar * const *tokens, guint64 size, guint64 *used_tokens, GError **error);
+NkTokenList *nk_token_list_parse(gchar *string, gunichar identifier, GError **error);
+NkTokenList *nk_token_list_parse_enum(gchar *string, gunichar identifier, const gchar * const *tokens, guint64 size, guint64 *used_tokens, GError **error);
 NkTokenList *nk_token_list_ref(NkTokenList *token_list);
 void nk_token_list_unref(NkTokenList *token_list);
 gchar *nk_token_list_replace(const NkTokenList *token_list, NkTokenListReplaceCallback callback, gpointer user_data);

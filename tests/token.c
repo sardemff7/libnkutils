@@ -43,6 +43,7 @@ typedef struct {
 } NkTokenTestDataData;
 
 typedef struct {
+    gunichar identifier;
     const gchar *source;
     NkTokenTestDataData data[MAX_DATA + 1];
     gint error;
@@ -56,6 +57,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/basic",
         .data = {
+            .identifier = '$',
             .source = "You can make ${recipe} with ${fruit}.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -68,6 +70,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/basic/dash-underscore",
         .data = {
+            .identifier = '$',
             .source = "You can make ${recipe_name} with ${fruit-name}.",
             .data = {
                 { .token = "fruit-name", .content = "a banana" },
@@ -80,6 +83,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/basic/unicode",
         .data = {
+            .identifier = '$',
             .source = "You can make ${recette} with ${ingrédient}.",
             .data = {
                 { .token = "ingrédient", .content = "a banana" },
@@ -92,6 +96,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/basic/wrong/1",
         .data = {
+            .identifier = '$',
             .source = "You can make ${recipe} with $fruit.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -104,6 +109,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/basic/wrong/2",
         .data = {
+            .identifier = '$',
             .source = "$fruit is good.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -116,6 +122,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/key/index",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${recipe[0]} with ${fruit}.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -128,6 +135,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/key/name",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${recipe[icecream]} with ${fruit}.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -140,6 +148,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/key/name/modifier",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${recipe[cake]:-banana cake} with ${fruit}.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -152,6 +161,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/key/join/replace",
         .data = {
+            .identifier = '$',
             .source = "You can make [${recipes[@@]/@/], [}] with ${fruit}.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -164,6 +174,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/wrong/modifier",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${recipe} with ${fruit::}.",
             .error = NK_TOKEN_ERROR_UNKNOWN_MODIFIER,
         }
@@ -171,6 +182,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/wrong/key/index",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${recipe[18446744073709551616]} with ${fruit}.",
             .error = NK_TOKEN_ERROR_WRONG_KEY,
         }
@@ -178,6 +190,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/wrong/key",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${recipe[|]} with ${fruit}.",
             .error = NK_TOKEN_ERROR_WRONG_KEY,
         }
@@ -185,6 +198,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/wrong/regex/pattern",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${recipe/[} with ${fruit}.",
             .error = NK_TOKEN_ERROR_REGEX,
         }
@@ -192,6 +206,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/wrong/regex/replace",
         .data = {
+            .identifier = '$',
             .source = "You can make ${recipe/a/\\gwrong} with ${fruit}.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -204,6 +219,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/fallback/with",
         .data = {
+            .identifier = '$',
             .source = "I want to eat ${fruit:-an apple}.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -215,6 +231,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/fallback/without",
         .data = {
+            .identifier = '$',
             .source = "I want to eat ${fruit:-an apple}.",
             .data = {
                 { .token = NULL }
@@ -225,6 +242,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/fallback/recurse",
         .data = {
+            .identifier = '$',
             .source = "I want to eat ${fruit:-${vegetable}}.",
             .data = {
                 { .token = "vegetable", .content = "a zucchini" },
@@ -236,6 +254,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/substitute/with",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${adjective:+(}${adjective}${adjective:+) }${recipe} with ${fruit}${addition:+ and }${addition}.",
             .data = {
                 { .token = "adjective", .content = "creamy" },
@@ -250,6 +269,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/substitute/without",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${adjective:+(}${adjective}${adjective:+) }${recipe} with ${fruit}${addition:+ and }${addition}.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -262,6 +282,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/anti-substitute/with",
         .data = {
+            .identifier = '$',
             .source = "I want to eat a ${adjective:!sweat }lemon.",
             .data = {
                 { .token = "adjective", .content = "juicy" },
@@ -273,6 +294,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/anti-substitute/without",
         .data = {
+            .identifier = '$',
             .source = "I want to eat a ${adjective:!sweat }lemon.",
             .data = {
                 { .token = NULL }
@@ -283,6 +305,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/full",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${recipe/split/cream} with ${fruit}.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -295,6 +318,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/missing",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -307,6 +331,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/capture",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${adjective/(.+)/(\\1) }${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
                 { .token = "adjective", .content = "creamy" },
@@ -321,6 +346,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/before-after/with",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${adjective/^/(/$/) }${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
                 { .token = "adjective", .content = "creamy" },
@@ -335,6 +361,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/before-after/without",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${adjective/^/(/$/) }${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -347,6 +374,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/remove",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${recipe/ split} with ${fruit}.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -359,6 +387,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/multiple",
         .data = {
+            .identifier = '$',
             .source = "You can make ${recipe/a banana/an apple pie/ split} with ${fruit/.+/apples}.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -371,6 +400,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/braces/paired",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${adjective/.{2}$/y/^/(/$/) }${recipe} with ${fruit}${addition/\\{//\\}//^/ and }.",
             .data = {
                 { .token = "adjective", .content = "creamed" },
@@ -385,6 +415,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/braces/opening",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${adjective/.{2}$/y/^/(/$/) }${recipe} with ${fruit}${addition/\\{//^/ and }.",
             .data = {
                 { .token = "adjective", .content = "creamed" },
@@ -399,6 +430,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/braces/closing",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${adjective/.{2}$/y/^/(/$/) }${recipe} with ${fruit}${addition/\\}//^/ and }.",
             .data = {
                 { .token = "adjective", .content = "creamed" },
@@ -413,6 +445,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/escaping/backslash",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${adjective/^/(/$/) /\\\\}${recipe} with ${fruit}${addition/^/ and }.",
             .data = {
                 { .token = "adjective", .content = "creamy\\" },
@@ -427,6 +460,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/escaping/forwardslash/1",
         .data = {
+            .identifier = '$',
             .source = "${data/\\/}",
             .data = {
                 { .token = "data", .content = "/" },
@@ -438,6 +472,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/escaping/forwardslash/2",
         .data = {
+            .identifier = '$',
             .source = "${data/a/\\/}",
             .data = {
                 { .token = "data", .content = "a" },
@@ -449,6 +484,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/escaping/forwardslash/3",
         .data = {
+            .identifier = '$',
             .source = "${data/a/\\//b/x}",
             .data = {
                 { .token = "data", .content = "ab" },
@@ -460,6 +496,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/escaping/right-curly-bracket/2",
         .data = {
+            .identifier = '$',
             .source = "${data/a/\\}}",
             .data = {
                 { .token = "data", .content = "a" },
@@ -471,6 +508,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/replace/recurse/with",
         .data = {
+            .identifier = '$',
             .source = "I want to eat ${recipe/an apple/${fruit}}.",
             .data = {
                 { .token = "recipe", .content = "an apple pie" },
@@ -483,6 +521,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/old/before-after",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${(<adjective>) }${recipe} with ${fruit}${ and <addition}.",
             .data = {
                 { .token = "fruit", .content = "a banana" },
@@ -493,13 +532,38 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/double-dollar",
+        .testpath = "/nkutils/token/identifier/double-escape",
         .data = {
+            .identifier = '$',
             .source = "echo $${PATH}",
             .data = {
                 { .token = NULL }
             },
             .result = "echo ${PATH}"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/identifier/non-dollar",
+        .data = {
+            .identifier = '%',
+            .source = "Some %{variable}",
+            .data = {
+                { .token = "variable", .content = "value" },
+                { .token = NULL }
+            },
+            .result = "Some value"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/identifier/none",
+        .data = {
+            .identifier = '\0',
+            .source = "Some {variable}",
+            .data = {
+                { .token = "variable", .content = "value" },
+                { .token = NULL }
+            },
+            .result = "Some value"
         }
     },
 };
@@ -525,7 +589,7 @@ _nk_token_list_tests_func(gconstpointer user_data)
     NkTokenList *token_list;
     GError *error = NULL;
 
-    token_list = nk_token_list_parse(g_strdup(data->source), &error);
+    token_list = nk_token_list_parse(g_strdup(data->source), data->identifier, &error);
     if ( data->result == NULL )
     {
         g_assert_null(token_list);
@@ -557,6 +621,7 @@ static const gchar * const _nk_token_list_enum_tests_tokens[_TOKEN_SIZE] = {
 };
 
 typedef struct {
+    gunichar identifier;
     const gchar *source;
     gchar *data[_TOKEN_SIZE];
     guint64 used_tokens;
@@ -571,6 +636,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/enum/basic",
         .data = {
+            .identifier = '$',
             .source = "You can make ${recipe} with ${fruit}.",
             .data = {
                 [TOKEN_FRUIT]  = "a banana",
@@ -583,6 +649,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/enum/nested",
         .data = {
+            .identifier = '$',
             .source = "I want to eat ${recipe:+${fruit} ${recipe}}.",
             .data = {
                 [TOKEN_FRUIT]  = "an apple",
@@ -595,6 +662,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/enum/wrong/regex",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${recipe/[} with ${fruit}.",
             .error = NK_TOKEN_ERROR_REGEX,
         }
@@ -602,6 +670,7 @@ static const struct {
     {
         .testpath = "/nkutils/token/enum/wrong/token",
         .data = {
+            .identifier = '$',
             .source = "You can make a ${recipe} with ${fruit} and ${addition}.",
             .error = NK_TOKEN_ERROR_UNKNOWN_TOKEN,
         }
@@ -624,7 +693,7 @@ _nk_token_list_enum_tests_func(gconstpointer user_data)
     guint64 used_tokens;
     GError *error = NULL;
 
-    token_list = nk_token_list_parse_enum(g_strdup(data->source), _nk_token_list_enum_tests_tokens, _TOKEN_SIZE, &used_tokens, &error);
+    token_list = nk_token_list_parse_enum(g_strdup(data->source), data->identifier, _nk_token_list_enum_tests_tokens, _TOKEN_SIZE, &used_tokens, &error);
     if ( data->result == NULL )
     {
         g_assert_null(token_list);

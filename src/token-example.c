@@ -87,7 +87,7 @@ main(int argc, char *argv[])
     gchar *result;
     GError *error = NULL;
 
-    template = nk_token_list_parse(g_strdup(argv[1]), &error);
+    template = nk_token_list_parse(g_strdup(argv[1]), '$', &error);
     if ( template == NULL )
     {
         g_warning("Template string could not be parsed: %s", error->message);

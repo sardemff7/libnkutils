@@ -127,7 +127,7 @@ _nk_token_strchr_escape(gchar *s, gsize l, gunichar c, gunichar pair_c)
 }
 
 NkTokenList *
-nk_token_list_parse(gchar *string, GError **error)
+nk_token_list_parse(gchar *string, gunichar identifier, GError **error)
 {
     g_return_val_if_fail(string != NULL, NULL);
     g_return_val_if_fail(error == NULL || *error == NULL, NULL);
@@ -139,13 +139,19 @@ nk_token_list_parse(gchar *string, GError **error)
     self->string = string;
     self->length = strlen(self->string);
 
+    gboolean have_identifier = ( identifier != '\0' );
+    if ( ! have_identifier )
+        identifier = '{';
+
     gchar *w = string;
-    while ( ( w = g_utf8_strchr(w, self->length - ( w - self->string ), '$') ) != NULL )
+    while ( ( w = g_utf8_strchr(w, self->length - ( w - self->string ), identifier) ) != NULL )
     {
         gchar *b = w;
 
+        if ( have_identifier )
+        {
             w = g_utf8_next_char(w);
-            if ( g_utf8_get_char(w) == '$' )
+            if ( g_utf8_get_char(w) == identifier )
             {
                 *w = '\0';
                 if ( *string != '\0' )
@@ -163,6 +169,7 @@ nk_token_list_parse(gchar *string, GError **error)
 
             if ( g_utf8_get_char(w) != '{' )
                 continue;
+        }
 
         w = g_utf8_next_char(w);
         gchar *e;
@@ -239,18 +246,18 @@ nk_token_list_parse(gchar *string, GError **error)
             switch ( g_utf8_get_char(w) )
             {
             case '-':
-                token.fallback = nk_token_list_parse(g_utf8_next_char(w), error);
+                token.fallback = nk_token_list_parse(g_utf8_next_char(w), identifier, error);
                 if ( token.fallback == NULL )
                     goto fail;
             break;
             case '+':
-                token.substitute = nk_token_list_parse(g_utf8_next_char(w), error);
+                token.substitute = nk_token_list_parse(g_utf8_next_char(w), identifier, error);
                 if ( token.substitute == NULL )
                     goto fail;
             break;
             case '!':
                 token.no_data = TRUE;
-                token.fallback = nk_token_list_parse(g_utf8_next_char(w), error);
+                token.fallback = nk_token_list_parse(g_utf8_next_char(w), identifier, error);
                 if ( token.fallback == NULL )
                     goto fail;
             break;
@@ -290,7 +297,7 @@ nk_token_list_parse(gchar *string, GError **error)
                 }
 
                 w = w + strlen(w) + 1;
-                token.replace[c].replacement = nk_token_list_parse(( w > e ) ? "" : w, error);
+                token.replace[c].replacement = nk_token_list_parse(( w > e ) ? "" : w, identifier, error);
                 if ( token.replace[c].replacement == NULL )
                     goto fail;
                 w += strlen(w);
@@ -363,13 +370,13 @@ _nk_token_list_search_enum_tokens(NkTokenList *self, const gchar * const *tokens
 }
 
 NkTokenList *
-nk_token_list_parse_enum(gchar *string, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens, GError **error)
+nk_token_list_parse_enum(gchar *string, gunichar identifier, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens, GError **error)
 {
     g_return_val_if_fail(string != NULL, NULL);
 
     NkTokenList *self;
 
-    self = nk_token_list_parse(string, error);
+    self = nk_token_list_parse(string, identifier, error);
     if ( self == NULL )
         return NULL;
 
