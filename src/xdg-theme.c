@@ -297,7 +297,7 @@ _nk_xdg_theme_find_dirs(NkXdgThemeTypeContext *self)
     switch ( self->type )
     {
     case TYPE_ICON:
-        ++length; /* pixmaps */
+        length *= 2; /* ~/.icons and pixmaps */
     break;
     case TYPE_SOUND:
     break;
@@ -316,14 +316,29 @@ _nk_xdg_theme_find_dirs(NkXdgThemeTypeContext *self)
 
     try_dir(g_get_user_data_dir());
 
-    const gchar * const *system_dir;
-    for ( system_dir = system_dirs ; *system_dir != NULL ; ++system_dir )
-        try_dir(*system_dir);
     switch ( self->type )
     {
     case TYPE_ICON:
-        if ( g_file_test(G_DIR_SEPARATOR_S "usr" G_DIR_SEPARATOR_S "share" G_DIR_SEPARATOR_S "pixmaps", G_FILE_TEST_IS_DIR) ) \
-            dirs[current++] = g_strdup(G_DIR_SEPARATOR_S "usr" G_DIR_SEPARATOR_S "share" G_DIR_SEPARATOR_S "pixmaps");\
+        subdir = ".icons";
+        try_dir(g_get_home_dir());
+        subdir = _nk_xdg_theme_subdirs[self->type];
+    break;
+    case TYPE_SOUND:
+    break;
+    }
+
+    const gchar * const *system_dir;
+    for ( system_dir = system_dirs ; *system_dir != NULL ; ++system_dir )
+        try_dir(*system_dir);
+
+    switch ( self->type )
+    {
+    case TYPE_ICON:
+        /* Let’s trust system_dirs to contains /usr/share, if it doesn’t,
+         * that probably means it would be useless to check it anyway */
+        subdir = "pixmaps";
+        for ( system_dir = system_dirs ; *system_dir != NULL ; ++system_dir )
+            try_dir(*system_dir);
     break;
     case TYPE_SOUND:
     break;

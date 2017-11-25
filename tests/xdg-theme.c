@@ -502,7 +502,7 @@ main(int argc, char *argv[])
 
     g_setenv("HOME", "/var/empty", TRUE);
     g_setenv("XDG_CONFIG_HOME", SRCDIR G_DIR_SEPARATOR_S "tests", TRUE);
-    g_setenv("XDG_DATA_HOME", "/var/empty", TRUE);
+    g_setenv("XDG_DATA_HOME", "/var/empty/.local/share", TRUE);
     g_setenv("XDG_DATA_DIRS", "/usr/share/", TRUE);
     g_setenv("XDG_SESSION_DESKTOP", "", TRUE);
     g_setenv("XDG_CURRENT_DESKTOP", "", TRUE);
