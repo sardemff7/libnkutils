@@ -56,6 +56,7 @@
 #define NK_KEYCODE_TO_BINDING(mask, keycode) _NK_VALUE_TO_BINDING(mask, keycode)
 #define NK_KEYSYM_TO_BINDING(mask, keysym) _NK_VALUE_TO_BINDING(mask, keysym)
 #define NK_BUTTON_TO_BINDING(mask, button) _NK_VALUE_TO_BINDING(mask, button)
+#define NK_SCROLL_TO_BINDING(mask, axis, step) _NK_VALUE_TO_BINDING(mask, (axis << 1) + ( (step < 0) ? 0 : 1 ))
 
 struct _NkBindings {
     guint64 double_click_delay;
@@ -85,6 +86,7 @@ typedef struct {
     GHashTable *keycodes;
     GHashTable *keysyms;
     GHashTable *buttons;
+    GHashTable *scroll;
 } NkBindingsScope;
 
 typedef struct {
@@ -141,6 +143,21 @@ static const gchar * const _nk_bindings_modifiers_names[] = {
     [NK_BINDINGS_MODIFIER_HYPER   + NK_BINDINGS_NUM_MODIFIERS * 3] = "",
 };
 
+static const gchar * const _nk_bindings_mouse_button_names[] = {
+    [NK_BINDINGS_MOUSE_BUTTON_PRIMARY] = "Primary",
+    [NK_BINDINGS_MOUSE_BUTTON_SECONDARY] = "Secondary",
+    [NK_BINDINGS_MOUSE_BUTTON_MIDDLE] = "Middle",
+    [NK_BINDINGS_MOUSE_BUTTON_BACK] = "Back",
+    [NK_BINDINGS_MOUSE_BUTTON_FORWARD] = "Forward",
+};
+
+static const gchar * const _nk_bindings_scroll_names[] = {
+    [NK_SCROLL_TO_BINDING(0, NK_BINDINGS_SCROLL_AXIS_VERTICAL, -1)] = "Up",
+    [NK_SCROLL_TO_BINDING(0, NK_BINDINGS_SCROLL_AXIS_VERTICAL,  1)] = "Down",
+    [NK_SCROLL_TO_BINDING(0, NK_BINDINGS_SCROLL_AXIS_HORIZONTAL, -1)] = "Left",
+    [NK_SCROLL_TO_BINDING(0, NK_BINDINGS_SCROLL_AXIS_HORIZONTAL,  1)] = "Right",
+};
+
 GQuark
 nk_bindings_error(void)
 {
@@ -155,6 +172,7 @@ _nk_bindings_scope_free(gpointer data)
     g_hash_table_unref(scope->keycodes);
     g_hash_table_unref(scope->keysyms);
     g_hash_table_unref(scope->buttons);
+    g_hash_table_unref(scope->scroll);
 
     g_slice_free(NkBindingsScope, scope);
 }
@@ -273,6 +291,7 @@ _nk_bindings_get_scope(NkBindings *self, guint64 scope_id)
         scope->keycodes = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL, _nk_bindings_binding_free);
         scope->keysyms = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL, _nk_bindings_binding_free);
         scope->buttons = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL, _nk_bindings_binding_mouse_free);
+        scope->scroll = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL, _nk_bindings_binding_free);
         self->scopes = g_list_insert_sorted(self->scopes, scope, _nk_bindings_scope_compare);
     }
 
@@ -461,17 +480,27 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
             }
 
             guint64 button;
-            gchar *ce;
-            errno = 0;
-            button = g_ascii_strtoull(s, &ce, 10);
-            if ( s == ce )
+            if ( g_ascii_strncasecmp(s, "Extra", strlen("Extra")) == 0 )
             {
-                g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_SYNTAX, "Syntax error in binding '%s': could not parse mouse button number", string);
-                return FALSE;
+                s += strlen("Extra");
+                gchar *ce;
+                errno = 0;
+                button = g_ascii_strtoull(s, &ce, 10);
+                if ( s == ce )
+                {
+                    g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_SYNTAX, "Syntax error in binding '%s': could not parse mouse extra button number", string);
+                    return FALSE;
+                }
+                else if ( e != ce )
+                {
+                    g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_SYNTAX, "Syntax error in binding '%s': mouse extra button must be the end of the binding string", string);
+                    return FALSE;
+                }
+                button += NK_BINDINGS_MOUSE_BUTTON_EXTRA;
             }
-            else if ( e != ce )
+            else if ( ! nk_enum_parse(s, _nk_bindings_mouse_button_names, G_N_ELEMENTS(_nk_bindings_mouse_button_names), TRUE, FALSE, &button) )
             {
-                g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_SYNTAX, "Syntax error in binding '%s': keycode must be the end of the binding string", string);
+                g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_SYNTAX, "Syntax error in binding '%s': unknown mouse button %s", string, s);
                 return FALSE;
             }
 
@@ -490,6 +519,32 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
                 binding = &mouse_binding->dclick;
             else
                 binding = &mouse_binding->click;
+        }
+        else if ( g_ascii_strncasecmp(s, "Scroll", strlen("Scroll")) == 0 )
+        {
+            s += strlen("Scroll");
+
+            if ( on_release )
+            {
+                g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_SYNTAX, "Syntax error in binding '%s': scroll action cannot be bound on release", string);
+                return FALSE;
+            }
+
+            guint64 scroll;
+            if ( ! nk_enum_parse(s, _nk_bindings_scroll_names, G_N_ELEMENTS(_nk_bindings_scroll_names), TRUE, FALSE, &scroll) )
+            {
+                g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_SYNTAX, "Syntax error in binding '%s': unknown scroll direction %s", string, s);
+                return FALSE;
+            }
+
+            guint64 value = _NK_VALUE_TO_BINDING(mask, scroll);
+            binding = g_hash_table_lookup(scope->scroll, &value);
+            if ( binding == NULL )
+            {
+                binding = g_slice_new0(NkBindingsBinding);
+                binding->binding = value;
+                g_hash_table_insert(scope->scroll, &binding->binding, binding);
+            }
         }
         else
             keysym = xkb_keysym_from_name(s, XKB_KEYSYM_NO_FLAGS);
@@ -604,6 +659,23 @@ _nk_bindings_try_button_bindings(NkBindings *self, NkBindingsSeat *seat, gpointe
         }
     }
     return FALSE;
+}
+
+static NkBindingsBinding *
+_nk_bindings_try_scroll_bindings(NkBindings *self, NkBindingsSeat *seat, gpointer target, guint64 scroll)
+{
+    GList *scope_;
+    for ( scope_ = self->scopes ; scope_ != NULL ; scope_ = g_list_next(scope_) )
+    {
+        NkBindingsScope *scope = scope_->data;
+        NkBindingsBinding *binding;
+
+        binding = g_hash_table_lookup(scope->scroll, &scroll);
+        if ( _nk_bindings_seat_binding_trigger(seat, binding, target, TRUE) )
+            return binding;
+    }
+
+    return NULL;
 }
 
 NkBindingsSeat *
@@ -858,7 +930,7 @@ nk_bindings_seat_handle_key_with_modmask(NkBindingsSeat *self, gpointer target, 
 }
 
 gboolean
-nk_bindings_seat_handle_button(NkBindingsSeat *self, gpointer target, guint32 button, NkBindingsButtonState state, guint64 timestamp)
+nk_bindings_seat_handle_button(NkBindingsSeat *self, gpointer target, NkBindingsMouseButton button, NkBindingsButtonState state, guint64 timestamp)
 {
     g_return_val_if_fail(self != NULL, FALSE);
 
@@ -885,6 +957,29 @@ nk_bindings_seat_handle_button(NkBindingsSeat *self, gpointer target, guint32 bu
         g_hash_table_insert(self->last_timestamps, binding_, g_memdup(&timestamp, sizeof(guint64)));
     else
         *last_timestamp = timestamp;
+    return TRUE;
+}
+
+gboolean
+nk_bindings_seat_handle_scroll(NkBindingsSeat *self, gpointer target, NkBindingsScrollAxis axis, gint32 step)
+{
+    g_return_val_if_fail(self != NULL, FALSE);
+    g_return_val_if_fail(step != 0, FALSE);
+
+    xkb_mod_mask_t dummy, mask;
+
+    _nk_bindings_seat_get_modifiers_masks(self, 0, &dummy, &mask);
+
+    guint64 binding_ = NK_SCROLL_TO_BINDING(mask, axis, step);
+
+    NkBindingsBinding *binding;
+    binding = _nk_bindings_try_scroll_bindings(self->bindings, self, target, binding_);
+
+    if ( binding == NULL )
+        return FALSE;
+
+    for ( step = ABS(step) ; step > 1 ; --step )
+        _nk_bindings_seat_binding_trigger(self, binding, target, TRUE);
     return TRUE;
 }
 

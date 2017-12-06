@@ -55,6 +55,21 @@ typedef enum {
 #define NK_BINDINGS_MODIFIER_MASK(m) (1 << (m))
 
 typedef enum {
+    NK_BINDINGS_MOUSE_BUTTON_PRIMARY,
+    NK_BINDINGS_MOUSE_BUTTON_SECONDARY,
+    NK_BINDINGS_MOUSE_BUTTON_MIDDLE,
+    NK_BINDINGS_MOUSE_BUTTON_BACK,
+    NK_BINDINGS_MOUSE_BUTTON_FORWARD,
+    NK_BINDINGS_MOUSE_BUTTON_EXTRA,
+} NkBindingsMouseButton;
+
+typedef enum {
+    NK_BINDINGS_SCROLL_AXIS_VERTICAL,
+    NK_BINDINGS_SCROLL_AXIS_HORIZONTAL,
+#define NK_BINDINGS_SCROLL_NUM_AXIS 2
+} NkBindingsScrollAxis;
+
+typedef enum {
     NK_BINDINGS_ERROR_SYNTAX,
     NK_BINDINGS_ERROR_NOTHING,
     NK_BINDINGS_ERROR_ALREADY_REGISTERED,
@@ -77,7 +92,8 @@ struct xkb_context *nk_bindings_seat_get_context(NkBindingsSeat *seat);
 
 gchar *nk_bindings_seat_handle_key(NkBindingsSeat *seat, gpointer target, xkb_keycode_t key, NkBindingsKeyState state);
 gchar *nk_bindings_seat_handle_key_with_modmask(NkBindingsSeat *self, gpointer target, xkb_mod_mask_t modmask, xkb_keycode_t keycode, NkBindingsKeyState state);
-gboolean nk_bindings_seat_handle_button(NkBindingsSeat *seat, gpointer target, guint32 button, NkBindingsButtonState state, guint64 timestamp);
+gboolean nk_bindings_seat_handle_button(NkBindingsSeat *seat, gpointer target, NkBindingsMouseButton button, NkBindingsButtonState state, guint64 timestamp);
+gboolean nk_bindings_seat_handle_scroll(NkBindingsSeat *seat, gpointer target, NkBindingsScrollAxis axis, gint32 steps);
 void nk_bindings_seat_update_mask(NkBindingsSeat *seat, gpointer target, xkb_mod_mask_t depressed_mods, xkb_mod_mask_t latched_mods, xkb_mod_mask_t locked_mods, xkb_layout_index_t depressed_layout, xkb_layout_index_t latched_layout, xkb_layout_index_t locked_layout);
 void nk_bindings_seat_reset(NkBindingsSeat *seat);
 
