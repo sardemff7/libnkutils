@@ -304,9 +304,6 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
     xkb_mod_mask_t mask = 0;
     xkb_keysym_t last_keysym = XKB_KEY_NoSymbol;
     xkb_keysym_t keysym = XKB_KEY_NoSymbol;
-    xkb_keycode_t keycode = XKB_KEYCODE_INVALID;
-    guint32 button = 0;
-    gboolean double_click = FALSE;
 
     const gchar *w = string;
 
@@ -412,15 +409,21 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
             return FALSE;
         }
     }
+
+    NkBindingsScope *scope;
+    scope = _nk_bindings_get_scope(self, scope_id);
+
+    NkBindingsBinding *binding = NULL;
     if ( s < e )
     {
         if ( g_utf8_get_char(s) == '[' )
         {
-            guint64 code;
+            s = g_utf8_next_char(s);
+
+            guint64 keycode;
             gchar *ce;
             errno = 0;
-            s = g_utf8_next_char(s);
-            code = g_ascii_strtoull(s, &ce, 10);
+            keycode = g_ascii_strtoull(s, &ce, 10);
             if ( s == ce )
             {
                 g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_SYNTAX, "Syntax error in binding '%s': could not parse keycode", string);
@@ -431,25 +434,36 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
                 g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_SYNTAX, "Syntax error in binding '%s': keycode must be the end of the binding string, enclosed in squared brackets '[]'", string);
                 return FALSE;
             }
-            else if ( ! xkb_keycode_is_legal_ext(code) )
+            else if ( ! xkb_keycode_is_legal_ext(keycode) )
             {
-                g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_SYNTAX, "Syntax error in binding '%s': wrong keycode value %"G_GINT64_MODIFIER"u", string, code);
+                g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_SYNTAX, "Syntax error in binding '%s': wrong keycode value %"G_GINT64_MODIFIER"u", string, keycode);
                 return FALSE;
             }
-            keycode = code;
+
+            guint64 value = NK_KEYCODE_TO_BINDING(mask, keycode);
+            binding = g_hash_table_lookup(scope->keycodes, &value);
+            if ( binding == NULL )
+            {
+                binding = g_slice_new0(NkBindingsBinding);
+                binding->binding = value;
+                g_hash_table_insert(scope->keycodes, &binding->binding, binding);
+            }
         }
         else if ( g_ascii_strncasecmp(s, "Mouse", strlen("Mouse")) == 0 )
         {
             s += strlen("Mouse");
+
+            gboolean double_click = FALSE;
             if ( g_unichar_toupper(g_utf8_get_char(s)) == 'D' )
             {
                 s = g_utf8_next_char(s);
                 double_click = TRUE;
             }
-            guint64 code;
+
+            guint64 button;
             gchar *ce;
             errno = 0;
-            code = g_ascii_strtoull(s, &ce, 10);
+            button = g_ascii_strtoull(s, &ce, 10);
             if ( s == ce )
             {
                 g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_SYNTAX, "Syntax error in binding '%s': could not parse mouse button number", string);
@@ -460,46 +474,28 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
                 g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_SYNTAX, "Syntax error in binding '%s': keycode must be the end of the binding string", string);
                 return FALSE;
             }
-            button = code;
+
+            guint64 value = NK_BUTTON_TO_BINDING(mask, button);
+            NkBindingsBindingMouse *mouse_binding;
+            mouse_binding = g_hash_table_lookup(scope->buttons, &value);
+            if ( mouse_binding == NULL )
+            {
+                mouse_binding = g_slice_new0(NkBindingsBindingMouse);
+                mouse_binding->click.binding = value;
+                mouse_binding->dclick.binding = value;
+                g_hash_table_insert(scope->buttons, &mouse_binding->click.binding, mouse_binding);
+            }
+
+            if ( double_click )
+                binding = &mouse_binding->dclick;
+            else
+                binding = &mouse_binding->click;
         }
         else
             keysym = xkb_keysym_from_name(s, XKB_KEYSYM_NO_FLAGS);
     }
 
-    NkBindingsScope *scope;
-    scope = _nk_bindings_get_scope(self, scope_id);
-
-    NkBindingsBinding *binding = NULL;
-    if ( button != 0 )
-    {
-        guint64 value = NK_BUTTON_TO_BINDING(mask, button);
-        NkBindingsBindingMouse *mouse_binding;
-        mouse_binding = g_hash_table_lookup(scope->buttons, &value);
-        if ( mouse_binding == NULL )
-        {
-            mouse_binding = g_slice_new0(NkBindingsBindingMouse);
-            mouse_binding->click.binding = value;
-            mouse_binding->dclick.binding = value;
-            g_hash_table_insert(scope->buttons, &mouse_binding->click.binding, mouse_binding);
-        }
-
-        if ( double_click )
-            binding = &mouse_binding->dclick;
-        else
-            binding = &mouse_binding->click;
-    }
-    else if ( keycode != XKB_KEYCODE_INVALID )
-    {
-        guint64 value = NK_KEYCODE_TO_BINDING(mask, keycode);
-        binding = g_hash_table_lookup(scope->keycodes, &value);
-        if ( binding == NULL )
-        {
-            binding = g_slice_new0(NkBindingsBinding);
-            binding->binding = value;
-            g_hash_table_insert(scope->keycodes, &binding->binding, binding);
-        }
-    }
-    else
+    if ( binding == NULL )
     {
         if ( keysym == XKB_KEY_NoSymbol )
         {
