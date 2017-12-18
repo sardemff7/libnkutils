@@ -922,7 +922,7 @@ nk_bindings_seat_handle_key_with_modmask(NkBindingsSeat *self, gpointer target, 
     if ( effective_mods == modmask )
         return nk_bindings_seat_handle_key(self, target, keycode, state);
 
-    xkb_state_update_mask(self->state, modmask, 0, 0, 0, 0, locked_layout);
+    xkb_state_update_mask(self->state, modmask, 0, 0, depressed_layout, latched_layout, locked_layout);
     ret = nk_bindings_seat_handle_key(self, target, keycode, state);
     xkb_state_update_mask(self->state, depressed_mods, latched_mods, locked_mods, depressed_layout, latched_layout, locked_layout);
 
