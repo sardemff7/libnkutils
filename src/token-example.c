@@ -33,6 +33,7 @@
 #define G_LOG_DOMAIN "nk-token-replace"
 
 #include <string.h>
+#include <locale.h>
 #include <errno.h>
 
 #include <glib.h>
@@ -73,6 +74,8 @@ _nk_token_replace_callback(const gchar *token, G_GNUC_UNUSED guint64 value, G_GN
 int
 main(int argc, char *argv[])
 {
+    setlocale(LC_ALL, "");
+
     if ( argc < 2 )
     {
         g_warning("You must provide a token string");
