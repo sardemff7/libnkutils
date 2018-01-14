@@ -283,7 +283,7 @@ main(int argc, char *argv[])
     if ( g_strcmp0(old_contents, new_contents) != 0 )
     {
         if ( out_file == NULL )
-            g_print(new_contents);
+            g_print("%s", new_contents);
         else if ( ! g_file_set_contents(out_file, new_contents, -1, &error) )
         {
             g_warning("Could not write new git version file: %s", error->message);
