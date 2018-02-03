@@ -29,7 +29,10 @@ TESTS += \
 	$(_libnkutils_tests)
 
 EXTRA_DIST += \
-	%D%/man/libnkutils-man.xml
+	%D%/man/libnkutils-man.xml \
+	%D%/tests/gtk-3.0/settings.ini \
+	%D%/tests/gtk-4.0/settings.ini \
+	$(null)
 
 
 NKUTILS_CFLAGS = \
