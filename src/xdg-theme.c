@@ -616,13 +616,20 @@ _nk_xdg_theme_load_theme(NkXdgThemeTypeContext *context, const gchar *name)
     self->context = context;
     self->name = g_strdup(name);
 
+    /*
+     * Make sure we won’t recursively try to load a theme.
+     * Some themes (like Numix as of early 2018) inherit themselves
+     * and put us in an infinite recursion.
+     */
+    g_hash_table_insert(context->themes, self->name, NULL);
+
     if ( ! _nk_xdg_theme_find(self) )
     {
-        g_hash_table_insert(context->themes, self->name, NULL);
         g_free(self);
         return NULL;
     }
 
+    g_hash_table_steal(context->themes, self->name);
     g_hash_table_insert(context->themes, self->name, self);
     return self;
 }

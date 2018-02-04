@@ -32,6 +32,8 @@ EXTRA_DIST += \
 	%D%/man/libnkutils-man.xml \
 	%D%/tests/gtk-3.0/settings.ini \
 	%D%/tests/gtk-4.0/settings.ini \
+	%D%/tests/icons/recursive-theme-test/index.theme \
+	%D%/tests/icons/recursive-theme-test/test-dir/test-icon.svg \
 	$(null)
 
 
