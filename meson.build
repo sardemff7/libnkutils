@@ -172,6 +172,14 @@ if xdg_theme
     executable('nk-xdg-theme-lookup', files('src/xdg-theme-example.c'), dependencies: libnkutils)
 endif
 
+if bindings
+    nk_xkeyboard_config = dependency('xkeyboard-config', required: false)
+    if not nk_xkeyboard_config.found()
+        # Do not build and run the test if no keymap data
+        bindings = false
+    endif
+endif
+
 foreach m : nk_modules
     if get_variable(m.underscorify())
         nk_test = executable('nk-@0@.test'.format(m), files('tests/@0@.c'.format(m)), c_args: nk_args, dependencies: libnkutils)
