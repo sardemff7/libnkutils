@@ -462,22 +462,23 @@ _nk_token_list_replace(GString *string, const NkTokenList *self, NkTokenListRepl
             else if ( self->tokens[i].replace != NULL )
             {
                 NkTokenRegex *regex;
-                gchar *n = NULL;
+                gchar *from = data;
+                gchar *to = NULL;
+
                 for ( regex = self->tokens[i].replace ; regex->regex != NULL ; ++regex )
                 {
-                    gchar *tmp = n;
                     gchar *replacement;
                     replacement = nk_token_list_replace(regex->replacement, callback, user_data);
-                    n = g_regex_replace(regex->regex, data, -1, 0, replacement, 0, NULL);
+                    to = g_regex_replace(regex->regex, from, -1, 0, replacement, 0, NULL);
                     g_free(replacement);
-                    g_free(tmp);
-                    if ( n == NULL )
+                    g_free(from);
+                    if ( to == NULL )
                         break;
-                    data = n;
+                    from = to;
                 }
-                if ( n != NULL )
-                    g_string_append(string, n);
-                g_free(n);
+                if ( to != NULL )
+                    g_string_append(string, to);
+                g_free(to);
             }
             else if ( ! self->tokens[i].no_data )
                 g_string_append(string, data);
