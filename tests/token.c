@@ -28,6 +28,7 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <string.h>
+#include <locale.h>
 
 #include <glib.h>
 
@@ -424,6 +425,54 @@ static const struct {
                 { .token = NULL }
             },
             .result = "I want to eat a bad lemon."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/range/symbol",
+        .data = {
+            .identifier = '$',
+            .source = "Dice roll gave: ${dice:[;1;byte 6;⚀;⚁;⚂;⚃;⚄;⚅]}.",
+            .data = {
+                { .token = "dice", .content = "uint64 6" },
+                { .token = NULL }
+            },
+            .result = "Dice roll gave: ⚅."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/range/text",
+        .data = {
+            .identifier = '$',
+            .source = "Signal strength: ${signal:[;0;100;low;medium;high;full]}.",
+            .data = {
+                { .token = "signal", .content = "24" },
+                { .token = NULL }
+            },
+            .result = "Signal strength: low."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/range/middle-split",
+        .data = {
+            .identifier = '$',
+            .source = "Signal strength: ${signal:[;0;100;bad;good]}.",
+            .data = {
+                { .token = "signal", .content = "50" },
+                { .token = NULL }
+            },
+            .result = "Signal strength: good."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/range/double",
+        .data = {
+            .identifier = '$',
+            .source = "${coin:[;0.0;1.0;heads;tails]}",
+            .data = {
+                { .token = "coin", .content = "0.6" },
+                { .token = NULL }
+            },
+            .result = "tails"
         }
     },
     {
@@ -840,6 +889,8 @@ _nk_token_list_enum_tests_func(gconstpointer user_data)
 int
 main(int argc, char *argv[])
 {
+    setlocale(LC_ALL, "");
+
     g_test_init(&argc, &argv, NULL);
 
     g_test_set_nonfatal_assertions();

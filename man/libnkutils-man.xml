@@ -46,6 +46,10 @@
             The syntax is: <userinput>${<replaceable>reference-name</replaceable>:!<replaceable>substitute-value</replaceable>}</userinput>.
         </para>
         <para>
+            You can use a range substitute if the data resolves to <type>a number</type> or <type>a boolean</type>.
+            The syntax is: <userinput>${<replaceable>reference-name</replaceable>:[<replaceable>separator</replaceable><replaceable>range-start</replaceable><replaceable>separator</replaceable><replaceable>range-end</replaceable><repeatable><replaceable>separator</replaceable><replaceable>substitute-value</replaceable></repeatable>]}</userinput>.
+        </para>
+        <para>
             You can replace parts of the data using the regex mechanism.
             The syntax is: <userinput>${<replaceable>reference-name</replaceable>/<replaceable>regex</replaceable>/<replaceable>replacement</replaceable>}</userinput>.
             The <replaceable>replacement</replaceable> part is optional (including the preceding forward slash). If it is omitted, matching parts of the data will simply be removed.
@@ -107,6 +111,14 @@
                 <listitem>
                     <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>fruit</varname> is <literal>"pear"</literal>and <varname>addition</varname> is <literal>nothing</literal>.</para>
                     <para>Resolves to: <literal>Bob is eating a raw pear.</literal></para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><literal>"${name} is eating a ${note:[;1;5;very bad;bad;good;very good]} ${fruit}."</literal></term>
+                <listitem>
+                    <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>fruit</varname> is <literal>"apple"</literal>and <varname>note</varname> is <literal>5</literal>.</para>
+                    <para>Resolves to: <literal>Bob is eating a very good apple.</literal></para>
                 </listitem>
             </varlistentry>
 

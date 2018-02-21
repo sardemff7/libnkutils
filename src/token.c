@@ -42,6 +42,13 @@
 #include "nkutils-token.h"
 
 typedef struct {
+    gdouble min;
+    gdouble max;
+    gsize length;
+    gchar **values;
+} NkTokenRange;
+
+typedef struct {
     GRegex *regex;
     NkTokenList *replacement;
 } NkTokenRegex;
@@ -54,6 +61,7 @@ typedef struct {
     guint64 value;
     NkTokenList *fallback;
     NkTokenList *substitute;
+    NkTokenRange range;
     NkTokenRegex *replace;
     gboolean no_data;
 } NkToken;
@@ -124,6 +132,57 @@ _nk_token_strchr_escape(gchar *s, gsize l, gunichar c, gunichar pair_c)
         return w;
     }
     return NULL;
+}
+
+static gboolean
+_nk_token_double_from_variant(GVariant *var, gdouble *value, GError **error)
+{
+#define _nk_token_list_range_value_check_type(t, T, s) \
+    else if ( g_variant_is_of_type(var, G_VARIANT_TYPE_##T##s) ) \
+        *value = g_variant_get_##t##s(var)
+
+    if ( g_variant_is_of_type(var, G_VARIANT_TYPE_DOUBLE) )
+        *value = g_variant_get_double(var);
+    _nk_token_list_range_value_check_type(int, INT, 16);
+    _nk_token_list_range_value_check_type(int, INT, 32);
+    _nk_token_list_range_value_check_type(int, INT, 64);
+    _nk_token_list_range_value_check_type(uint, UINT, 16);
+    _nk_token_list_range_value_check_type(uint, UINT, 32);
+    _nk_token_list_range_value_check_type(uint, UINT, 64);
+    else if ( g_variant_is_of_type(var, G_VARIANT_TYPE_BYTE) )
+        *value = g_variant_get_byte(var);
+    else if ( g_variant_is_of_type(var, G_VARIANT_TYPE_BOOLEAN) )
+        *value = g_variant_get_boolean(var) ? 1 : 0;
+    else
+    {
+        g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_RANGE, "Invalid range value type: %s", g_variant_get_type_string(var));
+        return FALSE;
+    }
+
+#undef _nk_token_list_range_value_check_type
+
+    return TRUE;
+}
+
+static gboolean
+_nk_token_list_parse_range_value(const gchar *s, const gchar *e, gdouble *value, GError **error)
+{
+    GError *_inner_error_ = NULL;
+    GVariant *var;
+    var = g_variant_parse(NULL, s, e, NULL, &_inner_error_);
+    if ( var == NULL )
+    {
+        g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_RANGE, "Invalid range value: %s", _inner_error_->message);
+        g_error_free(_inner_error_);
+        return FALSE;
+    }
+
+    gboolean ret;
+    ret = _nk_token_double_from_variant(var, value, error);
+
+    g_variant_unref(var);
+
+    return ret;
 }
 
 NkTokenList *
@@ -263,6 +322,53 @@ nk_token_list_parse(gchar *string, gunichar identifier, GError **error)
                 token.fallback = nk_token_list_parse(g_utf8_next_char(w), identifier, error);
                 if ( token.fallback == NULL )
                     goto fail;
+            break;
+            case '[':
+            {
+                w = g_utf8_next_char(w);
+                e = _nk_token_strchr_escape(w, e - w, ']', '[');
+                if ( e == NULL )
+                {
+                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_RANGE, "Missing range close bracket: %s", w);
+                    goto fail;
+                }
+                *e = '\0';
+
+                gunichar sep = g_utf8_get_char(w);
+                gchar *s;
+
+                w = g_utf8_next_char(w);
+                if ( ( s = g_utf8_strchr(w, e - w, sep) ) == NULL )
+                {
+                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_RANGE, "Missing range minimum value: %s", w);
+                    goto fail;
+                }
+                if ( ! _nk_token_list_parse_range_value(w, s, &token.range.min, error) )
+                    goto fail;
+
+                w = g_utf8_next_char(s);
+                if ( ( s = g_utf8_strchr(w, e - w, sep) ) == NULL )
+                {
+                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_RANGE, "Missing range maximum value: %s", w);
+                    goto fail;
+                }
+                if ( ! _nk_token_list_parse_range_value(w, s, &token.range.max, error) )
+                    goto fail;
+
+                if ( token.range.min > token.range.max )
+                {
+                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_RANGE, "Range minimum value is bigger than the valueimum value: min=%lf > value=%lf", token.range.min, token.range.max);
+                    goto fail;
+                }
+
+                do
+                {
+                    w = g_utf8_next_char(s);
+                    *s = '\0';
+                    token.range.values = g_renew(gchar *, token.range.values, ++token.range.length);
+                    token.range.values[token.range.length - 1] = w;
+                } while ( ( s = g_utf8_strchr(w, e - w, sep) ) != NULL );
+            }
             break;
             default:
                 /* Just fail on malformed string */
@@ -413,6 +519,8 @@ _nk_token_list_free(NkTokenList *self)
     {
         if ( self->tokens[i].substitute != NULL)
             _nk_token_list_free(self->tokens[i].substitute);
+        else if ( self->tokens[i].range.length > 0 )
+            g_free(self->tokens[i].range.values);
         else if ( self->tokens[i].replace != NULL )
         {
             NkTokenRegex *regex;
@@ -522,6 +630,29 @@ _nk_token_list_check_data(GVariant *data, const NkToken *token)
 }
 
 static void
+_nk_token_list_append_range(GString *string, GVariant *data, NkTokenRange *range)
+{
+    gdouble value;
+    if ( ! _nk_token_double_from_variant(data, &value, NULL) )
+        return;
+
+    gdouble v, r;
+    gsize i;
+
+    if ( value >= range->max )
+        i = range->length - 1;
+    else if ( value < range->min )
+        i = 0;
+    else
+    {
+        v = value - range->min;
+        r = range->max - range->min;
+        i = (gsize) ( (gdouble) ( range->length ) * ( v / r ) );
+    }
+    g_string_append(string, range->values[i]);
+}
+
+static void
 _nk_token_list_append_data(GString *string, GVariant *data, const gchar *joiner)
 {
     if ( g_variant_is_of_type(data, G_VARIANT_TYPE_ARRAY) )
@@ -585,6 +716,8 @@ _nk_token_list_replace(GString *string, const NkTokenList *self, NkTokenListRepl
         {
             if ( self->tokens[i].substitute != NULL)
                 _nk_token_list_replace(string, self->tokens[i].substitute, callback, user_data);
+            else if ( self->tokens[i].range.length > 0 )
+                _nk_token_list_append_range(string, data, &self->tokens[i].range);
             else if ( self->tokens[i].replace != NULL )
             {
                 NkTokenRegex *regex;
