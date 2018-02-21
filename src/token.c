@@ -444,6 +444,127 @@ nk_token_list_unref(NkTokenList *self)
     _nk_token_list_free(self);
 }
 
+static GVariant *
+_nk_token_list_search_data(GVariant *source, const gchar *key, gint64 index, const gchar **joiner)
+{
+    if ( source == NULL )
+        return NULL;
+
+    GVariant *data = source;
+    while ( g_variant_is_of_type(data, G_VARIANT_TYPE_VARIANT) )
+        data = g_variant_get_variant(data);
+
+    if ( g_variant_is_of_type(data, G_VARIANT_TYPE_DICTIONARY) )
+    {
+        if ( ( key == NULL ) || ( g_utf8_get_char(key) == '\0' ) )
+            data = NULL;
+        else
+            data = g_variant_lookup_value(data, key, NULL);
+    }
+    else if ( g_variant_is_of_type(data, G_VARIANT_TYPE_ARRAY) )
+    {
+        gsize length;
+        length = g_variant_n_children(data);
+
+        if ( length == 0 )
+            data = NULL;
+        else if ( key != NULL )
+        switch ( g_utf8_get_char(key) )
+        {
+        case '\0':
+        {
+            gsize i = ABS(index);
+            if ( ( index < 0 ) && ( i <= length ) )
+                data = g_variant_get_child_value(data, length - i);
+            else if ( ( index >= 0 ) && ( i < length ) )
+                data = g_variant_get_child_value(data, i);
+            else
+                data = NULL;
+        }
+        break;
+        case '@':
+        {
+            const gchar *s = g_utf8_next_char(key);
+            if ( g_utf8_get_char(s) != '\0')
+                *joiner = s;
+        }
+        break;
+        default:
+            data = NULL;
+        }
+    }
+
+    if ( data != NULL )
+    {
+        while ( g_variant_is_of_type(data, G_VARIANT_TYPE_VARIANT) )
+            data = g_variant_get_variant(data);
+
+        g_variant_ref(data);
+    }
+    g_variant_unref(source);
+    return data;
+}
+
+static gboolean
+_nk_token_list_check_data(GVariant *data, const NkToken *token)
+{
+    if ( data == NULL )
+        return FALSE;
+
+    if ( g_variant_is_of_type(data, G_VARIANT_TYPE_BOOLEAN) )
+    {
+        /* We want a boolean data to still be replaced if it’s not checked against */
+        if ( ! g_variant_get_boolean(data) )
+            return ( ( token->fallback == NULL ) && ( token->substitute == NULL ) );
+    }
+
+    return TRUE;
+}
+
+static void
+_nk_token_list_append_data(GString *string, GVariant *data, const gchar *joiner)
+{
+    if ( g_variant_is_of_type(data, G_VARIANT_TYPE_ARRAY) )
+    {
+        gsize length;
+        length = g_variant_n_children(data);
+
+        gsize jl = strlen(joiner);
+
+        gsize i;
+        for ( i = 0 ; i < length ; ++i )
+        {
+            _nk_token_list_append_data(string, g_variant_get_child_value(data, i), joiner);
+            g_string_append(string, joiner);
+        }
+        g_string_truncate(string, string->len - jl);
+    }
+    else if ( g_variant_is_of_type(data, G_VARIANT_TYPE_STRING) )
+        g_string_append(string, g_variant_get_string(data, NULL));
+    else if ( g_variant_is_of_type(data, G_VARIANT_TYPE_BOOLEAN) )
+        g_string_append(string, g_variant_get_boolean(data) ? "true" : "false");
+
+#define _nk_token_list_check_type_with_format(l, U, GFormat) \
+    else if ( g_variant_is_of_type(data, G_VARIANT_TYPE_##U) ) \
+            g_string_append_printf(string, "%" GFormat, g_variant_get_##l(data))
+#define _nk_token_list_check_type(l, U) _nk_token_list_check_type_with_format(l, U, G_G##U##_FORMAT)
+
+    _nk_token_list_check_type(int16, INT16);
+    _nk_token_list_check_type(int32, INT32);
+    _nk_token_list_check_type(int64, INT64);
+    _nk_token_list_check_type_with_format(byte, BYTE, "hhu");
+    _nk_token_list_check_type(uint16, UINT16);
+    _nk_token_list_check_type(uint32, UINT32);
+    _nk_token_list_check_type(uint64, UINT64);
+    _nk_token_list_check_type_with_format(double, DOUBLE, "lf");
+
+#undef _nk_token_list_check_type
+#undef _nk_token_list_check_type_with_format
+
+    else
+        g_variant_print_string(data, string, FALSE);
+}
+
 static void
 _nk_token_list_replace(GString *string, const NkTokenList *self, NkTokenListReplaceCallback callback, gpointer user_data)
 {
@@ -456,18 +577,24 @@ _nk_token_list_replace(GString *string, const NkTokenList *self, NkTokenListRepl
             continue;
         }
 
-        const gchar *data;
-        data = callback(self->tokens[i].name, self->tokens[i].value, self->tokens[i].key, self->tokens[i].index, user_data);
-        if ( data != NULL )
+        GVariant *data;
+        const gchar *joiner = ", ";
+        data = callback(self->tokens[i].name, self->tokens[i].value, user_data);
+        data = _nk_token_list_search_data(data, self->tokens[i].key, self->tokens[i].index, &joiner);
+        if ( _nk_token_list_check_data(data, &self->tokens[i]) )
         {
             if ( self->tokens[i].substitute != NULL)
                 _nk_token_list_replace(string, self->tokens[i].substitute, callback, user_data);
             else if ( self->tokens[i].replace != NULL )
             {
                 NkTokenRegex *regex;
-                gchar *from = data;
+                GString *tmp;
+                gchar *from;
                 gchar *to = NULL;
 
+                tmp = g_string_new("");
+                _nk_token_list_append_data(tmp, data, joiner);
+                from = g_string_free(tmp, FALSE);
                 for ( regex = self->tokens[i].replace ; regex->regex != NULL ; ++regex )
                 {
                     gchar *replacement;
@@ -484,7 +611,8 @@ _nk_token_list_replace(GString *string, const NkTokenList *self, NkTokenListRepl
                 g_free(to);
             }
             else if ( ! self->tokens[i].no_data )
-                g_string_append(string, data);
+                _nk_token_list_append_data(string, data, joiner);
+            g_variant_unref(data);
         }
         else if ( self->tokens[i].fallback != NULL )
             _nk_token_list_replace(string, self->tokens[i].fallback, callback, user_data);

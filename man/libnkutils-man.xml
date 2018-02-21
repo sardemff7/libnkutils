@@ -34,15 +34,15 @@
             You can use fallback values, substitute values or regexes on array members.
         </para>
         <para>
-            You can use a fallback value if the data resolves to <literal>nothing</literal>.
+            You can use a fallback value if the data resolves to <literal>nothing</literal> or <literal>false</literal>.
             The syntax is: <userinput>${<replaceable>reference-name</replaceable>:-<replaceable>fallback-value</replaceable>}</userinput>.
         </para>
         <para>
-            You can use a substitute value if (and only if) the data resolves to <literal>something</literal>.
+            You can use a substitute value if (and only if) the data resolves to <literal>something</literal> or <literal>true</literal>.
             The syntax is: <userinput>${<replaceable>reference-name</replaceable>:+<replaceable>substitute-value</replaceable>}</userinput>.
         </para>
         <para>
-            You can use a substitute value if (and only if) the data resolves to <literal>nothing</literal>.
+            You can use a substitute value if (and only if) the data resolves to <literal>nothing</literal> or <literal>false</literal>.
             The syntax is: <userinput>${<replaceable>reference-name</replaceable>:!<replaceable>substitute-value</replaceable>}</userinput>.
         </para>
         <para>

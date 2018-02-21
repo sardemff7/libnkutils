@@ -36,7 +36,7 @@ typedef enum {
 
 typedef struct _NkTokenList NkTokenList;
 
-typedef const gchar *(*NkTokenListReplaceCallback)(const gchar *token, guint64 value, const gchar *key, gint64 index, gpointer user_data);
+typedef GVariant *(*NkTokenListReplaceCallback)(const gchar *token, guint64 value, gpointer user_data);
 
 GQuark nk_token_error_quark(void);
 #define NK_TOKEN_ERROR (nk_token_error_quark())

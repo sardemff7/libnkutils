@@ -45,8 +45,8 @@ typedef struct {
     gchar **argv;
 } Args;
 
-static const gchar *
-_nk_token_replace_callback(const gchar *token, G_GNUC_UNUSED guint64 value, G_GNUC_UNUSED const gchar *key, G_GNUC_UNUSED gint64 index, gpointer user_data)
+static GVariant *
+_nk_token_replace_callback(const gchar *token, G_GNUC_UNUSED guint64 value, gpointer user_data)
 {
     Args *args = user_data;
     int i;
@@ -56,14 +56,14 @@ _nk_token_replace_callback(const gchar *token, G_GNUC_UNUSED guint64 value, G_GN
         if ( ! g_str_has_prefix(arg, token) )
             continue;
         arg += strlen(token);
-        switch ( *arg )
+        switch ( g_utf8_get_char(arg) )
         {
         case '\0':
             if ( ++i < args->argc )
-                return args->argv[i];
+                return g_variant_parse(NULL, args->argv[i], NULL, NULL, NULL);
         break;
         case '=':
-            return ++arg;
+            return g_variant_parse(NULL, g_utf8_next_char(arg), NULL, NULL, NULL);
         default:
         break;
         }
