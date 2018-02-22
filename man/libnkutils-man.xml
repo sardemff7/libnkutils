@@ -50,6 +50,30 @@
             The syntax is: <userinput>${<replaceable>reference-name</replaceable>:[<replaceable>separator</replaceable><replaceable>range-start</replaceable><replaceable>separator</replaceable><replaceable>range-end</replaceable><repeatable><replaceable>separator</replaceable><replaceable>substitute-value</replaceable></repeatable>]}</userinput>.
         </para>
         <para>
+            You can use a prettify flag to make a big value more readable.
+            The syntax is: <userinput>${<replaceable>reference-name</replaceable>(<replaceable>flag</replaceable><optional>addition</optional>)]}</userinput>.
+            The following flags are supported:
+        </para>
+        <variablelist>
+            <varlistentry>
+                <term><literal>f</literal></term>
+                <listitem>
+                    <para>Work on <type>a number</type>. It will display the value as a float, allowing for extra formatting, as with printf:</para>
+                    <para>Optionally, you can add a width (optionally with zero-padding): <userinput><optional>0</optional><replaceable>width</replaceable></userinput></para>
+                    <para>Optionally, you can add a precision: <userinput>.<replaceable>presicion</replaceable></userinput></para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><literal>p</literal></term>
+                <term><literal>b</literal></term>
+                <listitem>
+                    <para>Work on <type>a number</type>. They will reduce the number to a minimum, adding the corresponding SI prefix (or binary prefix for <literal>b</literal>).</para>
+                    <para>You can use the same additions as flag <literal>f</literal></para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <para>
             You can replace parts of the data using the regex mechanism.
             The syntax is: <userinput>${<replaceable>reference-name</replaceable>/<replaceable>regex</replaceable>/<replaceable>replacement</replaceable>}</userinput>.
             The <replaceable>replacement</replaceable> part is optional (including the preceding forward slash). If it is omitted, matching parts of the data will simply be removed.
@@ -119,6 +143,22 @@
                 <listitem>
                     <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>fruit</varname> is <literal>"apple"</literal>and <varname>note</varname> is <literal>5</literal>.</para>
                     <para>Resolves to: <literal>Bob is eating a very good apple.</literal></para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><literal>"Battery power: ${power(f03.1)}%."</literal></term>
+                <listitem>
+                    <para><varname>power</varname> is <literal>80.1</literal>.</para>
+                    <para>Resolves to: <literal>Battery power: 080.1%.</literal></para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><literal>"Disk space: ${space(b)}B."</literal></term>
+                <listitem>
+                    <para><varname>space</varname> is <literal>1048576</literal>.</para>
+                    <para>Resolves to: <literal>Disk space: 1MiB.</literal></para>
                 </listitem>
             </varlistentry>
 

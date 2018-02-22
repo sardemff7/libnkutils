@@ -476,6 +476,114 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/prettify/float/width",
+        .data = {
+            .identifier = '$',
+            .source = "${value(f4)}",
+            .data = {
+                { .token = "value", .content = "1" },
+                { .token = NULL }
+            },
+            .result = "   1"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/prettify/float/0-padding",
+        .data = {
+            .identifier = '$',
+            .source = "${value(f04)}",
+            .data = {
+                { .token = "value", .content = "1" },
+                { .token = NULL }
+            },
+            .result = "0001"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/prettify/float/precision",
+        .data = {
+            .identifier = '$',
+            .source = "${value(f.5)}",
+            .data = {
+                { .token = "value", .content = "1" },
+                { .token = NULL }
+            },
+            .result = "1.00000"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/prettify/prefixes/si/big",
+        .data = {
+            .identifier = '$',
+            .source = "${value(p)}",
+            .data = {
+                { .token = "value", .content = "1000000" },
+                { .token = NULL }
+            },
+            .result = "1M"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/prettify/prefixes/si/small",
+        .data = {
+            .identifier = '$',
+            .source = "${value(p)}",
+            .data = {
+                { .token = "value", .content = "0.001" },
+                { .token = NULL }
+            },
+            .result = "1m"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/prettify/prefixes/si/with-precision",
+        .data = {
+            .identifier = '$',
+            .source = "${value(p.1)}",
+            .data = {
+                { .token = "value", .content = "1000000" },
+                { .token = NULL }
+            },
+            .result = "1.0M"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/prettify/prefixes/si/2-precision",
+        .data = {
+            .identifier = '$',
+            .source = "${value(p.2)}",
+            .data = {
+                { .token = "value", .content = "626704" },
+                { .token = NULL }
+            },
+            .result = "626.70k"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/prettify/prefixes/si/0-precision",
+        .data = {
+            .identifier = '$',
+            .source = "${value(p.0)}",
+            .data = {
+                { .token = "value", .content = "626704" },
+                { .token = NULL }
+            },
+            .result = "627k"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/prettify/prefixes/binary",
+        .data = {
+            .identifier = '$',
+            .source = "${value(b)}",
+            .data = {
+                { .token = "value", .content = "626704" },
+                { .token = NULL }
+            },
+            .result = "612.015625Ki"
+        }
+    },
+    {
         .testpath = "/nkutils/token/replace/full",
         .data = {
             .identifier = '$',

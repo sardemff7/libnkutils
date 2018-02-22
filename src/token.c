@@ -48,6 +48,20 @@ typedef struct {
     gchar **values;
 } NkTokenRange;
 
+typedef enum {
+    NK_TOKEN_PRETTIFY_NONE = 0,
+    NK_TOKEN_PRETTIFY_FLOAT = 'f',
+    NK_TOKEN_PRETTIFY_PREFIXES_SI = 'p',
+    NK_TOKEN_PRETTIFY_PREFIXES_BINARY = 'b',
+} NkTokenPrettifyType;
+
+typedef struct {
+    NkTokenPrettifyType type;
+    gchar format[10]; /* %0*.*lf%s + \0 */
+    gint width;
+    gint precision;
+} NkTokenPrettify;
+
 typedef struct {
     GRegex *regex;
     NkTokenList *replacement;
@@ -62,6 +76,7 @@ typedef struct {
     NkTokenList *fallback;
     NkTokenList *substitute;
     NkTokenRange range;
+    NkTokenPrettify prettify;
     NkTokenRegex *replace;
     gboolean no_data;
 } NkToken;
@@ -379,6 +394,78 @@ nk_token_list_parse(gchar *string, gunichar identifier, GError **error)
             *m = '\0';
         }
         break;
+        case '(':
+        {
+            gchar *m = w;
+            w = g_utf8_next_char(w);
+            *e = *m = '\0';
+            e = _nk_token_strchr_escape(w, e - w, ')', '(');
+            if ( e == NULL )
+            {
+                g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_PRETIFFY, "Missing prettify close paren: %s", w);
+                goto fail;
+            }
+            *e = '\0';
+            switch ( g_utf8_get_char(w) )
+            {
+            case NK_TOKEN_PRETTIFY_FLOAT:
+            case NK_TOKEN_PRETTIFY_PREFIXES_SI:
+            case NK_TOKEN_PRETTIFY_PREFIXES_BINARY:
+                token.prettify.type = g_utf8_get_char(w);
+                token.prettify.width = 0;
+                token.prettify.precision = -1;
+            break;
+            default:
+                /* Just fail on malformed string */
+                *g_utf8_next_char(w) = '\0';
+                g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_PRETIFFY, "Wrong prettify identifier: %s", w);
+                goto fail;
+            }
+            w = g_utf8_next_char(w);
+
+            if ( g_utf8_get_char(w) == '0' )
+            {
+                g_snprintf(token.prettify.format, sizeof(token.prettify.format), "%%0*.*lf%%s");
+                w = g_utf8_next_char(w);
+            }
+            else
+                g_snprintf(token.prettify.format, sizeof(token.prettify.format), "%%*.*lf%%s");
+            if ( w == e )
+                break;
+            if ( g_unichar_isdigit(g_utf8_get_char(w))  )
+            {
+                gchar *ie;
+                errno = 0;
+                token.prettify.width = g_ascii_strtoll(w, &ie, 10);
+                if ( ( errno != 0 ) || ( w == ie ) )
+                {
+                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_PRETIFFY, "Could not parse pretiffy width: %s", w);
+                    goto fail;
+                }
+                w = ie;
+            }
+
+            if ( g_utf8_get_char(w) == '.' )
+            {
+                w = g_utf8_next_char(w);
+                gchar *ie;
+                errno = 0;
+                token.prettify.precision = g_ascii_strtoll(w, &ie, 10);
+                if ( ( errno != 0 ) || ( w == ie ) )
+                {
+                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_PRETIFFY, "Could not parse pretiffy precision: %s", w);
+                    goto fail;
+                }
+                w = ie;
+            }
+
+            if ( w != e )
+            {
+                g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_PRETIFFY, "Unexpected leftovers in prettify: %s", w);
+                goto fail;
+            }
+        }
+        break;
         case '/':
         {
             gchar *m = w;
@@ -652,6 +739,65 @@ _nk_token_list_append_range(GString *string, GVariant *data, NkTokenRange *range
     g_string_append(string, range->values[i]);
 }
 
+static const gchar *_nk_token_prefixes_si_big[] = {
+    "", "k", "M", "G", "T", "P", "E"
+};
+static const gchar *_nk_token_prefixes_si_small[] = {
+    "", "m", "µ", "n", "p", "f", "a"
+};
+static const gchar *_nk_token_prefixes_binary[] = {
+    "", "Ki", "Mi", "Gi", "Ti"
+};
+
+static void
+_nk_token_list_append_prettify(GString *string, GVariant *data, NkTokenPrettify *prettify)
+{
+    gdouble value;
+    if ( ! _nk_token_double_from_variant(data, &value, NULL) )
+        return;
+
+    switch ( prettify->type )
+    {
+    case NK_TOKEN_PRETTIFY_NONE:
+        g_return_if_reached();
+    case NK_TOKEN_PRETTIFY_FLOAT:
+    {
+        gint precision = prettify->precision;
+        if ( value == (gdouble) ( (gint64) value ) )
+            precision = MAX(0, precision);
+        g_string_append_printf(string, prettify->format, prettify->width, precision, value, "");
+    }
+    break;
+    case NK_TOKEN_PRETTIFY_PREFIXES_SI:
+    {
+        const gchar **prefix;
+        if ( ( value > -1 ) && ( value < 1 ) )
+        {
+            for ( prefix = _nk_token_prefixes_si_small ; ( value > -1 ) && ( value < 1 ) && ( prefix < ( _nk_token_prefixes_si_small + G_N_ELEMENTS(_nk_token_prefixes_si_small) ) ) ; ++prefix )
+                value *= 1000;
+        }
+        else for ( prefix = _nk_token_prefixes_si_big ; ( value >= 1000 ) && ( prefix < ( _nk_token_prefixes_si_big + G_N_ELEMENTS(_nk_token_prefixes_si_big) ) ) ; ++prefix )
+            value /= 1000;
+        gint precision = prettify->precision;
+        if ( value == (gdouble) ( (gint64) value ) )
+            precision = MAX(0, precision);
+        g_string_append_printf(string, prettify->format, prettify->width, precision, value, *prefix);
+    }
+    break;
+    case NK_TOKEN_PRETTIFY_PREFIXES_BINARY:
+    {
+        const gchar **prefix;
+        for ( prefix = _nk_token_prefixes_binary ; ( value >= 1024 ) && ( prefix < ( _nk_token_prefixes_binary + G_N_ELEMENTS(_nk_token_prefixes_binary) ) ) ; ++prefix )
+            value /= 1024;
+        gint precision = prettify->precision;
+        if ( value == (gdouble) ( (gint64) value ) )
+            precision = MAX(0, precision);
+        g_string_append_printf(string, prettify->format, prettify->width, precision, value, *prefix);
+    }
+    break;
+    }
+}
+
 static void
 _nk_token_list_append_data(GString *string, GVariant *data, const gchar *joiner)
 {
@@ -718,6 +864,8 @@ _nk_token_list_replace(GString *string, const NkTokenList *self, NkTokenListRepl
                 _nk_token_list_replace(string, self->tokens[i].substitute, callback, user_data);
             else if ( self->tokens[i].range.length > 0 )
                 _nk_token_list_append_range(string, data, &self->tokens[i].range);
+            else if ( self->tokens[i].prettify.type != NK_TOKEN_PRETTIFY_NONE )
+                _nk_token_list_append_prettify(string, data, &self->tokens[i].prettify);
             else if ( self->tokens[i].replace != NULL )
             {
                 NkTokenRegex *regex;
