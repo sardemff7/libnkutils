@@ -181,6 +181,9 @@ nk_token_list_parse(gchar *string, gunichar identifier, GError **error)
         while ( g_unichar_isalpha(g_utf8_get_char(w)) || ( g_utf8_get_char(w) == '-' ) || ( g_utf8_get_char(w) == '_' ) )
             w = g_utf8_next_char(w);
 
+        /* Empty name */
+        if ( token.name == w )
+            continue;
 
         e = _nk_token_strchr_escape(w, self->length - ( w - self->string ), '}', '{');
         if ( e == NULL )
