@@ -941,6 +941,31 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/enum/fallback",
+        .data = {
+            .identifier = '$',
+            .source = "I want to eat ${fruit} ${recipe:-pie}.",
+            .data = {
+                [TOKEN_FRUIT]  = "'an apple'",
+            },
+            .used_tokens = (1 << TOKEN_FRUIT) | (1 << TOKEN_RECIPE),
+            .result = "I want to eat an apple pie."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/enum/regex",
+        .data = {
+            .identifier = '$',
+            .source = "I want to eat ${fruit/an apple/a banana} ${recipe:-pie}.",
+            .data = {
+                [TOKEN_FRUIT]  = "'an apple'",
+                [TOKEN_RECIPE]  = "'split'",
+            },
+            .used_tokens = (1 << TOKEN_FRUIT) | (1 << TOKEN_RECIPE),
+            .result = "I want to eat a banana split."
+        }
+    },
+    {
         .testpath = "/nkutils/token/enum/wrong/regex",
         .data = {
             .identifier = '$',
@@ -963,6 +988,8 @@ _nk_token_list_enum_tests_callback(const gchar *token, guint64 value, gpointer u
 {
     const gchar * const *data = user_data;
     g_assert_cmpstr(token, ==, _nk_token_list_enum_tests_tokens[value]);
+    if ( data[value] == NULL )
+        return NULL;
     return g_variant_parse(NULL, data[value], NULL, NULL, NULL);
 }
 

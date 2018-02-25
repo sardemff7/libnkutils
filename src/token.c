@@ -555,7 +555,7 @@ _nk_token_list_search_enum_tokens(NkTokenList *self, const gchar * const *tokens
             _nk_token_list_search_enum_tokens(self->tokens[i].fallback, tokens, size, used_tokens, error);
         if ( self->tokens[i].substitute != NULL )
             _nk_token_list_search_enum_tokens(self->tokens[i].substitute, tokens, size, used_tokens, error);
-        if ( self->tokens[i].fallback != NULL )
+        if ( self->tokens[i].replace != NULL )
         {
             NkTokenRegex *regex;
             for ( regex = self->tokens[i].replace ; regex->regex != NULL ; ++regex )
