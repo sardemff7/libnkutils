@@ -41,6 +41,8 @@
 
 #include "nkutils-token.h"
 
+#define NK_TOKEN_PRETTIFY_DURATION_DEFAULT "%{weeks:+%{weeks} week%{weeks:[;2;2;;s]} }%{days:+%{days} day%{days:[;2;2;;s]} }%{hours:+%{hours} hour%{hours:[;2;2;;s]} }%{minutes:+%{minutes} minute%{minutes:[;2;2;;s]} }%{seconds:-0} second%{seconds:[;2;2;;s]}"
+
 typedef struct {
     gdouble min;
     gdouble max;
@@ -54,15 +56,45 @@ typedef enum {
     NK_TOKEN_PRETTIFY_PREFIXES_SI = 'p',
     NK_TOKEN_PRETTIFY_PREFIXES_BINARY = 'b',
     NK_TOKEN_PRETTIFY_TIME = 't',
+    NK_TOKEN_PRETTIFY_DURATION = 'd',
 } NkTokenPrettifyType;
 
 typedef struct {
     NkTokenPrettifyType type;
     gchar format[10]; /* %0*.*lf%s + \0 */
     const gchar *time_format;
+    NkTokenList *duration_format;
     gint width;
     gint precision;
 } NkTokenPrettify;
+
+typedef enum {
+    NK_TOKEN_PRETTIFY_DURATION_TOKEN_WEEKS,
+    NK_TOKEN_PRETTIFY_DURATION_TOKEN_DAYS,
+    NK_TOKEN_PRETTIFY_DURATION_TOKEN_HOURS,
+    NK_TOKEN_PRETTIFY_DURATION_TOKEN_MINUTES,
+    NK_TOKEN_PRETTIFY_DURATION_TOKEN_SECONDS,
+    NK_TOKEN_PRETTIFY_DURATION_TOKEN_MILLISECONDS,
+    NK_TOKEN_PRETTIFY_DURATION_TOKEN_MICROSECONDS,
+    NK_TOKEN_PRETTIFY_DURATION_TOKEN_NANOSECONDS,
+} NkTokenListPrettifyDurationToken;
+
+static const gchar * const _nk_token_list_prettify_duration_tokens[] = {
+    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_WEEKS] = "weeks",
+    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_DAYS] = "days",
+    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_HOURS] = "hours",
+    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_MINUTES] = "minutes",
+    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_SECONDS] = "seconds",
+    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_MILLISECONDS] = "milliseconds",
+    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_MICROSECONDS] = "microseconds",
+    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_NANOSECONDS] = "nanoseconds",
+};
+
+typedef struct {
+    guint64 w;
+    guint8 d, h, m, s;
+    guint16 ms, us, ns;
+} NkTokenListPrettifyDurationData;
 
 typedef struct {
     GRegex *regex;
@@ -481,6 +513,12 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
                     token.prettify.time_format = "%c";
                 w = e;
                 goto end_prettify;
+            case NK_TOKEN_PRETTIFY_DURATION:
+                token.prettify.duration_format = _nk_token_list_parse_enum(( w == e ), ( w == e ) ? g_strdup(NK_TOKEN_PRETTIFY_DURATION_DEFAULT) : w, '%', _nk_token_list_prettify_duration_tokens, G_N_ELEMENTS(_nk_token_list_prettify_duration_tokens), NULL, error);
+                if ( token.prettify.duration_format == NULL )
+                    goto fail;
+                w = e;
+                goto end_prettify;
             default:
                 /* Just fail on malformed string */
                 *w = '\0';
@@ -741,6 +779,8 @@ _nk_token_list_check_data(GVariant *data, const NkToken *token)
     return TRUE;
 }
 
+static void _nk_token_list_replace(GString *string, const NkTokenList *self, NkTokenListReplaceCallback callback, gpointer user_data);
+
 static void
 _nk_token_list_append_range(GString *string, GVariant *data, NkTokenRange *range)
 {
@@ -762,6 +802,48 @@ _nk_token_list_append_range(GString *string, GVariant *data, NkTokenRange *range
         i = (gsize) ( (gdouble) ( range->length ) * ( v / r ) );
     }
     g_string_append(string, range->values[i]);
+}
+
+static GVariant *
+_nk_token_list_prettify_duration_callback(G_GNUC_UNUSED const gchar *token, guint64 value, gpointer user_data)
+{
+    NkTokenListPrettifyDurationData *data = user_data;
+    switch ( (NkTokenListPrettifyDurationToken) value )
+    {
+    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_WEEKS:
+        if ( data->w == 0 )
+            return NULL;
+        return g_variant_new_uint64(data->w);
+    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_DAYS:
+        if ( data->d == 0 )
+            return NULL;
+        return g_variant_new_uint64(data->d);
+    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_HOURS:
+        if ( data->h == 0 )
+            return NULL;
+        return g_variant_new_uint64(data->h);
+    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_MINUTES:
+        if ( data->m == 0 )
+            return NULL;
+        return g_variant_new_uint64(data->m);
+    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_SECONDS:
+        if ( data->s == 0 )
+            return NULL;
+        return g_variant_new_uint64(data->s);
+    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_MILLISECONDS:
+        if ( data->ms == 0 )
+            return NULL;
+        return g_variant_new_uint16(data->ms);
+    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_MICROSECONDS:
+        if ( data->us == 0 )
+            return NULL;
+        return g_variant_new_uint16(data->us);
+    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_NANOSECONDS:
+        if ( data->ns == 0 )
+            return NULL;
+        return g_variant_new_uint16(data->ns);
+    }
+    return NULL;
 }
 
 static const gchar *_nk_token_prefixes_si_big[] = {
@@ -833,6 +915,59 @@ _nk_token_list_append_prettify(GString *string, GVariant *data, NkTokenPrettify 
         if ( tmp != NULL )
             g_string_append(string, tmp);
         g_free(tmp);
+    }
+    break;
+    case NK_TOKEN_PRETTIFY_DURATION:
+    {
+        NkTokenListPrettifyDurationData data = { .w = 0 };
+        guint64 s = (guint64) value;
+        value -= s;
+
+        if ( s > 604800 )
+        {
+            data.w = s / 604800;
+            s %= 604800;
+        }
+
+        if ( s > 86400 )
+        {
+            data.d = s / 86400;
+            s %= 86400;
+        }
+
+        if ( s > 3600 )
+        {
+            data.h = s / 3600;
+            s %= 3600;
+        }
+
+        if ( s > 60 )
+        {
+            data.m = s / 60;
+            s %= 60;
+        }
+
+        data.s = s;
+
+        if ( value >= 0.001 )
+        {
+            data.ms = (guint16) ( value * 1000 );
+            value -= ( data.ms / 1000. );
+        }
+
+        if ( value >= 0.000001 )
+        {
+            data.us = (guint16) ( value * 1000000 );
+            value -= ( data.us / 1000000. );
+        }
+
+        if ( value >= 0.000000001 )
+        {
+            data.ns = (guint16) ( value * 1000000000 );
+            value -= ( data.ns / 1000000000. );
+        }
+
+        _nk_token_list_replace(string, prettify->duration_format, _nk_token_list_prettify_duration_callback, &data);
     }
     break;
     }

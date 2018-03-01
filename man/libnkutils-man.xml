@@ -80,6 +80,27 @@
                     <para>You can have an strftime-like format string as addition.</para>
                 </listitem>
             </varlistentry>
+
+            <varlistentry>
+                <term><literal>d</literal></term>
+                <listitem>
+                    <para>Work on <type>a number</type>. The number will be used as seconds.</para>
+                    <para>
+                        You can have a nested format string as addition, with the following data available:
+                        <simplelist>
+                            <member><literal>%{weeks}</literal></member>
+                            <member><literal>%{days}</literal></member>
+                            <member><literal>%{hours}</literal></member>
+                            <member><literal>%{minutes}</literal></member>
+                            <member><literal>%{seconds}</literal></member>
+                            <member><literal>%{milliseconds}</literal></member>
+                            <member><literal>%{microseconds}</literal></member>
+                            <member><literal>%{nanoseconds}</literal></member>
+                        </simplelist>.
+                    </para>
+                    <para>The default format is <literal>%{weeks:+%{weeks} week%{weeks:[;2;2;;s]} }%{days:+%{days} day%{days:[;2;2;;s]} }%{hours:+%{hours} hour%{hours:[;2;2;;s]} }%{minutes:+%{minutes} minute%{minutes:[;2;2;;s]} }%{seconds:-0} second%{seconds:[;2;2;;s]}</literal>.</para>
+                </listitem>
+            </varlistentry>
         </variablelist>
         <para>
             You can replace parts of the data using the regex mechanism.
@@ -183,6 +204,14 @@
                 <listitem>
                     <para><varname>time</varname> is <literal>1519910048</literal>.</para>
                     <para>Resolves to: <literal>2018-03-01 14:14:08</literal></para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><literal>"${buildtime(d)}"</literal></term>
+                <listitem>
+                    <para><varname>buildtime</varname> is <literal>905</literal>.</para>
+                    <para>Resolves to: <literal>15 minutes 5 seconds</literal></para>
                 </listitem>
             </varlistentry>
 

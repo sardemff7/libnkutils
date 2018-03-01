@@ -632,6 +632,30 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/prettify/duration/default",
+        .data = {
+            .identifier = '$',
+            .source = "${duration(d)}",
+            .data = {
+                { .token = "duration", .content = "788645" },
+                { .token = NULL }
+            },
+            .result = "1 week 2 days 3 hours 4 minutes 5 seconds"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/prettify/duration/with-format",
+        .data = {
+            .identifier = '$',
+            .source = "${duration(d%{weeks}w %{days}d %{hours(f02)}:%{minutes(f02)}:%{seconds(f02)})}",
+            .data = {
+                { .token = "duration", .content = "788645" },
+                { .token = NULL }
+            },
+            .result = "1w 2d 03:04:05"
+        }
+    },
+    {
         .testpath = "/nkutils/token/replace/full",
         .data = {
             .identifier = '$',
