@@ -608,6 +608,30 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/prettify/time/default",
+        .data = {
+            .identifier = '$',
+            .source = "${timestamp(t)}",
+            .data = {
+                { .token = "timestamp", .content = "1519910048" },
+                { .token = NULL }
+            },
+            .result = "Thu Mar  1 14:14:08 2018"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/prettify/time/with-format",
+        .data = {
+            .identifier = '$',
+            .source = "${timestamp(t%F %T)}",
+            .data = {
+                { .token = "timestamp", .content = "1519910048" },
+                { .token = NULL }
+            },
+            .result = "2018-03-01 14:14:08"
+        }
+    },
+    {
         .testpath = "/nkutils/token/replace/full",
         .data = {
             .identifier = '$',
@@ -1111,6 +1135,8 @@ int
 main(int argc, char *argv[])
 {
     setlocale(LC_ALL, "");
+    setlocale(LC_TIME, "C");
+    g_setenv("TZ", "Europe/Paris", TRUE);
 
     g_test_init(&argc, &argv, NULL);
 

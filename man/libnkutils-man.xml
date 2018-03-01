@@ -72,6 +72,14 @@
                     <para>You can use the same additions as flag <literal>f</literal></para>
                 </listitem>
             </varlistentry>
+
+            <varlistentry>
+                <term><literal>t</literal></term>
+                <listitem>
+                    <para>Work on <type>a number</type>. The number will be used as a UNIX timestamp.</para>
+                    <para>You can have an strftime-like format string as addition.</para>
+                </listitem>
+            </varlistentry>
         </variablelist>
         <para>
             You can replace parts of the data using the regex mechanism.
@@ -159,6 +167,22 @@
                 <listitem>
                     <para><varname>space</varname> is <literal>1048576</literal>.</para>
                     <para>Resolves to: <literal>Disk space: 1MiB.</literal></para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><literal>"${time(t)}"</literal></term>
+                <listitem>
+                    <para><varname>time</varname> is <literal>1519910048</literal>.</para>
+                    <para>Resolves to: <literal>Thu Mar  1 14:14:08 2018</literal></para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><literal>"${time(t%F %T)}"</literal></term>
+                <listitem>
+                    <para><varname>time</varname> is <literal>1519910048</literal>.</para>
+                    <para>Resolves to: <literal>2018-03-01 14:14:08</literal></para>
                 </listitem>
             </varlistentry>
 

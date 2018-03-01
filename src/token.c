@@ -53,11 +53,13 @@ typedef enum {
     NK_TOKEN_PRETTIFY_FLOAT = 'f',
     NK_TOKEN_PRETTIFY_PREFIXES_SI = 'p',
     NK_TOKEN_PRETTIFY_PREFIXES_BINARY = 'b',
+    NK_TOKEN_PRETTIFY_TIME = 't',
 } NkTokenPrettifyType;
 
 typedef struct {
     NkTokenPrettifyType type;
     gchar format[10]; /* %0*.*lf%s + \0 */
+    const gchar *time_format;
     gint width;
     gint precision;
 } NkTokenPrettify;
@@ -472,6 +474,13 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
             case NK_TOKEN_PRETTIFY_PREFIXES_SI:
             case NK_TOKEN_PRETTIFY_PREFIXES_BINARY:
             break;
+            case NK_TOKEN_PRETTIFY_TIME:
+                if ( w != e )
+                    token.prettify.time_format = w;
+                else
+                    token.prettify.time_format = "%c";
+                w = e;
+                goto end_prettify;
             default:
                 /* Just fail on malformed string */
                 *w = '\0';
@@ -515,6 +524,7 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
                 w = ie;
             }
 
+        end_prettify:
             if ( w != e )
             {
                 g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_PRETIFFY, "Unexpected leftovers in prettify: %s", w);
@@ -808,6 +818,21 @@ _nk_token_list_append_prettify(GString *string, GVariant *data, NkTokenPrettify 
         if ( value == (gdouble) ( (gint64) value ) )
             precision = MAX(0, precision);
         g_string_append_printf(string, prettify->format, prettify->width, precision, value, *prefix);
+    }
+    break;
+    case NK_TOKEN_PRETTIFY_TIME:
+    {
+        GDateTime *time;
+        gchar *tmp = NULL;
+        time = g_date_time_new_from_unix_local(value);
+        if ( time != NULL )
+        {
+            tmp = g_date_time_format(time, prettify->time_format);
+            g_date_time_unref(time);
+        }
+        if ( tmp != NULL )
+            g_string_append(string, tmp);
+        g_free(tmp);
     }
     break;
     }
