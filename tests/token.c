@@ -452,6 +452,30 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/range/plural/singular",
+        .data = {
+            .identifier = '$',
+            .source = "${quantity} unit${quantity:[;2;2;;s]}",
+            .data = {
+                { .token = "quantity", .content = "1" },
+                { .token = NULL }
+            },
+            .result = "1 unit"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/range/plural/plural",
+        .data = {
+            .identifier = '$',
+            .source = "${quantity} unit${quantity:[;2;2;;s]}",
+            .data = {
+                { .token = "quantity", .content = "2" },
+                { .token = NULL }
+            },
+            .result = "2 units"
+        }
+    },
+    {
         .testpath = "/nkutils/token/range/middle-split",
         .data = {
             .identifier = '$',
@@ -893,12 +917,14 @@ _nk_token_list_tests_func(gconstpointer user_data)
 typedef enum {
     TOKEN_FRUIT,
     TOKEN_RECIPE,
+    TOKEN_VALUE,
     _TOKEN_SIZE
 } NkTokenListEnumTokens;
 
 static const gchar * const _nk_token_list_enum_tests_tokens[_TOKEN_SIZE] = {
     [TOKEN_FRUIT]  = "fruit",
     [TOKEN_RECIPE] = "recipe",
+    [TOKEN_VALUE] = "value",
 };
 
 typedef struct {
@@ -953,10 +979,70 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/enum/substitute",
+        .data = {
+            .identifier = '$',
+            .source = "I want to eat ${fruit:+a fruit}.",
+            .data = {
+                [TOKEN_FRUIT]  = "'an apple'",
+            },
+            .used_tokens = (1 << TOKEN_FRUIT),
+            .result = "I want to eat a fruit."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/enum/anti-substitute",
+        .data = {
+            .identifier = '$',
+            .source = "I want to eat${fruit:! a fruit}.",
+            .data = {
+                [TOKEN_FRUIT]  = "'an apple'",
+            },
+            .used_tokens = (1 << TOKEN_FRUIT),
+            .result = "I want to eat."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/enum/prettify/float",
+        .data = {
+            .identifier = '$',
+            .source = "${value(f.2)}",
+            .data = {
+                [TOKEN_VALUE]  = "1.5555",
+            },
+            .used_tokens = (1 << TOKEN_VALUE),
+            .result = "1.56"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/enum/prettify/prefixes/si",
+        .data = {
+            .identifier = '$',
+            .source = "${value(p)}",
+            .data = {
+                [TOKEN_VALUE]  = "1000",
+            },
+            .used_tokens = (1 << TOKEN_VALUE),
+            .result = "1k"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/enum/prettify/prefixes/binary",
+        .data = {
+            .identifier = '$',
+            .source = "${value(b)}",
+            .data = {
+                [TOKEN_VALUE]  = "1024",
+            },
+            .used_tokens = (1 << TOKEN_VALUE),
+            .result = "1Ki"
+        }
+    },
+    {
         .testpath = "/nkutils/token/enum/regex",
         .data = {
             .identifier = '$',
-            .source = "I want to eat ${fruit/an apple/a banana} ${recipe:-pie}.",
+            .source = "I want to eat ${fruit/an apple/a banana} ${recipe}.",
             .data = {
                 [TOKEN_FRUIT]  = "'an apple'",
                 [TOKEN_RECIPE]  = "'split'",
