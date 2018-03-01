@@ -406,22 +406,22 @@ nk_token_list_parse(gchar *string, gunichar identifier, GError **error)
                 goto fail;
             }
             *e = '\0';
-            switch ( g_utf8_get_char(w) )
+            token.prettify.type = g_utf8_get_char(w);
+            token.prettify.width = 0;
+            token.prettify.precision = -1;
+            w = g_utf8_next_char(w);
+            switch ( token.prettify.type )
             {
             case NK_TOKEN_PRETTIFY_FLOAT:
             case NK_TOKEN_PRETTIFY_PREFIXES_SI:
             case NK_TOKEN_PRETTIFY_PREFIXES_BINARY:
-                token.prettify.type = g_utf8_get_char(w);
-                token.prettify.width = 0;
-                token.prettify.precision = -1;
             break;
             default:
                 /* Just fail on malformed string */
-                *g_utf8_next_char(w) = '\0';
-                g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_PRETIFFY, "Wrong prettify identifier: %s", w);
+                *w = '\0';
+                g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_PRETIFFY, "Wrong prettify identifier: %s", m);
                 goto fail;
             }
-            w = g_utf8_next_char(w);
 
             if ( g_utf8_get_char(w) == '0' )
             {
@@ -432,7 +432,7 @@ nk_token_list_parse(gchar *string, gunichar identifier, GError **error)
                 g_snprintf(token.prettify.format, sizeof(token.prettify.format), "%%*.*lf%%s");
             if ( w == e )
                 break;
-            if ( g_unichar_isdigit(g_utf8_get_char(w))  )
+            if ( g_unichar_isdigit(g_utf8_get_char(w)) )
             {
                 gchar *ie;
                 errno = 0;
