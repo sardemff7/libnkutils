@@ -78,7 +78,7 @@ _nk_gtk_settings_try_dir(gpointer value, const gchar *keys[NK_GTK_SETTINGS_NUM_V
     return found;
 }
 
-gboolean
+static gboolean
 _nk_gtk_settings_get(gpointer value, const gchar *keys[NK_GTK_SETTINGS_NUM_VERSION], NkGtkSettingsGetter getter)
 {
     if ( _nk_gtk_settings_try_dir(value, keys, getter, g_get_user_config_dir()) )
