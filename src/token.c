@@ -83,6 +83,7 @@ typedef struct {
 
 struct _NkTokenList {
     guint64 ref_count;
+    gboolean owned;
     gchar *string;
     gsize length;
     NkToken *tokens;
@@ -200,8 +201,62 @@ _nk_token_list_parse_range_value(const gchar *s, const gchar *e, gdouble *value,
     return ret;
 }
 
-NkTokenList *
-nk_token_list_parse(gchar *string, gunichar identifier, GError **error)
+static gboolean
+_nk_token_list_search_enum_tokens(NkTokenList *self, const gchar * const *tokens, guint64 size, guint64 *used_tokens, GError **error)
+{
+    gsize i;
+    for ( i = 0 ; i < self->size ; ++i )
+    {
+        if ( self->tokens[i].name == NULL )
+            continue;
+        if ( ! nk_enum_parse(self->tokens[i].name, tokens, size, FALSE, FALSE, &self->tokens[i].value) )
+        {
+            g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_UNKNOWN_TOKEN, "Unknown token: %s", self->tokens[i].name);
+            return FALSE;
+        }
+        *used_tokens |= (1 << self->tokens[i].value);
+
+        if ( self->tokens[i].fallback != NULL )
+            _nk_token_list_search_enum_tokens(self->tokens[i].fallback, tokens, size, used_tokens, error);
+        if ( self->tokens[i].substitute != NULL )
+            _nk_token_list_search_enum_tokens(self->tokens[i].substitute, tokens, size, used_tokens, error);
+        if ( self->tokens[i].replace != NULL )
+        {
+            NkTokenRegex *regex;
+            for ( regex = self->tokens[i].replace ; regex->regex != NULL ; ++regex )
+                _nk_token_list_search_enum_tokens(regex->replacement, tokens, size, used_tokens, error);
+        }
+    }
+    return TRUE;
+}
+
+static NkTokenList *_nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError **error);
+static NkTokenList *
+_nk_token_list_parse_enum(gboolean owned, gchar *string, gunichar identifier, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens, GError **error)
+{
+    g_return_val_if_fail(string != NULL, NULL);
+
+    NkTokenList *self;
+
+    self = _nk_token_list_parse(owned, string, identifier, error);
+    if ( self == NULL )
+        return NULL;
+
+    guint64 used_tokens = 0;
+    if ( ! _nk_token_list_search_enum_tokens(self, tokens, size, &used_tokens, error) )
+        goto fail;
+    if ( ret_used_tokens != NULL )
+        *ret_used_tokens = used_tokens;
+
+    return self;
+
+fail:
+    nk_token_list_unref(self);
+    return NULL;
+}
+
+static NkTokenList *
+_nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError **error)
 {
     g_return_val_if_fail(string != NULL, NULL);
     g_return_val_if_fail(error == NULL || *error == NULL, NULL);
@@ -210,6 +265,7 @@ nk_token_list_parse(gchar *string, gunichar identifier, GError **error)
 
     self = g_new0(NkTokenList, 1);
     self->ref_count = 1;
+    self->owned = owned;
     self->string = string;
     self->length = strlen(self->string);
 
@@ -323,18 +379,18 @@ nk_token_list_parse(gchar *string, gunichar identifier, GError **error)
             switch ( g_utf8_get_char(w) )
             {
             case '-':
-                token.fallback = nk_token_list_parse(g_utf8_next_char(w), identifier, error);
+                token.fallback = _nk_token_list_parse(FALSE, g_utf8_next_char(w), identifier, error);
                 if ( token.fallback == NULL )
                     goto fail;
             break;
             case '+':
-                token.substitute = nk_token_list_parse(g_utf8_next_char(w), identifier, error);
+                token.substitute = _nk_token_list_parse(FALSE, g_utf8_next_char(w), identifier, error);
                 if ( token.substitute == NULL )
                     goto fail;
             break;
             case '!':
                 token.no_data = TRUE;
-                token.fallback = nk_token_list_parse(g_utf8_next_char(w), identifier, error);
+                token.fallback = _nk_token_list_parse(FALSE, g_utf8_next_char(w), identifier, error);
                 if ( token.fallback == NULL )
                     goto fail;
             break;
@@ -493,7 +549,7 @@ nk_token_list_parse(gchar *string, gunichar identifier, GError **error)
                 }
 
                 w = w + strlen(w) + 1;
-                token.replace[c].replacement = nk_token_list_parse(( w > e ) ? "" : w, identifier, error);
+                token.replace[c].replacement = _nk_token_list_parse(FALSE, ( w > e ) ? "" : w, identifier, error);
                 if ( token.replace[c].replacement == NULL )
                     goto fail;
                 w += strlen(w);
@@ -536,57 +592,16 @@ fail:
     return NULL;
 }
 
-static gboolean
-_nk_token_list_search_enum_tokens(NkTokenList *self, const gchar * const *tokens, guint64 size, guint64 *used_tokens, GError **error)
+NkTokenList *
+nk_token_list_parse(gchar *string, gunichar identifier, GError **error)
 {
-    gsize i;
-    for ( i = 0 ; i < self->size ; ++i )
-    {
-        if ( self->tokens[i].name == NULL )
-            continue;
-        if ( ! nk_enum_parse(self->tokens[i].name, tokens, size, FALSE, FALSE, &self->tokens[i].value) )
-        {
-            g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_UNKNOWN_TOKEN, "Unknown token: %s", self->tokens[i].name);
-            return FALSE;
-        }
-        *used_tokens |= (1 << self->tokens[i].value);
-
-        if ( self->tokens[i].fallback != NULL )
-            _nk_token_list_search_enum_tokens(self->tokens[i].fallback, tokens, size, used_tokens, error);
-        if ( self->tokens[i].substitute != NULL )
-            _nk_token_list_search_enum_tokens(self->tokens[i].substitute, tokens, size, used_tokens, error);
-        if ( self->tokens[i].replace != NULL )
-        {
-            NkTokenRegex *regex;
-            for ( regex = self->tokens[i].replace ; regex->regex != NULL ; ++regex )
-                _nk_token_list_search_enum_tokens(regex->replacement, tokens, size, used_tokens, error);
-        }
-    }
-    return TRUE;
+    return _nk_token_list_parse(TRUE, string, identifier, error);
 }
 
 NkTokenList *
 nk_token_list_parse_enum(gchar *string, gunichar identifier, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens, GError **error)
 {
-    g_return_val_if_fail(string != NULL, NULL);
-
-    NkTokenList *self;
-
-    self = nk_token_list_parse(string, identifier, error);
-    if ( self == NULL )
-        return NULL;
-
-    guint64 used_tokens = 0;
-    if ( ! _nk_token_list_search_enum_tokens(self, tokens, size, &used_tokens, error) )
-        goto fail;
-    if ( ret_used_tokens != NULL )
-        *ret_used_tokens = used_tokens;
-
-    return self;
-
-fail:
-    nk_token_list_unref(self);
-    return NULL;
+    return _nk_token_list_parse_enum(TRUE, string, identifier, tokens, size, ret_used_tokens, error);
 }
 
 NkTokenList *
@@ -600,6 +615,8 @@ nk_token_list_ref(NkTokenList *self)
 static void
 _nk_token_list_free(NkTokenList *self)
 {
+    if ( self->owned )
+        g_free(self->string);
 
     gsize i;
     for ( i = 0 ; i < self->size ; ++i )
@@ -633,8 +650,6 @@ nk_token_list_unref(NkTokenList *self)
     g_return_if_fail(self != NULL);
     if ( --self->ref_count > 0 )
         return;
-
-    g_free(self->string);
 
     _nk_token_list_free(self);
 }
