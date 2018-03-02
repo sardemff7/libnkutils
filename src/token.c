@@ -360,7 +360,18 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
             w = g_utf8_next_char(w);
             const gchar *key = w;
             gint64 index = 0;
-            if ( g_unichar_isdigit(g_utf8_get_char(w)) )
+            if ( g_unichar_isalpha(g_utf8_get_char(w)) )
+            {
+                while ( g_unichar_isalpha(g_utf8_get_char(w)) || ( g_utf8_get_char(w) == '-' ) || ( g_utf8_get_char(w) == '_' ) )
+                    w = g_utf8_next_char(w);
+            }
+            else if ( g_utf8_get_char(w) == '@' )
+            {
+                /* We consider the rest as a join token */
+                while ( g_utf8_get_char(w) != ']' )
+                    w = g_utf8_next_char(w);
+            }
+            else
             {
                 gchar *ie;
                 errno = 0;
@@ -373,19 +384,6 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
                 }
                 w = ie;
             }
-            else if ( g_unichar_isalpha(g_utf8_get_char(w)) )
-            {
-                while ( g_unichar_isalpha(g_utf8_get_char(w)) || ( g_utf8_get_char(w) == '-' ) || ( g_utf8_get_char(w) == '_' ) )
-                    w = g_utf8_next_char(w);
-            }
-            else if ( g_utf8_get_char(w) == '@' )
-            {
-                /* We consider the rest as a join token */
-                while ( g_utf8_get_char(w) != ']' )
-                    w = g_utf8_next_char(w);
-            }
-            else
-                w = ss;
 
             if ( g_utf8_get_char(w) != ']' )
             {

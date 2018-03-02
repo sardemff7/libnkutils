@@ -143,13 +143,26 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/key/index",
+        .testpath = "/nkutils/token/key/index/positive",
         .data = {
             .identifier = '$',
             .source = "You can make a ${recipe[0]} with ${fruit}.",
             .data = {
                 { .token = "fruit", .content = "'a banana'" },
-                { .token = "recipe", .content = "['banana split']" },
+                { .token = "recipe", .content = "['banana split', 'apple pie']" },
+                { .token = NULL }
+            },
+            .result = "You can make a banana split with a banana."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/key/index/negative",
+        .data = {
+            .identifier = '$',
+            .source = "You can make a ${recipe[-1]} with ${fruit}.",
+            .data = {
+                { .token = "fruit", .content = "'a banana'" },
+                { .token = "recipe", .content = "['apple pie', 'banana split']" },
                 { .token = NULL }
             },
             .result = "You can make a banana split with a banana."
