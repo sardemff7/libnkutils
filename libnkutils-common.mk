@@ -29,6 +29,7 @@ TESTS += \
 	$(_libnkutils_tests)
 
 EXTRA_DIST += \
+	%D%/src/git-version.c \
 	%D%/man/libnkutils-man.xml \
 	%D%/tests/gtk-3.0/settings.ini \
 	%D%/tests/gtk-4.0/settings.ini \
