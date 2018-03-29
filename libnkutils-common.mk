@@ -25,6 +25,9 @@
 check_PROGRAMS += \
 	$(_libnkutils_tests)
 
+noinst_PROGRAMS += \
+	$(_libnkutils_examples)
+
 TESTS += \
 	$(_libnkutils_tests)
 
@@ -68,6 +71,7 @@ NKUTILS_MANFILES = \
 
 
 _libnkutils_sources =
+_libnkutils_examples =
 _libnkutils_tests =
 
 if NK_ENABLE_UUID_LIBUUID
@@ -118,6 +122,9 @@ _libnkutils_sources += \
 	%D%/src/token.c \
 	%D%/src/nkutils-token.h
 
+_libnkutils_examples += \
+	%D%/nk-token-replace
+
 _libnkutils_tests += \
 	%D%/tests/token.test
 endif
@@ -154,6 +161,9 @@ _libnkutils_sources += \
 	%D%/src/xdg-theme.c \
 	%D%/src/nkutils-xdg-theme.h
 
+_libnkutils_examples += \
+	%D%/nk-xdg-theme-lookup
+
 _libnkutils_tests += \
 	%D%/tests/xdg-theme.test
 endif
@@ -166,6 +176,35 @@ _libnkutils_sources += \
 _libnkutils_tests += \
 	%D%/tests/bindings.test
 endif
+
+
+#
+# Examples
+#
+
+# token
+%C%_nk_token_replace_SOURCES = \
+	%D%/src/token-example.c
+
+%C%_nk_token_replace_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(NKUTILS_CFLAGS) \
+	$(_NKUTILS_INTERNAL_CFLAGS)
+
+%C%_nk_token_replace_LDADD = \
+	$(NKUTILS_LIBS)
+
+# xdg-theme
+%C%_nk_xdg_theme_lookup_SOURCES = \
+	%D%/src/xdg-theme-example.c
+
+%C%_nk_xdg_theme_lookup_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(NKUTILS_CFLAGS) \
+	$(_NKUTILS_INTERNAL_CFLAGS)
+
+%C%_nk_xdg_theme_lookup_LDADD = \
+	$(NKUTILS_LIBS)
 
 
 #
