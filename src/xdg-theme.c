@@ -581,7 +581,9 @@ _nk_xdg_theme_find(NkXdgThemeTheme *self)
             else
                 self->subdirs = g_list_insert_sorted(self->subdirs, subdir, _nk_xdg_theme_subdir_sort);
         }
+        g_free(*subdir_path);
     }
+    g_free(subdirs);
 
     if ( self->subdirs == NULL )
         goto error;
