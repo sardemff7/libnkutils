@@ -1171,9 +1171,7 @@ _nk_token_list_enum_tests_func(gconstpointer user_data)
 int
 main(int argc, char *argv[])
 {
-    setlocale(LC_ALL, "");
-    setlocale(LC_TIME, "C");
-    setlocale(LC_NUMERIC, "C");
+    setlocale(LC_ALL, "C");
     g_setenv("TZ", "Europe/Paris", TRUE);
 
     g_test_init(&argc, &argv, NULL);
