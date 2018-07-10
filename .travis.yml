@@ -9,7 +9,7 @@ compiler:
 addons:
     apt:
         packages:
-            - python3-pip
+            - python3.5
             - libglib2.0-dev
             - uuid-dev
             - libxkbcommon-dev
@@ -18,13 +18,15 @@ addons:
             - sound-theme-freedesktop
             - pidgin-data
 install:
-    - pip3 install --user meson
+    - wget https://github.com/mesonbuild/meson/releases/download/0.47.0/meson-0.47.0.tar.gz
+    - tar xf meson-0.47.0.tar.gz
+    - export MESON=$(pwd)/meson-0.47.0/meson.py
     - wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip
     - unzip ninja-linux.zip
     - export PATH=$(pwd):$PATH
 
 before_script:
-    - meson build -Db_coverage=true
+    - python3.5 ${MESON} build -Db_coverage=true
 script:
     - ninja -C build -v test
     - cat build/meson-logs/testlog.txt
