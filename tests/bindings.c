@@ -533,9 +533,12 @@ int
 main(int argc, char *argv[])
 {
     setlocale(LC_CTYPE, "en_US.UTF-8");
+
     g_test_init(&argc, &argv, NULL);
 
     g_test_set_nonfatal_assertions();
+
+    g_setenv("HOME", "/var/empty", TRUE);
 
     gsize i;
     for ( i = 0 ; i < G_N_ELEMENTS(_nk_bindings_tests_list) ; ++i )
