@@ -36,13 +36,15 @@ nk_glib_min_version = '2.40'
 nk_options = []
 
 nk_modules = [
-    'uuid',
     'token',
     'gtk-settings',
     'xdg-de',
     'xdg-theme',
     'enum',
     'colour',
+]
+nk_special_modules = [
+    'uuid',
     'bindings',
 ]
 nk_dependencies = [
@@ -69,7 +71,7 @@ nkutils_manfiles = files('man/libnkutils-man.xml')
 nkutils_mandepends = []
 nkutils_docbook_conditions = []
 
-foreach m : nk_modules
+foreach m : nk_modules + nk_special_modules
     if get_option(m)
         nk_options += '@0@=true'.format(m)
     endif
@@ -91,42 +93,8 @@ foreach m : nk_modules
     endif
 endforeach
 
-if uuid
-    nk_libuuid = dependency('uuid', required: false)
-    if nk_libuuid.found()
-        nk_sources += files('src/uuid-libuuid.c')
-        nk_deps += nk_libuuid
-    else
-        nk_apr_util_1 = dependency('apr-util-1', required: false)
-        if nk_apr_util_1.found()
-            nk_sources += files('src/uuid-apr-util.c')
-            nk_deps += nk_apr_util_1
-        else
-            nk_apr_util = dependency('apr-util', required: false)
-            if nk_apr_util.found()
-                nk_sources += files('src/uuid-apr-util.c')
-                nk_deps += nk_apr_util
-            else
-                error('libnkutils: A UUID library is required')
-            endif
-        endif
-    endif
-    nk_sources += files('src/uuid-internal.h')
-endif
-
 if xdg_theme
     nk_deps += [ dependency('gio-2.0'), dependency('gobject-2.0') ]
-endif
-
-if bindings
-    nk_xkbcommon = dependency('xkbcommon', version: '>= 0.4.1')
-    nk_deps += nk_xkbcommon
-    if nk_xkbcommon.version().version_compare('>= 0.7.0')
-        nk_args += '-DNK_XKBCOMMON_HAS_COMPOSE'
-        nk_args += '-DNK_XKBCOMMON_HAS_CONSUMED2'
-    elif nk_xkbcommon.version().version_compare('>= 0.5.0')
-        nk_args += '-DNK_XKBCOMMON_HAS_COMPOSE'
-    endif
 endif
 
 nk_lib = static_library('nkutils', nk_sources, c_args: nk_args, dependencies: nk_deps)
@@ -164,6 +132,57 @@ endif
 
 libnkutils = declare_dependency(link_with: nk_lib, include_directories: nk_inc, dependencies: nk_deps, sources: nk_src)
 
+if uuid
+    nk_libuuid = dependency('uuid', required: false)
+    nk_sources = files(
+        'src/uuid.c',
+        'src/nkutils-uuid.h',
+        'src/uuid-internal.h',
+    )
+    if nk_libuuid.found()
+        nk_sources += files('src/uuid-libuuid.c')
+        nk_deps += nk_libuuid
+    else
+        nk_libuuid = dependency('apr-util-1', required: false)
+        if nk_libuuid.found()
+            nk_sources += files('src/uuid-apr-util.c')
+        else
+            nk_libuuid = dependency('apr-util', required: false)
+            if nk_libuuid.found()
+                nk_sources += files('src/uuid-apr-util.c')
+                nk_deps += nk_libuuid
+            else
+                nk_libuuid = disabler()
+            endif
+        endif
+    endif
+    if not nk_libuuid.found()
+        libnkutils_uuid = disabler()
+    else
+        nk_deps_uuid = [ nk_libuuid, nk_deps ]
+        nk_lib = static_library('nkutils-uuid', nk_sources, c_args: nk_args, dependencies: nk_deps_uuid, build_by_default: false)
+        libnkutils_uuid = declare_dependency(link_with: nk_lib, include_directories: nk_inc, dependencies: nk_deps_uuid, sources: nk_src)
+    endif
+endif
+
+nk_xkbcommon = dependency('xkbcommon', version: '>= 0.4.1', required: false)
+if bindings and not nk_xkbcommon.found()
+    libnkutils_bindings = disabler()
+elif bindings
+    if nk_xkbcommon.version().version_compare('>= 0.7.0')
+        nk_args += '-DNK_XKBCOMMON_HAS_COMPOSE'
+        nk_args += '-DNK_XKBCOMMON_HAS_CONSUMED2'
+    elif nk_xkbcommon.version().version_compare('>= 0.5.0')
+        nk_args += '-DNK_XKBCOMMON_HAS_COMPOSE'
+    endif
+    nk_sources = files(
+        'src/bindings.c',
+        'src/nkutils-bindings.h',
+    )
+    nk_deps_bindings = [ nk_xkbcommon, libnkutils ]
+    nk_lib = static_library('nkutils-bindings', nk_sources, c_args: nk_args, dependencies: nk_deps_bindings, build_by_default: false)
+    libnkutils_bindings = declare_dependency(link_with: nk_lib, include_directories: nk_inc, dependencies: nk_deps_bindings, sources: nk_src)
+endif
 
 if token
     executable('nk-token-replace', files('src/token-example.c'), dependencies: libnkutils)
@@ -184,6 +203,13 @@ endif
 foreach m : nk_modules
     if get_variable(m.underscorify())
         nk_test = executable('nk-@0@.test'.format(m), files('tests/@0@.c'.format(m)), c_args: nk_args, dependencies: libnkutils)
+        test('libnkutils @0@ module tests'.format(m), nk_test)
+    endif
+endforeach
+
+foreach m : nk_special_modules
+    if get_variable(m.underscorify())
+        nk_test = executable('nk-@0@.test'.format(m), files('tests/@0@.c'.format(m)), c_args: nk_args, dependencies: get_variable('libnkutils_@0@'.format(m.underscorify())))
         test('libnkutils @0@ module tests'.format(m), nk_test)
     endif
 endforeach
