@@ -429,7 +429,7 @@ static const struct {
             .size = 10,
             .scale = 1,
             .svg = TRUE,
-            .result = SRCDIR G_DIR_SEPARATOR_S "tests/icons/recursive-theme-test/test-dir/test-icon.svg",
+            .result = SRCDIR G_DIR_SEPARATOR_S "tests" G_DIR_SEPARATOR_S "icons" G_DIR_SEPARATOR_S "recursive-theme-test" G_DIR_SEPARATOR_S "test-dir" G_DIR_SEPARATOR_S "test-icon.svg",
         }
     },
     {
