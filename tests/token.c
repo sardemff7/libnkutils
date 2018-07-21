@@ -1172,6 +1172,8 @@ int
 main(int argc, char *argv[])
 {
     setlocale(LC_ALL, "C");
+
+    g_setenv("LANG", "C", TRUE);
     g_setenv("TZ", "UTC", TRUE);
 
     g_test_init(&argc, &argv, NULL);
