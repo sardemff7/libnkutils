@@ -629,7 +629,7 @@ static const struct {
                 { .token = "timestamp", .content = "1519910048" },
                 { .token = NULL }
             },
-            .result = "Thu Mar  1 14:14:08 2018"
+            .result = "Thu Mar  1 13:14:08 2018"
         }
     },
     {
@@ -641,7 +641,7 @@ static const struct {
                 { .token = "timestamp", .content = "1519910048" },
                 { .token = NULL }
             },
-            .result = "2018-03-01 14:14:08"
+            .result = "2018-03-01 13:14:08"
         }
     },
     {
@@ -1172,7 +1172,7 @@ int
 main(int argc, char *argv[])
 {
     setlocale(LC_ALL, "C");
-    g_setenv("TZ", "Europe/Paris", TRUE);
+    g_setenv("TZ", "UTC", TRUE);
 
     g_test_init(&argc, &argv, NULL);
 
