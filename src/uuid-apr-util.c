@@ -56,7 +56,7 @@ nk_uuid_generate(NkUuid *self)
 gboolean
 nk_uuid_parse(NkUuid *self, const gchar *string)
 {
-    if ( apr_uuid_parse((apr_uuid_t *) self, string) < 0 )
+    if ( apr_uuid_parse((apr_uuid_t *) self, string) != APR_SUCCESS )
         return FALSE;
 
     nk_uuid_update_string(self);
