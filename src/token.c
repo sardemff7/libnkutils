@@ -876,7 +876,9 @@ _nk_token_list_append_prettify(GString *string, GVariant *data, NkTokenPrettify 
     case NK_TOKEN_PRETTIFY_PREFIXES_SI:
     {
         const gchar **prefix;
-        if ( ( value > -1 ) && ( value < 1 ) )
+        if ( value == 0 )
+            prefix = _nk_token_prefixes_si_small; /* Empty string */
+        else if ( ( value > -1 ) && ( value < 1 ) )
         {
             for ( prefix = _nk_token_prefixes_si_small ; ( value > -1 ) && ( value < 1 ) && ( prefix < ( _nk_token_prefixes_si_small + G_N_ELEMENTS(_nk_token_prefixes_si_small) ) ) ; ++prefix )
                 value *= 1000;
