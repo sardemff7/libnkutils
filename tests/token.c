@@ -573,6 +573,18 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/prettify/prefixes/si/zero",
+        .data = {
+            .identifier = '$',
+            .source = "${value(p)}",
+            .data = {
+                { .token = "value", .content = "0" },
+                { .token = NULL }
+            },
+            .result = "0"
+        }
+    },
+    {
         .testpath = "/nkutils/token/prettify/prefixes/si/with-precision",
         .data = {
             .identifier = '$',
@@ -609,7 +621,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/token/prettify/prefixes/binary",
+        .testpath = "/nkutils/token/prettify/prefixes/binary/big",
         .data = {
             .identifier = '$',
             .source = "${value(b)}",
@@ -618,6 +630,18 @@ static const struct {
                 { .token = NULL }
             },
             .result = "612.015625Ki"
+        }
+    },
+    {
+        .testpath = "/nkutils/token/prettify/prefixes/binary/zero",
+        .data = {
+            .identifier = '$',
+            .source = "${value(b)}",
+            .data = {
+                { .token = "value", .content = "0" },
+                { .token = NULL }
+            },
+            .result = "0"
         }
     },
     {
