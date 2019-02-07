@@ -50,6 +50,11 @@ typedef struct {
     gchar **values;
 } NkTokenRange;
 
+typedef struct {
+    gchar *true_;
+    gchar *false_;
+} NkTokenSwitch;
+
 typedef enum {
     NK_TOKEN_PRETTIFY_NONE = 0,
     NK_TOKEN_PRETTIFY_FLOAT = 'f',
@@ -110,6 +115,7 @@ typedef struct {
     NkTokenList *fallback;
     NkTokenList *substitute;
     NkTokenRange range;
+    NkTokenSwitch switch_;
     NkTokenPrettify prettify;
     NkTokenRegex *replace;
     gboolean no_data;
@@ -473,6 +479,32 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
                 } while ( ( s = g_utf8_strchr(w, e - w, sep) ) != NULL );
             }
             break;
+            case '{':
+            {
+                w = g_utf8_next_char(w);
+                e = _nk_token_strchr_escape(w, e - w, '}', '{');
+                if ( e == NULL )
+                {
+                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_RANGE, "Missing switch close bracket: %s", w);
+                    goto fail;
+                }
+                *e = '\0';
+
+                gunichar sep = g_utf8_get_char(w);
+                gchar *s;
+
+                w = g_utf8_next_char(w);
+                if ( ( s = g_utf8_strchr(w, e - w, sep) ) == NULL )
+                {
+                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_SWITCH, "Missing switch false value: %s", w);
+                    goto fail;
+                }
+                token.switch_.true_ = w;
+                w = g_utf8_next_char(s);
+                *s = '\0';
+                token.switch_.false_ = w;
+            }
+            break;
             default:
                 /* Just fail on malformed string */
                 *g_utf8_next_char(w) = '\0';
@@ -802,6 +834,15 @@ _nk_token_list_append_range(GString *string, GVariant *data, NkTokenRange *range
     g_string_append(string, range->values[i]);
 }
 
+static void
+_nk_token_list_append_switch(GString *string, GVariant *data, NkTokenSwitch *switch_)
+{
+    if ( ! g_variant_is_of_type(data, G_VARIANT_TYPE_BOOLEAN) )
+        return;
+
+    g_string_append(string, g_variant_get_boolean(data) ? switch_->true_ : switch_->false_);
+}
+
 static GVariant *
 _nk_token_list_prettify_duration_callback(G_GNUC_UNUSED const gchar *token, guint64 value, gpointer user_data)
 {
@@ -1039,6 +1080,8 @@ _nk_token_list_replace(GString *string, const NkTokenList *self, NkTokenListRepl
                 _nk_token_list_replace(string, self->tokens[i].substitute, callback, user_data);
             else if ( self->tokens[i].range.length > 0 )
                 _nk_token_list_append_range(string, data, &self->tokens[i].range);
+            else if ( self->tokens[i].switch_.true_ != NULL )
+                _nk_token_list_append_switch(string, data, &self->tokens[i].switch_);
             else if ( self->tokens[i].prettify.type != NK_TOKEN_PRETTIFY_NONE )
                 _nk_token_list_append_prettify(string, data, &self->tokens[i].prettify);
             else if ( self->tokens[i].replace != NULL )

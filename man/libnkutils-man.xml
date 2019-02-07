@@ -46,7 +46,11 @@
             The syntax is: <userinput>${<replaceable>reference-name</replaceable>:!<replaceable>substitute-value</replaceable>}</userinput>.
         </para>
         <para>
-            You can use a range substitute if the data resolves to <type>a number</type> or <type>a boolean</type>.
+            You can use a switch substitute if the data resolves to <type>a boolean</type>.
+            The syntax is: <userinput>${<replaceable>reference-name</replaceable>:{<replaceable>separator</replaceable><replaceable>value-if-false</replaceable><replaceable>separator</replaceable><replaceable>value-if-true</replaceable>}}</userinput>.
+        </para>
+        <para>
+            You can use a range substitute if the data resolves to <type>a number</type>.
             The syntax is: <userinput>${<replaceable>reference-name</replaceable>:[<replaceable>separator</replaceable><replaceable>range-start</replaceable><replaceable>separator</replaceable><replaceable>range-end</replaceable><repeatable><replaceable>separator</replaceable><replaceable>substitute-value</replaceable></repeatable>]}</userinput>.
         </para>
         <para>
@@ -164,6 +168,14 @@
                 <listitem>
                     <para><varname>name</varname> is <literal>"Bob"</literal>, <varname>fruit</varname> is <literal>"pear"</literal>and <varname>addition</varname> is <literal>nothing</literal>.</para>
                     <para>Resolves to: <literal>Bob is eating a raw pear.</literal></para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><literal>"${mode} mode is ${active:{;active;inactive}}."</literal></term>
+                <listitem>
+                    <para><varname>mode</varname> is <literal>"Random"</literal> and <varname>active</varname> is <literal>true</literal>.</para>
+                    <para>Resolves to: <literal>Random mode is active.</literal></para>
                 </listitem>
             </varlistentry>
 

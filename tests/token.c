@@ -441,6 +441,30 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/token/switch/true",
+        .data = {
+            .identifier = '$',
+            .source = "Active: ${active:{;yes;no}}.",
+            .data = {
+                { .token = "active", .content = "true" },
+                { .token = NULL }
+            },
+            .result = "Active: yes."
+        }
+    },
+    {
+        .testpath = "/nkutils/token/switch/false",
+        .data = {
+            .identifier = '$',
+            .source = "Active: ${active:{;yes;no}}.",
+            .data = {
+                { .token = "active", .content = "false" },
+                { .token = NULL }
+            },
+            .result = "Active: no."
+        }
+    },
+    {
         .testpath = "/nkutils/token/range/symbol",
         .data = {
             .identifier = '$',
