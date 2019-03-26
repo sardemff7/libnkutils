@@ -320,6 +320,17 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/xdg-theme/icon/no-theme/size/fallback/home-icons",
+        .data = {
+            .type = TYPE_ICON,
+            .name = "test-icon-home-icons",
+            .size = 0,
+            .scale = 1,
+            .svg = FALSE,
+            .result = SRCDIR G_DIR_SEPARATOR_S "tests" G_DIR_SEPARATOR_S "home" G_DIR_SEPARATOR_S ".icons" G_DIR_SEPARATOR_S "test-icon-home-icons.png",
+        }
+    },
+    {
         .testpath = "/nkutils/xdg-theme/icon/Adwaita/size/biggest/fixed",
         .data = {
             .type = TYPE_ICON,
@@ -555,7 +566,7 @@ main(int argc, char *argv[])
 
     g_test_set_nonfatal_assertions();
 
-    g_setenv("HOME", "/var/empty", TRUE);
+    g_setenv("HOME", SRCDIR G_DIR_SEPARATOR_S "tests" G_DIR_SEPARATOR_S "home", TRUE);
     g_setenv("XDG_CONFIG_HOME", SRCDIR G_DIR_SEPARATOR_S "tests", TRUE);
     g_setenv("XDG_DATA_HOME", SRCDIR G_DIR_SEPARATOR_S "tests", TRUE);
     g_setenv("XDG_SESSION_DESKTOP", "", TRUE);
