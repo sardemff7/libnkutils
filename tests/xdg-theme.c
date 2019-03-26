@@ -77,11 +77,11 @@ static const struct {
         .data = {
             .type = TYPE_ICON,
             .themes = { [0] = "Adwaita" },
-            .name = "zoom-in-symbolic",
+            .name = "application-certificate-symbolic",
             .size = 48,
             .scale = 1,
             .svg = FALSE,
-            .result = "icons/Adwaita/48x48/actions/zoom-in-symbolic.symbolic.png",
+            .result = "icons/Adwaita/48x48/mimetypes/application-certificate-symbolic.symbolic.png",
             .theme_test = "icons/Adwaita/index.theme",
         }
     },
@@ -335,11 +335,11 @@ static const struct {
         .data = {
             .type = TYPE_ICON,
             .themes = { [0] = "Adwaita" },
-            .name = "edit-find-symbolic",
+            .name = "application-certificate-symbolic",
             .size = 0,
             .scale = 1,
             .svg = FALSE,
-            .result = "icons/Adwaita/96x96/actions/edit-find-symbolic.symbolic.png",
+            .result = "icons/Adwaita/96x96/mimetypes/application-certificate-symbolic.symbolic.png",
             .theme_test = "icons/Adwaita/index.theme",
         }
     },
