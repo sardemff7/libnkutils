@@ -58,7 +58,7 @@ typedef struct {
 static const struct {
     const gchar *testpath;
     NkXdgThemeTestData data;
-} _nk_uuid_tests_list[] = {
+} _nk_xdg_theme_tests_list[] = {
     {
         .testpath = "/nkutils/xdg-theme/icon/Adwaita/symbolic/found",
         .data = {
@@ -478,7 +478,7 @@ static const struct {
 };
 
 static void
-_nk_uuid_tests_func(gconstpointer user_data)
+_nk_xdg_theme_tests_func(gconstpointer user_data)
 {
     const NkXdgThemeTestData *data = user_data;
 
@@ -523,8 +523,8 @@ main(int argc, char *argv[])
     g_setenv("DESKTOP_SESSION", "", TRUE);
 
     gsize i;
-    for ( i = 0 ; i < G_N_ELEMENTS(_nk_uuid_tests_list) ; ++i )
-        g_test_add_data_func(_nk_uuid_tests_list[i].testpath, &_nk_uuid_tests_list[i].data, _nk_uuid_tests_func);
+    for ( i = 0 ; i < G_N_ELEMENTS(_nk_xdg_theme_tests_list) ; ++i )
+        g_test_add_data_func(_nk_xdg_theme_tests_list[i].testpath, &_nk_xdg_theme_tests_list[i].data, _nk_xdg_theme_tests_func);
 
     context = nk_xdg_theme_context_new(NULL, NULL);
     int ret = g_test_run();
