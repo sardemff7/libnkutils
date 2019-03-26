@@ -68,8 +68,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/Adwaita/scalable/actions/zoom-in-symbolic.svg",
-            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+            .result = "icons/Adwaita/scalable/actions/zoom-in-symbolic.svg",
+            .theme_test = "icons/Adwaita/index.theme",
         }
     },
     {
@@ -81,8 +81,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/icons/Adwaita/48x48/actions/zoom-in-symbolic.symbolic.png",
-            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+            .result = "icons/Adwaita/48x48/actions/zoom-in-symbolic.symbolic.png",
+            .theme_test = "icons/Adwaita/index.theme",
         }
     },
     {
@@ -94,8 +94,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/Adwaita/48x48/status/trophy-gold.png",
-            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+            .result = "icons/Adwaita/48x48/status/trophy-gold.png",
+            .theme_test = "icons/Adwaita/index.theme",
         }
     },
     {
@@ -107,8 +107,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/Adwaita/48x48/status/trophy-gold.png",
-            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+            .result = "icons/Adwaita/48x48/status/trophy-gold.png",
+            .theme_test = "icons/Adwaita/index.theme",
         }
     },
     {
@@ -120,8 +120,8 @@ static const struct {
             .size = 16,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/icons/hicolor/16x16/apps/geany.png",
-            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+            .result = "icons/hicolor/16x16/apps/geany.png",
+            .theme_test = "icons/Adwaita/index.theme",
         }
     },
     {
@@ -134,8 +134,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/Adwaita/scalable/status/network-wireless-signal-ok-symbolic.svg",
-            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+            .result = "icons/Adwaita/scalable/status/network-wireless-signal-ok-symbolic.svg",
+            .theme_test = "icons/Adwaita/index.theme",
         }
     },
     {
@@ -149,7 +149,7 @@ static const struct {
             .scale = 1,
             .svg = TRUE,
             .result = NULL,
-            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+            .theme_test = "icons/Adwaita/index.theme",
         }
     },
     {
@@ -162,8 +162,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/Adwaita/scalable/emblems/emblem-favorite-symbolic.svg",
-            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+            .result = "icons/Adwaita/scalable/emblems/emblem-favorite-symbolic.svg",
+            .theme_test = "icons/Adwaita/index.theme",
         }
     },
     {
@@ -175,8 +175,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/gnome/scalable/actions/zoom-in-symbolic.svg",
-            .theme_test = "/usr/share/icons/gnome/index.theme",
+            .result = "icons/gnome/scalable/actions/zoom-in-symbolic.svg",
+            .theme_test = "icons/gnome/index.theme",
         }
     },
     {
@@ -188,8 +188,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/icons/gnome/48x48/actions/zoom-in.png",
-            .theme_test = "/usr/share/icons/gnome/index.theme",
+            .result = "icons/gnome/48x48/actions/zoom-in.png",
+            .theme_test = "icons/gnome/index.theme",
         }
     },
     {
@@ -201,8 +201,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/gnome/48x48/status/trophy-gold.png",
-            .theme_test = "/usr/share/icons/gnome/index.theme",
+            .result = "icons/gnome/48x48/status/trophy-gold.png",
+            .theme_test = "icons/gnome/index.theme",
         }
     },
     {
@@ -214,8 +214,8 @@ static const struct {
             .size = 16,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/icons/hicolor/16x16/apps/geany.png",
-            .theme_test = "/usr/share/icons/gnome/index.theme",
+            .result = "icons/hicolor/16x16/apps/geany.png",
+            .theme_test = "icons/gnome/index.theme",
         }
     },
     {
@@ -228,8 +228,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/gnome/scalable/status/network-wireless-signal-ok-symbolic.svg",
-            .theme_test = "/usr/share/icons/gnome/index.theme",
+            .result = "icons/gnome/scalable/status/network-wireless-signal-ok-symbolic.svg",
+            .theme_test = "icons/gnome/index.theme",
         }
     },
     {
@@ -243,7 +243,7 @@ static const struct {
             .scale = 1,
             .svg = TRUE,
             .result = NULL,
-            .theme_test = "/usr/share/icons/gnome/index.theme",
+            .theme_test = "icons/gnome/index.theme",
         }
     },
     {
@@ -256,8 +256,8 @@ static const struct {
             .size = 48,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/gnome/scalable/emblems/emblem-favorite-symbolic.svg",
-            .theme_test = "/usr/share/icons/gnome/index.theme",
+            .result = "icons/gnome/scalable/emblems/emblem-favorite-symbolic.svg",
+            .theme_test = "icons/gnome/index.theme",
         }
     },
     {
@@ -268,8 +268,8 @@ static const struct {
             .size = 18,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/icons/hicolor/16x16/apps/geany.png",
-            .theme_test = "/usr/share/icons/hicolor/index.theme",
+            .result = "icons/hicolor/16x16/apps/geany.png",
+            .theme_test = "icons/hicolor/index.theme",
         }
     },
     {
@@ -280,8 +280,8 @@ static const struct {
             .size = 18,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/icons/hicolor/16x16/apps/pidgin.png",
-            .theme_test = "/usr/share/icons/hicolor/index.theme",
+            .result = "icons/hicolor/16x16/apps/pidgin.png",
+            .theme_test = "icons/hicolor/index.theme",
         }
     },
     {
@@ -293,8 +293,8 @@ static const struct {
             .size = 0,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/hicolor/scalable/apps/pidgin.svg",
-            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+            .result = "icons/hicolor/scalable/apps/pidgin.svg",
+            .theme_test = "icons/Adwaita/index.theme",
         }
     },
     {
@@ -305,7 +305,7 @@ static const struct {
             .size = 19,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/pixmaps/htop.png",
+            .result = "pixmaps/htop.png",
         }
     },
     {
@@ -316,7 +316,7 @@ static const struct {
             .size = 0,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/pixmaps/debian-logo.png",
+            .result = "pixmaps/debian-logo.png",
         }
     },
     {
@@ -328,8 +328,8 @@ static const struct {
             .size = 0,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/icons/Adwaita/96x96/actions/edit-find-symbolic.symbolic.png",
-            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+            .result = "icons/Adwaita/96x96/actions/edit-find-symbolic.symbolic.png",
+            .theme_test = "icons/Adwaita/index.theme",
         }
     },
     {
@@ -341,8 +341,8 @@ static const struct {
             .size = 0,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/Adwaita/scalable/actions/edit-find-symbolic.svg",
-            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+            .result = "icons/Adwaita/scalable/actions/edit-find-symbolic.svg",
+            .theme_test = "icons/Adwaita/index.theme",
         }
     },
     {
@@ -354,8 +354,8 @@ static const struct {
             .size = 19,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/icons/Adwaita/22x22/actions/edit-find.png",
-            .theme_test = "/usr/share/icons/Adwaita/index.theme",
+            .result = "icons/Adwaita/22x22/actions/edit-find.png",
+            .theme_test = "icons/Adwaita/index.theme",
         }
     },
     {
@@ -367,8 +367,8 @@ static const struct {
             .size = 0,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/icons/gnome/96x96/actions/edit-find-symbolic.symbolic.png",
-            .theme_test = "/usr/share/icons/gnome/index.theme",
+            .result = "icons/gnome/96x96/actions/edit-find-symbolic.symbolic.png",
+            .theme_test = "icons/gnome/index.theme",
         }
     },
     {
@@ -380,8 +380,8 @@ static const struct {
             .size = 0,
             .scale = 1,
             .svg = TRUE,
-            .result = "/usr/share/icons/gnome/scalable/actions/edit-find-symbolic.svg",
-            .theme_test = "/usr/share/icons/gnome/index.theme",
+            .result = "icons/gnome/scalable/actions/edit-find-symbolic.svg",
+            .theme_test = "icons/gnome/index.theme",
         }
     },
     {
@@ -393,8 +393,8 @@ static const struct {
             .size = 19,
             .scale = 1,
             .svg = FALSE,
-            .result = "/usr/share/icons/gnome/22x22/actions/edit-find.png",
-            .theme_test = "/usr/share/icons/gnome/index.theme",
+            .result = "icons/gnome/22x22/actions/edit-find.png",
+            .theme_test = "icons/gnome/index.theme",
         }
     },
     {
@@ -439,8 +439,8 @@ static const struct {
             .themes = { [0] = "freedesktop" },
             .name = "network-connectivity-established",
             .profile = "stereo",
-            .result = "/usr/share/sounds/freedesktop/stereo/network-connectivity-established.oga",
-            .theme_test = "/usr/share/sounds/freedesktop/index.theme",
+            .result = "sounds/freedesktop/stereo/network-connectivity-established.oga",
+            .theme_test = "sounds/freedesktop/index.theme",
         }
     },
     {
@@ -450,8 +450,8 @@ static const struct {
             .themes = { [0] = "freedesktop" },
             .name = "bell-too-specific",
             .profile = "stereo",
-            .result = "/usr/share/sounds/freedesktop/stereo/bell.oga",
-            .theme_test = "/usr/share/sounds/freedesktop/index.theme",
+            .result = "sounds/freedesktop/stereo/bell.oga",
+            .theme_test = "sounds/freedesktop/index.theme",
         }
     },
     {
@@ -461,8 +461,8 @@ static const struct {
             .themes = { [0] = "non-existing-i-hope" },
             .name = "dialog-information",
             .profile = "stereo",
-            .result = "/usr/share/sounds/freedesktop/stereo/dialog-information.oga",
-            .theme_test = "/usr/share/sounds/freedesktop/index.theme",
+            .result = "sounds/freedesktop/stereo/dialog-information.oga",
+            .theme_test = "sounds/freedesktop/index.theme",
         }
     },
     {
@@ -472,35 +472,78 @@ static const struct {
             .themes = { [0] = "purple" },
             .name = "logout",
             .profile = "stereo",
-            .result = "/usr/share/sounds/purple/logout.wav",
+            .result = "sounds/purple/logout.wav",
         }
     },
 };
+
+static gchar *
+_nk_xdg_theme_file_exists(const gchar *file)
+{
+    if ( g_path_is_absolute(file) )
+    {
+        if ( ! g_file_test(file, G_FILE_TEST_IS_REGULAR) )
+            return NULL;
+        return g_strdup(file);
+    }
+
+    const gchar * const *system_dirs = g_get_system_data_dirs();
+    const gchar * const *system_dir;
+
+    for ( system_dir = system_dirs ; *system_dir != NULL ; ++system_dir )
+    {
+        gchar *full_path;
+        full_path = g_build_filename(*system_dir, file, NULL);
+        if ( g_file_test(full_path, G_FILE_TEST_IS_REGULAR) )
+            return full_path;
+        g_free(full_path);
+    }
+
+    return NULL;
+}
 
 static void
 _nk_xdg_theme_tests_func(gconstpointer user_data)
 {
     const NkXdgThemeTestData *data = user_data;
 
-    if ( ( ( data->result != NULL ) && ( ! g_file_test(data->result, G_FILE_TEST_IS_REGULAR) ) )
-         || ( ( data->theme_test != NULL ) && ( ! g_file_test(data->theme_test, G_FILE_TEST_IS_REGULAR) ) ) )
+    gchar *theme_test = NULL;
+    gchar *expected = NULL;
+
+    if ( data->theme_test != NULL )
     {
-        g_test_skip("Theme not installed");
-        return;
+        theme_test = _nk_xdg_theme_file_exists(data->theme_test);
+        if ( theme_test == NULL )
+        {
+            g_test_skip("Theme not installed");
+            return;
+        }
+        g_free(theme_test);
     }
 
-    gchar *file = NULL;
+    if ( data->result != NULL )
+    {
+        expected = _nk_xdg_theme_file_exists(data->result);
+        if ( expected == NULL )
+        {
+            g_test_skip("Icon file not installed");
+            return;
+        }
+    }
+
+    gchar *found = NULL;
     switch ( data->type )
     {
     case TYPE_ICON:
-        file = nk_xdg_theme_get_icon(context, data->themes, data->context, data->name, data->size, data->scale, data->svg);
+        found = nk_xdg_theme_get_icon(context, data->themes, data->context, data->name, data->size, data->scale, data->svg);
     break;
     case TYPE_SOUND:
-        file = nk_xdg_theme_get_sound(context, data->themes, data->name, data->profile, NULL);
+        found = nk_xdg_theme_get_sound(context, data->themes, data->name, data->profile, NULL);
     break;
     }
-    g_assert_cmpstr(file, ==, data->result);
-    g_free(file);
+    g_assert_cmpstr(found, ==, expected);
+    g_free(found);
+    g_free(expected);
 }
 
 int
@@ -515,7 +558,6 @@ main(int argc, char *argv[])
     g_setenv("HOME", "/var/empty", TRUE);
     g_setenv("XDG_CONFIG_HOME", SRCDIR G_DIR_SEPARATOR_S "tests", TRUE);
     g_setenv("XDG_DATA_HOME", SRCDIR G_DIR_SEPARATOR_S "tests", TRUE);
-    g_setenv("XDG_DATA_DIRS", "/usr/share/", TRUE);
     g_setenv("XDG_SESSION_DESKTOP", "", TRUE);
     g_setenv("XDG_CURRENT_DESKTOP", "", TRUE);
     g_setenv("GNOME_DESKTOP_SESSION_ID", "", TRUE);
