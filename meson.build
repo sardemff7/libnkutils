@@ -204,6 +204,8 @@ foreach m : nk_modules
         nk_test = executable('nk-@0@.test'.format(m), files('tests/@0@.c'.format(m)), c_args: nk_args, dependencies: libnkutils)
         test('libnkutils @0@ module tests'.format(m), nk_test,
             suite: [ m ],
+            args: [ '--tap' ],
+            protocol: 'tap',
         )
     endif
 endforeach
@@ -213,6 +215,8 @@ foreach m : nk_special_modules
         nk_test = executable('nk-@0@.test'.format(m), files('tests/@0@.c'.format(m)), c_args: nk_args, dependencies: get_variable('libnkutils_@0@'.format(m.underscorify())))
         test('libnkutils @0@ module tests'.format(m), nk_test,
             suite: [ m ],
+            args: [ '--tap' ],
+            protocol: 'tap',
         )
     endif
 endforeach
