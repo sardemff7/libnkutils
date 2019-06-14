@@ -31,6 +31,8 @@
 #include <locale.h>
 
 #include <glib.h>
+#include <glib-object.h>
+#include <gio/gio.h>
 
 #include <nkutils-xdg-theme.h>
 
@@ -327,7 +329,7 @@ static const struct {
             .size = 0,
             .scale = 1,
             .svg = FALSE,
-            .result = SRCDIR G_DIR_SEPARATOR_S "tests" G_DIR_SEPARATOR_S "home" G_DIR_SEPARATOR_S ".icons" G_DIR_SEPARATOR_S "test-icon-home-icons.png",
+            .result = SRCDIR "/tests/home/.icons/test-icon-home-icons.png",
         }
     },
     {
@@ -440,7 +442,7 @@ static const struct {
             .size = 10,
             .scale = 1,
             .svg = TRUE,
-            .result = SRCDIR G_DIR_SEPARATOR_S "tests" G_DIR_SEPARATOR_S "icons" G_DIR_SEPARATOR_S "recursive-theme-test" G_DIR_SEPARATOR_S "test-dir" G_DIR_SEPARATOR_S "test-icon.svg",
+            .result = SRCDIR "/tests/icons/recursive-theme-test/test-dir/test-icon.svg",
         }
     },
     {
@@ -489,13 +491,29 @@ static const struct {
 };
 
 static gchar *
+_nk_xdg_theme_file_canonicalize(gchar *path)
+{
+    if ( path == NULL )
+        return NULL;
+
+    GFile *file;
+    file = g_file_new_for_path(path);
+    g_free(path);
+
+    path = g_file_get_path(file);
+    g_object_unref(file);
+
+    return path;
+}
+
+static gchar *
 _nk_xdg_theme_file_exists(const gchar *file)
 {
     if ( g_path_is_absolute(file) )
     {
         if ( ! g_file_test(file, G_FILE_TEST_IS_REGULAR) )
             return NULL;
-        return g_strdup(file);
+        return _nk_xdg_theme_file_canonicalize(g_strdup(file));
     }
 
     const gchar * const *system_dirs = g_get_system_data_dirs();
@@ -506,7 +524,7 @@ _nk_xdg_theme_file_exists(const gchar *file)
         gchar *full_path;
         full_path = g_build_filename(*system_dir, file, NULL);
         if ( g_file_test(full_path, G_FILE_TEST_IS_REGULAR) )
-            return full_path;
+            return _nk_xdg_theme_file_canonicalize(full_path);
         g_free(full_path);
     }
 
@@ -552,6 +570,7 @@ _nk_xdg_theme_tests_func(gconstpointer user_data)
         found = nk_xdg_theme_get_sound(context, data->themes, data->name, data->profile, NULL);
     break;
     }
+    found = _nk_xdg_theme_file_canonicalize(found);
     g_assert_cmpstr(found, ==, expected);
     g_free(found);
     g_free(expected);
