@@ -210,7 +210,7 @@ main(int argc, char *argv[])
         return 1;
 
     gchar *out_type = argv[1];
-    gchar *out_file = argv[2];
+    gchar *output_file = argv[2];
     gchar *work_tree_dir = argv[3];
     gchar *git_dir = argv[4];
     gchar *git = argv[5];
@@ -224,20 +224,20 @@ main(int argc, char *argv[])
         .commit = NULL,
     };
 
-    if ( g_strcmp0(out_file, "-") == 0 )
-        out_file = NULL;
-    else if ( g_file_test(out_file, G_FILE_TEST_IS_REGULAR) )
+    if ( g_strcmp0(output_file, "-") == 0 )
+        output_file = NULL;
+    else if ( g_file_test(output_file, G_FILE_TEST_IS_REGULAR) )
     {
-        if ( ! g_file_get_contents(out_file, &old_contents, NULL, &error) )
+        if ( ! g_file_get_contents(output_file, &old_contents, NULL, &error) )
         {
             g_warning("Could not read old file: %s", error->message);
             ret = 2;
             goto fail;
         }
     }
-    else if ( g_file_test(out_file, G_FILE_TEST_EXISTS) )
+    else if ( g_file_test(output_file, G_FILE_TEST_EXISTS) )
     {
-        g_warning("Target file '%s' exists already but is not a regular file", out_file);
+        g_warning("Target file '%s' exists already but is not a regular file", output_file);
         ret = 2;
         goto fail;
     }
@@ -282,9 +282,9 @@ main(int argc, char *argv[])
 
     if ( g_strcmp0(old_contents, new_contents) != 0 )
     {
-        if ( out_file == NULL )
+        if ( output_file == NULL )
             g_print("%s", new_contents);
-        else if ( ! g_file_set_contents(out_file, new_contents, -1, &error) )
+        else if ( ! g_file_set_contents(output_file, new_contents, -1, &error) )
         {
             g_warning("Could not write new git version file: %s", error->message);
             ret = 11;
