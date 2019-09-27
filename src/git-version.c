@@ -41,6 +41,23 @@ typedef struct {
     gchar *branch;
 } NkGitVersionInfo;
 
+typedef enum {
+    DESCRIBE,
+    BRANCH,
+} NkGitVersionTokens;
+
+static gchar * _nk_git_version_token_commands[] = {
+    [DESCRIBE] = "--dirty",
+    [BRANCH]   = "--all",
+};
+
+#define NK_GIT_VERSION_NUM_TOKENS (G_N_ELEMENTS(_nk_git_version_token_commands))
+
+typedef struct {
+    gchar *data[NK_GIT_VERSION_NUM_TOKENS];
+} NkGitVersionData;
+
+
 static gchar *
 _nk_git_version_run_git(gchar *git, gchar *work_tree, gchar *arg)
 {
@@ -82,35 +99,38 @@ _nk_git_version_run_git(gchar *git, gchar *work_tree, gchar *arg)
 }
 
 static gboolean
-_nk_git_version_get_version(NkGitVersionInfo *info, gchar *git, gchar *work_tree)
+_nk_git_version_get_data(NkGitVersionData *data, guint64 used_tokens, gchar *git, gchar *work_tree)
 {
-    gchar *commit;
-    gchar *branch;
-
-    commit = _nk_git_version_run_git(git, work_tree, "--dirty");
-    if ( commit == NULL )
-        return FALSE;
-
-    branch = _nk_git_version_run_git(git, work_tree, "--all");
-    if ( branch == NULL )
+    guint64 token;
+    for ( token = 0 ; token < NK_GIT_VERSION_NUM_TOKENS ; ++token )
     {
-        g_free(commit);
-        return FALSE;
-    }
+        if ( ( used_tokens & (1 << token) ) == 0 )
+            continue;
 
-    info->commit = commit;
+        gchar *value;
+        value = _nk_git_version_run_git(git, work_tree, _nk_git_version_token_commands[token]);
+        if ( value == NULL )
+            return FALSE;
 
-    if ( g_str_has_prefix(branch, "heads/") )
-    {
-        gsize i, o;
-        o = strlen("heads/");
-        for ( i = 0 ; branch[i] != '\0' ; ++i )
-            branch[i] = branch[o + i];
-        branch[i] = '\0';
-        info->branch = branch;
+        switch ( (NkGitVersionTokens) token )
+        {
+        case BRANCH:
+            if ( g_str_has_prefix(value, "heads/") )
+            {
+                gsize i, o;
+                o = strlen("heads/");
+                for ( i = 0 ; value[i] != '\0' ; ++i )
+                    value[i] = value[o + i];
+                value[i] = '\0';
+            }
+            else
+                value = (g_free(value), NULL);
+        break;
+        case DESCRIBE:
+        break;
+        }
+        data->data[token] = value;
     }
-    else
-        g_free(branch);
 
     return TRUE;
 }
@@ -242,6 +262,8 @@ main(int argc, char *argv[])
         goto fail;
     }
 
+    NkGitVersionData data = { .data = { NULL } };
+
     if ( ! g_file_test(git_dir, G_FILE_TEST_IS_DIR) )
     {
         if ( g_file_test(git_dir, G_FILE_TEST_EXISTS) )
@@ -260,8 +282,11 @@ main(int argc, char *argv[])
             goto fail;
         }
     }
-    else if ( ! _nk_git_version_get_version(&info, git, work_tree) )
+    else if ( ! _nk_git_version_get_data(&data, ~0LL, git, work_tree) )
         goto fail;
+
+    info.commit = data.data[DESCRIBE];
+    info.branch = data.data[BRANCH];
 
     switch ( g_utf8_get_char(out_type) )
     {
