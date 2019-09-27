@@ -46,9 +46,9 @@ typedef enum {
     BRANCH,
 } NkGitVersionTokens;
 
-static gchar * _nk_git_version_token_commands[] = {
-    [DESCRIBE] = "--dirty",
-    [BRANCH]   = "--all",
+static gchar ** _nk_git_version_token_commands[] = {
+    [DESCRIBE] = (gchar *[]) { "describe", "--always", "--tags", "--dirty", NULL },
+    [BRANCH]   = (gchar *[]) { "describe", "--always", "--tags", "--all", NULL },
 };
 
 #define NK_GIT_VERSION_NUM_TOKENS (G_N_ELEMENTS(_nk_git_version_token_commands))
@@ -59,18 +59,16 @@ typedef struct {
 
 
 static gchar *
-_nk_git_version_run_git(gchar *git, gchar *work_tree, gchar *arg)
+_nk_git_version_run_git(gchar *git, gchar *work_tree, gchar **token_args)
 {
-    gsize size = 4;
-    gsize i = 0;
+    gsize size = g_strv_length(token_args);
+    gsize i = 0, j;
     gchar **args = g_new0(gchar *, size + 3 + 1);
     args[i++] = g_strdup(git);
     args[i++] = g_strdup("-C");
     args[i++] = g_strdup(work_tree);
-    args[i++] = g_strdup("describe");
-    args[i++] = g_strdup("--always");
-    args[i++] = g_strdup("--tags");
-    args[i++] = g_strdup(arg);
+    for ( j = 0 ; j < size ; ++j )
+        args[i++] = g_strdup(token_args[j]);
     args[i] = NULL;
 
     gchar *out = NULL;
