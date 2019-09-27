@@ -42,14 +42,14 @@ typedef struct {
 } NkGitVersionInfo;
 
 static gchar *
-_nk_git_version_run_git(gchar *git, gchar *work_tree, gchar *git_dir, gchar *arg)
+_nk_git_version_run_git(gchar *git, gchar *work_tree, gchar *arg)
 {
     gsize size = 4;
     gsize i = 0;
     gchar **args = g_new0(gchar *, size + 3 + 1);
     args[i++] = g_strdup(git);
-    args[i++] = g_strdup("--git-dir");
-    args[i++] = g_strdup(git_dir);
+    args[i++] = g_strdup("-C");
+    args[i++] = g_strdup(work_tree);
     args[i++] = g_strdup("describe");
     args[i++] = g_strdup("--always");
     args[i++] = g_strdup("--tags");
@@ -61,7 +61,7 @@ _nk_git_version_run_git(gchar *git, gchar *work_tree, gchar *git_dir, gchar *arg
     gint status;
     GError *error = NULL;
 
-    if ( ! g_spawn_sync(work_tree, args, NULL, G_SPAWN_DEFAULT, NULL, NULL, &out, &err, &status, &error) )
+    if ( ! g_spawn_sync(NULL, args, NULL, G_SPAWN_DEFAULT, NULL, NULL, &out, &err, &status, &error) )
     {
         g_warning("Could not run Git: %s", error->message);
         return NULL;
@@ -82,16 +82,16 @@ _nk_git_version_run_git(gchar *git, gchar *work_tree, gchar *git_dir, gchar *arg
 }
 
 static gboolean
-_nk_git_version_get_version(NkGitVersionInfo *info, gchar *git, gchar *work_tree, gchar *git_dir)
+_nk_git_version_get_version(NkGitVersionInfo *info, gchar *git, gchar *work_tree)
 {
     gchar *commit;
     gchar *branch;
 
-    commit = _nk_git_version_run_git(git, work_tree, git_dir, "--dirty");
+    commit = _nk_git_version_run_git(git, work_tree, "--dirty");
     if ( commit == NULL )
         return FALSE;
 
-    branch = _nk_git_version_run_git(git, work_tree, git_dir, "--all");
+    branch = _nk_git_version_run_git(git, work_tree, "--all");
     if ( branch == NULL )
     {
         g_free(commit);
@@ -260,7 +260,7 @@ main(int argc, char *argv[])
             goto fail;
         }
     }
-    else if ( ! _nk_git_version_get_version(&info, git, work_tree, git_dir) )
+    else if ( ! _nk_git_version_get_version(&info, git, work_tree) )
         goto fail;
 
     switch ( g_utf8_get_char(out_type) )
