@@ -53,7 +53,7 @@ main(int argc, char *argv[])
     GError *error = NULL;
     GOptionContext *option_context;
 
-    option_context = g_option_context_new("<icon name> [<theme name>…] - example utilise for libnkutils xdg-theme module");
+    option_context = g_option_context_new("<icon name> [<theme name>…] - example utility for libnkutils xdg-theme module");
     g_option_context_add_main_entries(option_context, entries, NULL);
     if ( ! g_option_context_parse(option_context, &argc, &argv, &error) )
     {
