@@ -44,16 +44,18 @@ typedef struct {
 static gchar *
 _nk_git_version_run_git(gchar *git, gchar *work_tree, gchar *git_dir, gchar *arg)
 {
-    gchar *args[] = {
-        git,
-        "--git-dir",
-        git_dir,
-        "describe",
-        "--always",
-        "--tags",
-        arg,
-        NULL
-    };
+    gsize size = 4;
+    gsize i = 0;
+    gchar **args = g_new0(gchar *, size + 3 + 1);
+    args[i++] = g_strdup(git);
+    args[i++] = g_strdup("--git-dir");
+    args[i++] = g_strdup(git_dir);
+    args[i++] = g_strdup("describe");
+    args[i++] = g_strdup("--always");
+    args[i++] = g_strdup("--tags");
+    args[i++] = g_strdup(arg);
+    args[i] = NULL;
+
     gchar *out = NULL;
     gchar *err = NULL;
     gint status;
@@ -64,6 +66,7 @@ _nk_git_version_run_git(gchar *git, gchar *work_tree, gchar *git_dir, gchar *arg
         g_warning("Could not run Git: %s", error->message);
         return NULL;
     }
+    g_strfreev(args);
 
     if ( ! g_spawn_check_exit_status(status, &error) )
     {
