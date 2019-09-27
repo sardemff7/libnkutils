@@ -193,7 +193,10 @@ int
 main(int argc, char *argv[])
 {
     if ( argc < 5 )
+    {
+        g_print("Usage: %s {header|entity|simple} {-|<output file>} <git work tree> <git>\n", argv[0]);
         return 1;
+    }
 
     gchar *template = argv[1];
     NkFormatString *format_string = NULL;
