@@ -632,21 +632,3 @@ nk_colour_to_rgba(const NkColour *colour)
         g_snprintf(string, COLOUR_DOUBLE_RGBA_MAXLEN, "rgb(%.10lf,%.10lf,%.10lf)", red, green, blue);
     return string;
 }
-
-#define COLOUR_DOUBLE_RGBA_MAXLEN 64 /* strlen("rgba(255.0000000000,255.0000000000,255.0000000000,0.0000000000)") + 1 */
-const gchar *
-nk_colour_to_hsla(const NkColour *colour)
-{
-    gdouble red   = colour->red   * 255.;
-    gdouble green = colour->green * 255.;
-    gdouble blue  = colour->blue  * 255.;
-    gdouble alpha = colour->alpha;
-
-    static gchar string[COLOUR_DOUBLE_RGBA_MAXLEN];
-    if ( alpha != 1.0 )
-        g_snprintf(string, COLOUR_DOUBLE_RGBA_MAXLEN, "rgba(%.10lf,%.10lf,%.10lf,%.10lf)", red, green, blue, alpha);
-    else
-        g_snprintf(string, COLOUR_DOUBLE_RGBA_MAXLEN, "rgb(%.10lf,%.10lf,%.10lf)", red, green, blue);
-    return string;
-}
-

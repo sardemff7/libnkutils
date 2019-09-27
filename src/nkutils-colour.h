@@ -36,6 +36,5 @@ typedef struct {
 gboolean nk_colour_parse(const gchar *string, NkColour *colour);
 const gchar *nk_colour_to_hex(const NkColour *colour);
 const gchar *nk_colour_to_rgba(const NkColour *colour);
-const gchar *nk_colour_to_hsl(const NkColour *colour);
 
 #endif /* __NK_UTILS_COLOUR_H__ */
