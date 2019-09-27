@@ -90,7 +90,20 @@ _nk_gtk_settings_get(gpointer value, const gchar *keys[NK_GTK_SETTINGS_NUM_VERSI
         if ( _nk_gtk_settings_try_dir(value, keys, getter, *dir) )
             return TRUE;
     }
+#ifdef G_OS_WIN32
+    gchar *installdir, *sysconfdir;
+    installdir = g_win32_get_package_installation_directory_of_module(NULL);
+    sysconfdir = g_build_filename(installdir, "etc", NULL);
+    g_free(installdir);
+
+    gboolean r;
+    r = _nk_gtk_settings_try_dir(value, keys, getter, sysconfdir);
+
+    g_free(sysconfdir);
+    return r;
+#else /* ! G_OS_WIN32 */
     return _nk_gtk_settings_try_dir(value, keys, getter, SYSCONFDIR);
+#endif /* ! G_OS_WIN32 */
 }
 
 static gboolean
