@@ -74,10 +74,8 @@ _nk_git_version_run_git(gchar *git, gchar *work_tree_dir, gchar *git_dir, gchar 
         return NULL;
     }
 
-
-
     g_free(err);
-    return out;
+    return ( out == NULL ) ? NULL : g_strstrip(out);
 }
 
 static gboolean
@@ -97,9 +95,8 @@ _nk_git_version_get_version(NkGitVersionInfo *info, gchar *git, gchar *work_tree
         return FALSE;
     }
 
-    info->commit = g_strstrip(commit);
+    info->commit = commit;
 
-    g_strstrip(branch);
     if ( g_str_has_prefix(branch, "heads/") )
     {
         gsize i, o;
