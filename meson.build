@@ -30,6 +30,12 @@ project('libnkutils', 'c',
     ],
 )
 
+if meson.is_subproject()
+    nk_git_work_tree = get_option('git-work-tree')
+else
+    nk_git_work_tree = meson.source_root()
+endif
+
 nk_glib_min_major='2'
 nk_glib_min_minor='40'
 nk_glib_min_version='.'.join([nk_glib_min_major, nk_glib_min_minor])
@@ -59,6 +65,8 @@ nk_dependencies = [
     [ 'bindings', 'xdg-de' ],
 ]
 
+need_native = nk_git_work_tree != ''
+
 nk_sources = []
 nk_args = [
     '-DSRCDIR="@0@"'.format(meson.current_source_dir()),
@@ -67,6 +75,9 @@ nk_args = [
     '-DGLIB_VERSION_MIN_REQUIRED=(G_ENCODE_VERSION(@0@,@1@))'.format(nk_glib_min_major, nk_glib_min_minor),
 ]
 nk_deps = [ dependency('glib-2.0', version: '>= @0@'.format(nk_glib_min_version)) ]
+if need_native
+    nk_deps_native = [ dependency('glib-2.0', version: '>= @0@'.format(nk_glib_min_version), native: true) ]
+endif
 
 nkutils_xsltpaths = [ join_paths(meson.current_source_dir(), 'man'), meson.current_build_dir() ]
 nkutils_manfiles = files('man/libnkutils-man.xml')
@@ -86,6 +97,10 @@ foreach d : nk_dependencies
     endif
 endforeach
 
+if nk_git_work_tree != ''
+    format_string = true
+endif
+
 foreach m : nk_modules
     if get_variable(m.underscorify())
         nk_sources += files(
@@ -97,26 +112,25 @@ endforeach
 
 if xdg_theme
     nk_deps += [ dependency('gio-2.0'), dependency('gobject-2.0') ]
+    if need_native
+        nk_deps_native += [ dependency('gio-2.0', native: true), dependency('gobject-2.0', native: true) ]
+    endif
 endif
 
 nk_lib = static_library('nkutils', nk_sources, c_args: nk_args, dependencies: nk_deps)
 nk_inc = include_directories('.', 'src')
 nk_src = []
 
-if meson.is_subproject()
-    nk_git_work_tree = get_option('git-work-tree')
-else
-    nk_git_work_tree = meson.source_root()
-endif
-
 if nk_git_work_tree != ''
+    nk_lib_native = static_library('nkutils-native', nk_sources, c_args: nk_args, dependencies: nk_deps_native, native: true)
+
     nk_options += 'git-work-tree=@0@'.format(nk_git_work_tree)
     nk_git = find_program('git', required: false)
     if not nk_git.found()
         nk_git = ''
     endif
 
-    nk_git_version = executable('nk-git-version', files('src/git-version.c'), dependencies: dependency('glib-2.0', native: true), native: true)
+    nk_git_version = executable('nk-git-version', files('src/git-version.c'), link_with: nk_lib_native, dependencies: nk_deps_native, native: true)
     nk_src += custom_target('nkutils-git-version.h',
         output: 'nkutils-git-version.h',
         command: [ nk_git_version, 'header', '@OUTPUT@', nk_git_work_tree, nk_git ],
