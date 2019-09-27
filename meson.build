@@ -116,14 +116,14 @@ if nk_git_work_tree != ''
     nk_git_version = executable('nk-git-version', files('src/git-version.c'), dependencies: dependency('glib-2.0', native: true), native: true)
     nk_src += custom_target('nkutils-git-version.h',
         output: 'nkutils-git-version.h',
-        command: [ nk_git_version, 'header', '@OUTPUT@', nk_git_work_tree, join_paths(nk_git_work_tree, '.git'), nk_git ],
+        command: [ nk_git_version, 'header', '@OUTPUT@', nk_git_work_tree, nk_git ],
         build_always_stale: true,
         build_by_default: not meson.is_subproject(),
     )
 
     nkutils_mandepends += custom_target('nkutils-git-version.ent',
         output: 'nkutils-git-version.ent',
-        command: [ nk_git_version, 'entity', '@OUTPUT@', nk_git_work_tree, join_paths(nk_git_work_tree, '.git'), nk_git ],
+        command: [ nk_git_version, 'entity', '@OUTPUT@', nk_git_work_tree, nk_git ],
         build_always_stale: true,
         build_by_default: not meson.is_subproject(),
     )

@@ -226,14 +226,14 @@ _nk_git_version_make_simple(NkGitVersionInfo *info)
 int
 main(int argc, char *argv[])
 {
-    if ( argc < 6 )
+    if ( argc < 5 )
         return 1;
 
     gchar *out_type = argv[1];
     gchar *output_file = argv[2];
     gchar *work_tree = argv[3];
-    gchar *git_dir = argv[4];
-    gchar *git = argv[5];
+    gchar *git_dir = NULL;
+    gchar *git = argv[4];
 
     gint ret = 10;
     gchar *old_contents = NULL;
@@ -264,6 +264,7 @@ main(int argc, char *argv[])
 
     NkGitVersionData data = { .data = { NULL } };
 
+    git_dir = g_build_filename(work_tree, ".git", NULL);
     if ( ! g_file_test(git_dir, G_FILE_TEST_IS_DIR) )
     {
         if ( g_file_test(git_dir, G_FILE_TEST_EXISTS) )
@@ -325,5 +326,6 @@ fail:
     g_free(info.branch);
     g_free(old_contents);
     g_free(new_contents);
+    g_free(git_dir);
     return ret;
 }
