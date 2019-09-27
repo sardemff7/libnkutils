@@ -36,6 +36,7 @@
 
 #include <glib.h>
 
+#include "nkutils-enum.h"
 #include "nkutils-format-string.h"
 
 typedef enum {
@@ -43,6 +44,12 @@ typedef enum {
     TEMPLATE_HEADER,
     TEMPLATE_ENTITY,
 } NkGitVersionTemplates;
+
+static const gchar * const _nk_git_version_template_names[] = {
+    [TEMPLATE_SIMPLE] = "simple",
+    [TEMPLATE_HEADER] = "header",
+    [TEMPLATE_ENTITY] = "entity",
+};
 
 static const gchar * const _nk_git_version_templates[] = {
     [TEMPLATE_SIMPLE] = "${describe}\n${branch}\n",
@@ -188,7 +195,7 @@ main(int argc, char *argv[])
     if ( argc < 5 )
         return 1;
 
-    gchar *out_type = argv[1];
+    gchar *template = argv[1];
     NkFormatString *format_string = NULL;
     gchar *output_file = argv[2];
     gchar *work_tree = argv[3];
@@ -219,20 +226,10 @@ main(int argc, char *argv[])
     }
 
     guint64 template_value;
-    switch ( g_utf8_get_char(out_type) )
+    if ( ! nk_enum_parse(template, _nk_git_version_template_names, G_N_ELEMENTS(_nk_git_version_template_names), TRUE, FALSE, &template_value) )
     {
-    case 'h':
-        template_value = TEMPLATE_HEADER;
-    break;
-    case 'e':
-        template_value = TEMPLATE_ENTITY;
-    break;
-    case 's':
-        template_value = TEMPLATE_SIMPLE;
-    break;
-    default:
         ret = 5;
-        g_warning("Wrong output type: %s", out_type);
+        g_warning("Unknown template: %s", template);
         goto fail;
     }
 

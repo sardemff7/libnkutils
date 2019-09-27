@@ -99,6 +99,7 @@ endforeach
 
 if nk_git_work_tree != ''
     format_string = true
+    enum = true
 endif
 
 foreach m : nk_modules
