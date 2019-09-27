@@ -1,5 +1,5 @@
 /*
- * libnkutils/token - Miscellaneous utilities, token module
+ * libnkutils/xdg-theme - Miscellaneous utilities, xdg-theme module
  *
  * Copyright © 2011-2017 Quentin "Sardem FF7" Glidic
  *
