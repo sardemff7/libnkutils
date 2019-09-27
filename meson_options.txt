@@ -1,5 +1,5 @@
 option('uuid', type: 'boolean', value: false, description: 'nkutils uuid module')
-option('token', type: 'boolean', value: false, description: 'nkutils token module')
+option('format-string', type: 'boolean', value: false, description: 'nkutils format-string module')
 option('gtk-settings', type: 'boolean', value: false, description: 'nkutils gtk-settings module')
 option('xdg-de', type: 'boolean', value: false, description: 'nkutils xdg-de module')
 option('xdg-theme', type: 'boolean', value: false, description: 'nkutils xdg-theme module')

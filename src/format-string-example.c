@@ -1,5 +1,5 @@
 /*
- * libnkutils/token - Miscellaneous utilities, token module
+ * libnkutils/format-string - Miscellaneous utilities, format string module
  *
  * Copyright © 2011-2017 Quentin "Sardem FF7" Glidic
  *
@@ -30,7 +30,7 @@
 #ifdef G_LOG_DOMAIN
 #undef G_LOG_DOMAIN
 #endif /* G_LOG_DOMAIN */
-#define G_LOG_DOMAIN "nk-token-replace"
+#define G_LOG_DOMAIN "nk-format-string-replace"
 
 #include <string.h>
 #include <locale.h>
@@ -38,7 +38,7 @@
 
 #include <glib.h>
 
-#include "nkutils-token.h"
+#include "nkutils-format-string.h"
 
 typedef struct {
     int argc;
@@ -46,16 +46,16 @@ typedef struct {
 } Args;
 
 static GVariant *
-_nk_token_replace_callback(const gchar *token, G_GNUC_UNUSED guint64 value, gpointer user_data)
+_nk_format_string_replace_reference_callback(const gchar *name, G_GNUC_UNUSED guint64 value, gpointer user_data)
 {
     Args *args = user_data;
     int i;
     for ( i = 0 ; i < args->argc ; ++i )
     {
         const gchar *arg = args->argv[i];
-        if ( ! g_str_has_prefix(arg, token) )
+        if ( ! g_str_has_prefix(arg, name) )
             continue;
-        arg += strlen(token);
+        arg += strlen(name);
         switch ( g_utf8_get_char(arg) )
         {
         case '\0':
@@ -78,11 +78,11 @@ main(int argc, char *argv[])
 
     if ( argc < 2 )
     {
-        g_warning("You must provide a token string");
+        g_warning("You must provide a format string");
         return 1;
     }
 
-    NkTokenList *template;
+    NkFormatString *template;
     Args args = {
         .argc = argc - 2,
         .argv = argv + 2,
@@ -90,19 +90,19 @@ main(int argc, char *argv[])
     gchar *result;
     GError *error = NULL;
 
-    template = nk_token_list_parse(g_strdup(argv[1]), '$', &error);
+    template = nk_format_string_parse(g_strdup(argv[1]), '$', &error);
     if ( template == NULL )
     {
         g_warning("Template string could not be parsed: %s", error->message);
         g_clear_error(&error);
         return 2;
     }
-    result = nk_token_list_replace(template, _nk_token_replace_callback, &args);
+    result = nk_format_string_replace(template, _nk_format_string_replace_reference_callback, &args);
 
     g_print("%s\n", result);
 
     g_free(result);
-    nk_token_list_unref(template);
+    nk_format_string_unref(template);
 
     return 0;
 }

@@ -22,7 +22,7 @@
   along with libnkutils. If not, see <http://www.gnu.org/licenses/>.
 -->
 <refentry>
-    <refsect2 id="nk-token-reference-description">
+    <refsect2 id="nk-format-string-reference-description">
         <para>
             References use a shell-like format: <userinput>${<replaceable>reference-name</replaceable>}</userinput>.
             Each reference is resolved to a data that is substitued to the reference at the corresponding place in the string.

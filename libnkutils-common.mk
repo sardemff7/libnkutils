@@ -117,16 +117,16 @@ _libnkutils_tests += \
 	%D%/tests/enum.test
 endif
 
-if NK_ENABLE_TOKEN
+if NK_ENABLE_FORMAT_STRING
 _libnkutils_sources += \
-	%D%/src/token.c \
-	%D%/src/nkutils-token.h
+	%D%/src/format-string.c \
+	%D%/src/nkutils-format-string.h
 
 _libnkutils_examples += \
-	%D%/nk-token-replace
+	%D%/nk-format-string-replace
 
 _libnkutils_tests += \
-	%D%/tests/token.test
+	%D%/tests/format-string.test
 endif
 
 if NK_ENABLE_COLOUR
@@ -182,16 +182,16 @@ endif
 # Examples
 #
 
-# token
-%C%_nk_token_replace_SOURCES = \
-	%D%/src/token-example.c
+# format-string
+%C%_nk_format_string_replace_SOURCES = \
+	%D%/src/format-string-example.c
 
-%C%_nk_token_replace_CFLAGS = \
+%C%_nk_format_string_replace_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
 	$(_NKUTILS_INTERNAL_CFLAGS)
 
-%C%_nk_token_replace_LDADD = \
+%C%_nk_format_string_replace_LDADD = \
 	$(NKUTILS_LIBS)
 
 # xdg-theme
@@ -224,16 +224,16 @@ endif
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)
 
-# token
-%C%_tests_token_test_SOURCES = \
-	%D%/tests/token.c
+# format-string
+%C%_tests_format-string_test_SOURCES = \
+	%D%/tests/format-string.c
 
-%C%_tests_token_test_CFLAGS = \
+%C%_tests_format_string_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
 	$(_NKUTILS_INTERNAL_CFLAGS)
 
-%C%_tests_token_test_LDADD = \
+%C%_tests_format_string_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)
 

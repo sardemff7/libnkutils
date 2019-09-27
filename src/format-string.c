@@ -1,5 +1,5 @@
 /*
- * libnkutils/token - Miscellaneous utilities, token module
+ * libnkutils/format-string - Miscellaneous utilities, format string module
  *
  * Copyright © 2011-2017 Quentin "Sardem FF7" Glidic
  *
@@ -30,7 +30,7 @@
 #ifdef G_LOG_DOMAIN
 #undef G_LOG_DOMAIN
 #endif /* G_LOG_DOMAIN */
-#define G_LOG_DOMAIN "libnkutils-token"
+#define G_LOG_DOMAIN "libnkutils-format-string"
 
 #include <string.h>
 #include <errno.h>
@@ -39,72 +39,72 @@
 
 #include "nkutils-enum.h"
 
-#include "nkutils-token.h"
+#include "nkutils-format-string.h"
 
-#define NK_TOKEN_PRETTIFY_DURATION_DEFAULT "%{weeks:+%{weeks} week%{weeks:[;2;2;;s]} }%{days:+%{days} day%{days:[;2;2;;s]} }%{hours:+%{hours} hour%{hours:[;2;2;;s]} }%{minutes:+%{minutes} minute%{minutes:[;2;2;;s]} }%{seconds:-0} second%{seconds:[;2;2;;s]}"
+#define NK_FORMAT_STRING_PRETTIFY_DURATION_DEFAULT "%{weeks:+%{weeks} week%{weeks:[;2;2;;s]} }%{days:+%{days} day%{days:[;2;2;;s]} }%{hours:+%{hours} hour%{hours:[;2;2;;s]} }%{minutes:+%{minutes} minute%{minutes:[;2;2;;s]} }%{seconds:-0} second%{seconds:[;2;2;;s]}"
 
 typedef struct {
     gdouble min;
     gdouble max;
     gsize length;
     gchar **values;
-} NkTokenRange;
+} NkFormatStringRange;
 
 typedef struct {
     gchar *true_;
     gchar *false_;
-} NkTokenSwitch;
+} NkFormatStringSwitch;
 
 typedef enum {
-    NK_TOKEN_PRETTIFY_NONE = 0,
-    NK_TOKEN_PRETTIFY_FLOAT = 'f',
-    NK_TOKEN_PRETTIFY_PREFIXES_SI = 'p',
-    NK_TOKEN_PRETTIFY_PREFIXES_BINARY = 'b',
-    NK_TOKEN_PRETTIFY_TIME = 't',
-    NK_TOKEN_PRETTIFY_DURATION = 'd',
-} NkTokenPrettifyType;
+    NK_FORMAT_STRING_PRETTIFY_NONE = 0,
+    NK_FORMAT_STRING_PRETTIFY_FLOAT = 'f',
+    NK_FORMAT_STRING_PRETTIFY_PREFIXES_SI = 'p',
+    NK_FORMAT_STRING_PRETTIFY_PREFIXES_BINARY = 'b',
+    NK_FORMAT_STRING_PRETTIFY_TIME = 't',
+    NK_FORMAT_STRING_PRETTIFY_DURATION = 'd',
+} NkFormatStringPrettifyType;
 
 typedef struct {
-    NkTokenPrettifyType type;
+    NkFormatStringPrettifyType type;
     gchar format[10]; /* %0*.*lf%s + \0 */
     const gchar *time_format;
-    NkTokenList *duration_format;
+    NkFormatString *duration_format;
     gint width;
     gint precision;
-} NkTokenPrettify;
+} NkFormatStringPrettify;
 
 typedef enum {
-    NK_TOKEN_PRETTIFY_DURATION_TOKEN_WEEKS,
-    NK_TOKEN_PRETTIFY_DURATION_TOKEN_DAYS,
-    NK_TOKEN_PRETTIFY_DURATION_TOKEN_HOURS,
-    NK_TOKEN_PRETTIFY_DURATION_TOKEN_MINUTES,
-    NK_TOKEN_PRETTIFY_DURATION_TOKEN_SECONDS,
-    NK_TOKEN_PRETTIFY_DURATION_TOKEN_MILLISECONDS,
-    NK_TOKEN_PRETTIFY_DURATION_TOKEN_MICROSECONDS,
-    NK_TOKEN_PRETTIFY_DURATION_TOKEN_NANOSECONDS,
-} NkTokenListPrettifyDurationToken;
+    NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_WEEKS,
+    NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_DAYS,
+    NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_HOURS,
+    NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_MINUTES,
+    NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_SECONDS,
+    NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_MILLISECONDS,
+    NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_MICROSECONDS,
+    NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_NANOSECONDS,
+} NkFormatStringPrettifyDurationToken;
 
-static const gchar * const _nk_token_list_prettify_duration_tokens[] = {
-    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_WEEKS] = "weeks",
-    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_DAYS] = "days",
-    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_HOURS] = "hours",
-    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_MINUTES] = "minutes",
-    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_SECONDS] = "seconds",
-    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_MILLISECONDS] = "milliseconds",
-    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_MICROSECONDS] = "microseconds",
-    [NK_TOKEN_PRETTIFY_DURATION_TOKEN_NANOSECONDS] = "nanoseconds",
+static const gchar * const _nk_format_string_prettify_duration_tokens[] = {
+    [NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_WEEKS] = "weeks",
+    [NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_DAYS] = "days",
+    [NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_HOURS] = "hours",
+    [NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_MINUTES] = "minutes",
+    [NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_SECONDS] = "seconds",
+    [NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_MILLISECONDS] = "milliseconds",
+    [NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_MICROSECONDS] = "microseconds",
+    [NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_NANOSECONDS] = "nanoseconds",
 };
 
 typedef struct {
     guint64 w;
     guint8 d, h, m, s;
     guint16 ms, us, ns;
-} NkTokenListPrettifyDurationData;
+} NkFormatStringPrettifyDurationData;
 
 typedef struct {
     GRegex *regex;
-    NkTokenList *replacement;
-} NkTokenRegex;
+    NkFormatString *replacement;
+} NkFormatStringRegex;
 
 typedef struct {
     const gchar *string;
@@ -112,33 +112,29 @@ typedef struct {
     const gchar *key;
     gint64 index;
     guint64 value;
-    NkTokenList *fallback;
-    NkTokenList *substitute;
-    NkTokenRange range;
-    NkTokenSwitch switch_;
-    NkTokenPrettify prettify;
-    NkTokenRegex *replace;
+    NkFormatString *fallback;
+    NkFormatString *substitute;
+    NkFormatStringRange range;
+    NkFormatStringSwitch switch_;
+    NkFormatStringPrettify prettify;
+    NkFormatStringRegex *replace;
     gboolean no_data;
-} NkToken;
+} NkFormatStringToken;
 
-struct _NkTokenList {
+struct _NkFormatString {
     guint64 ref_count;
     gboolean owned;
     gchar *string;
     gsize length;
-    NkToken *tokens;
+    NkFormatStringToken *tokens;
     gsize size;
 };
 
 
-GQuark
-nk_token_error_quark(void)
-{
-    return g_quark_from_static_string("nk_token_error-quark");
-}
+G_DEFINE_QUARK(nk_format_string_error-quark, nk_format_string_error)
 
 static gchar *
-_nk_token_strchr_escape(gchar *s, gsize l, gunichar c, gunichar pair_c)
+_nk_format_string_strchr_escape(gchar *s, gsize l, gunichar c, gunichar pair_c)
 {
     gchar *e = s + l;
 
@@ -191,50 +187,50 @@ _nk_token_strchr_escape(gchar *s, gsize l, gunichar c, gunichar pair_c)
 }
 
 static gboolean
-_nk_token_double_from_variant(GVariant *var, gdouble *value, GError **error)
+_nk_format_string_double_from_variant(GVariant *var, gdouble *value, GError **error)
 {
-#define _nk_token_list_range_value_check_type(t, T, s) \
+#define _nk_format_string_range_value_check_type(t, T, s) \
     else if ( g_variant_is_of_type(var, G_VARIANT_TYPE_##T##s) ) \
         *value = g_variant_get_##t##s(var)
 
     if ( g_variant_is_of_type(var, G_VARIANT_TYPE_DOUBLE) )
         *value = g_variant_get_double(var);
-    _nk_token_list_range_value_check_type(int, INT, 16);
-    _nk_token_list_range_value_check_type(int, INT, 32);
-    _nk_token_list_range_value_check_type(int, INT, 64);
-    _nk_token_list_range_value_check_type(uint, UINT, 16);
-    _nk_token_list_range_value_check_type(uint, UINT, 32);
-    _nk_token_list_range_value_check_type(uint, UINT, 64);
+    _nk_format_string_range_value_check_type(int, INT, 16);
+    _nk_format_string_range_value_check_type(int, INT, 32);
+    _nk_format_string_range_value_check_type(int, INT, 64);
+    _nk_format_string_range_value_check_type(uint, UINT, 16);
+    _nk_format_string_range_value_check_type(uint, UINT, 32);
+    _nk_format_string_range_value_check_type(uint, UINT, 64);
     else if ( g_variant_is_of_type(var, G_VARIANT_TYPE_BYTE) )
         *value = g_variant_get_byte(var);
     else if ( g_variant_is_of_type(var, G_VARIANT_TYPE_BOOLEAN) )
         *value = g_variant_get_boolean(var) ? 1 : 0;
     else
     {
-        g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_RANGE, "Invalid range value type: %s", g_variant_get_type_string(var));
+        g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_RANGE, "Invalid range value type: %s", g_variant_get_type_string(var));
         return FALSE;
     }
 
-#undef _nk_token_list_range_value_check_type
+#undef _nk_format_string_range_value_check_type
 
     return TRUE;
 }
 
 static gboolean
-_nk_token_list_parse_range_value(const gchar *s, const gchar *e, gdouble *value, GError **error)
+_nk_format_string_parse_range_value(const gchar *s, const gchar *e, gdouble *value, GError **error)
 {
     GError *_inner_error_ = NULL;
     GVariant *var;
     var = g_variant_parse(NULL, s, e, NULL, &_inner_error_);
     if ( var == NULL )
     {
-        g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_RANGE, "Invalid range value: %s", _inner_error_->message);
+        g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_RANGE, "Invalid range value: %s", _inner_error_->message);
         g_error_free(_inner_error_);
         return FALSE;
     }
 
     gboolean ret;
-    ret = _nk_token_double_from_variant(var, value, error);
+    ret = _nk_format_string_double_from_variant(var, value, error);
 
     g_variant_unref(var);
 
@@ -242,7 +238,7 @@ _nk_token_list_parse_range_value(const gchar *s, const gchar *e, gdouble *value,
 }
 
 static gboolean
-_nk_token_list_search_enum_tokens(NkTokenList *self, const gchar * const *tokens, guint64 size, guint64 *used_tokens, GError **error)
+_nk_format_string_search_enum_tokens(NkFormatString *self, const gchar * const *tokens, guint64 size, guint64 *used_tokens, GError **error)
 {
     gsize i;
     for ( i = 0 ; i < self->size ; ++i )
@@ -251,39 +247,39 @@ _nk_token_list_search_enum_tokens(NkTokenList *self, const gchar * const *tokens
             continue;
         if ( ! nk_enum_parse(self->tokens[i].name, tokens, size, FALSE, FALSE, &self->tokens[i].value) )
         {
-            g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_UNKNOWN_TOKEN, "Unknown token: %s", self->tokens[i].name);
+            g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_UNKNOWN_TOKEN, "Unknown token: %s", self->tokens[i].name);
             return FALSE;
         }
         *used_tokens |= (1 << self->tokens[i].value);
 
         if ( self->tokens[i].fallback != NULL )
-            _nk_token_list_search_enum_tokens(self->tokens[i].fallback, tokens, size, used_tokens, error);
+            _nk_format_string_search_enum_tokens(self->tokens[i].fallback, tokens, size, used_tokens, error);
         if ( self->tokens[i].substitute != NULL )
-            _nk_token_list_search_enum_tokens(self->tokens[i].substitute, tokens, size, used_tokens, error);
+            _nk_format_string_search_enum_tokens(self->tokens[i].substitute, tokens, size, used_tokens, error);
         if ( self->tokens[i].replace != NULL )
         {
-            NkTokenRegex *regex;
+            NkFormatStringRegex *regex;
             for ( regex = self->tokens[i].replace ; regex->regex != NULL ; ++regex )
-                _nk_token_list_search_enum_tokens(regex->replacement, tokens, size, used_tokens, error);
+                _nk_format_string_search_enum_tokens(regex->replacement, tokens, size, used_tokens, error);
         }
     }
     return TRUE;
 }
 
-static NkTokenList *_nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError **error);
-static NkTokenList *
-_nk_token_list_parse_enum(gboolean owned, gchar *string, gunichar identifier, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens, GError **error)
+static NkFormatString *_nk_format_string_parse(gboolean owned, gchar *string, gunichar identifier, GError **error);
+static NkFormatString *
+_nk_format_string_parse_enum(gboolean owned, gchar *string, gunichar identifier, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens, GError **error)
 {
     g_return_val_if_fail(string != NULL, NULL);
 
-    NkTokenList *self;
+    NkFormatString *self;
 
-    self = _nk_token_list_parse(owned, string, identifier, error);
+    self = _nk_format_string_parse(owned, string, identifier, error);
     if ( self == NULL )
         return NULL;
 
     guint64 used_tokens = 0;
-    if ( ! _nk_token_list_search_enum_tokens(self, tokens, size, &used_tokens, error) )
+    if ( ! _nk_format_string_search_enum_tokens(self, tokens, size, &used_tokens, error) )
         goto fail;
     if ( ret_used_tokens != NULL )
         *ret_used_tokens = used_tokens;
@@ -291,19 +287,19 @@ _nk_token_list_parse_enum(gboolean owned, gchar *string, gunichar identifier, co
     return self;
 
 fail:
-    nk_token_list_unref(self);
+    nk_format_string_unref(self);
     return NULL;
 }
 
-static NkTokenList *
-_nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError **error)
+static NkFormatString *
+_nk_format_string_parse(gboolean owned, gchar *string, gunichar identifier, GError **error)
 {
     g_return_val_if_fail(string != NULL, NULL);
     g_return_val_if_fail(error == NULL || *error == NULL, NULL);
 
-    NkTokenList *self;
+    NkFormatString *self;
 
-    self = g_new0(NkTokenList, 1);
+    self = g_new0(NkFormatString, 1);
     self->ref_count = 1;
     self->owned = owned;
     self->string = string;
@@ -326,11 +322,11 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
                 *w = '\0';
                 if ( *string != '\0' )
                 {
-                    NkToken token = {
+                    NkFormatStringToken token = {
                         .string = string
                     };
                     ++self->size;
-                    self->tokens = g_renew(NkToken, self->tokens, self->size);
+                    self->tokens = g_renew(NkFormatStringToken, self->tokens, self->size);
                     self->tokens[self->size - 1] = token;
                 }
                 string = w = g_utf8_next_char(w);
@@ -343,7 +339,7 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
 
         w = g_utf8_next_char(w);
         gchar *e;
-        NkToken token = {
+        NkFormatStringToken token = {
             .name = w
         };
 
@@ -355,7 +351,7 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
         if ( token.name == w )
             continue;
 
-        e = _nk_token_strchr_escape(w, self->length - ( w - self->string ), '}', '{');
+        e = _nk_format_string_strchr_escape(w, self->length - ( w - self->string ), '}', '{');
         if ( e == NULL )
             continue;
         gchar *next = g_utf8_next_char(e);
@@ -385,7 +381,7 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
                 index = g_ascii_strtoll(w, &ie, 10);
                 if ( ( errno != 0 ) || ( w == ie ) )
                 {
-                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_KEY, "Could not parse index value: %s", ss);
+                    g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_KEY, "Could not parse index value: %s", ss);
                     goto fail;
                 }
                 w = ie;
@@ -393,7 +389,7 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
 
             if ( g_utf8_get_char(w) != ']' )
             {
-                g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_KEY, "Wrong key value: %s", ss);
+                g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_KEY, "Wrong key value: %s", ss);
                 goto fail;
             }
 
@@ -417,28 +413,28 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
             switch ( g_utf8_get_char(w) )
             {
             case '-':
-                token.fallback = _nk_token_list_parse(FALSE, g_utf8_next_char(w), identifier, error);
+                token.fallback = _nk_format_string_parse(FALSE, g_utf8_next_char(w), identifier, error);
                 if ( token.fallback == NULL )
                     goto fail;
             break;
             case '+':
-                token.substitute = _nk_token_list_parse(FALSE, g_utf8_next_char(w), identifier, error);
+                token.substitute = _nk_format_string_parse(FALSE, g_utf8_next_char(w), identifier, error);
                 if ( token.substitute == NULL )
                     goto fail;
             break;
             case '!':
                 token.no_data = TRUE;
-                token.fallback = _nk_token_list_parse(FALSE, g_utf8_next_char(w), identifier, error);
+                token.fallback = _nk_format_string_parse(FALSE, g_utf8_next_char(w), identifier, error);
                 if ( token.fallback == NULL )
                     goto fail;
             break;
             case '[':
             {
                 w = g_utf8_next_char(w);
-                e = _nk_token_strchr_escape(w, e - w, ']', '[');
+                e = _nk_format_string_strchr_escape(w, e - w, ']', '[');
                 if ( e == NULL )
                 {
-                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_RANGE, "Missing range close bracket: %s", w);
+                    g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_RANGE, "Missing range close bracket: %s", w);
                     goto fail;
                 }
                 *e = '\0';
@@ -449,24 +445,24 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
                 w = g_utf8_next_char(w);
                 if ( ( s = g_utf8_strchr(w, e - w, sep) ) == NULL )
                 {
-                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_RANGE, "Missing range minimum value: %s", w);
+                    g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_RANGE, "Missing range minimum value: %s", w);
                     goto fail;
                 }
-                if ( ! _nk_token_list_parse_range_value(w, s, &token.range.min, error) )
+                if ( ! _nk_format_string_parse_range_value(w, s, &token.range.min, error) )
                     goto fail;
 
                 w = g_utf8_next_char(s);
                 if ( ( s = g_utf8_strchr(w, e - w, sep) ) == NULL )
                 {
-                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_RANGE, "Missing range maximum value: %s", w);
+                    g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_RANGE, "Missing range maximum value: %s", w);
                     goto fail;
                 }
-                if ( ! _nk_token_list_parse_range_value(w, s, &token.range.max, error) )
+                if ( ! _nk_format_string_parse_range_value(w, s, &token.range.max, error) )
                     goto fail;
 
                 if ( token.range.min > token.range.max )
                 {
-                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_RANGE, "Range minimum value is bigger than the valueimum value: min=%lf > value=%lf", token.range.min, token.range.max);
+                    g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_RANGE, "Range minimum value is bigger than the valueimum value: min=%lf > value=%lf", token.range.min, token.range.max);
                     goto fail;
                 }
 
@@ -482,10 +478,10 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
             case '{':
             {
                 w = g_utf8_next_char(w);
-                e = _nk_token_strchr_escape(w, e - w, '}', '{');
+                e = _nk_format_string_strchr_escape(w, e - w, '}', '{');
                 if ( e == NULL )
                 {
-                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_RANGE, "Missing switch close bracket: %s", w);
+                    g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_RANGE, "Missing switch close bracket: %s", w);
                     goto fail;
                 }
                 *e = '\0';
@@ -496,7 +492,7 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
                 w = g_utf8_next_char(w);
                 if ( ( s = g_utf8_strchr(w, e - w, sep) ) == NULL )
                 {
-                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_SWITCH, "Missing switch false value: %s", w);
+                    g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_SWITCH, "Missing switch false value: %s", w);
                     goto fail;
                 }
                 token.switch_.true_ = w;
@@ -508,7 +504,7 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
             default:
                 /* Just fail on malformed string */
                 *g_utf8_next_char(w) = '\0';
-                g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_UNKNOWN_MODIFIER, "Wrong modifier value: %s", w);
+                g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_UNKNOWN_MODIFIER, "Wrong modifier value: %s", w);
                 goto fail;
             }
             *m = '\0';
@@ -519,10 +515,10 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
             gchar *m = w;
             w = g_utf8_next_char(w);
             *e = *m = '\0';
-            e = _nk_token_strchr_escape(w, e - w, ')', '(');
+            e = _nk_format_string_strchr_escape(w, e - w, ')', '(');
             if ( e == NULL )
             {
-                g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_PRETIFFY, "Missing prettify close paren: %s", w);
+                g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_PRETIFFY, "Missing prettify close paren: %s", w);
                 goto fail;
             }
             *e = '\0';
@@ -532,19 +528,19 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
             w = g_utf8_next_char(w);
             switch ( token.prettify.type )
             {
-            case NK_TOKEN_PRETTIFY_FLOAT:
-            case NK_TOKEN_PRETTIFY_PREFIXES_SI:
-            case NK_TOKEN_PRETTIFY_PREFIXES_BINARY:
+            case NK_FORMAT_STRING_PRETTIFY_FLOAT:
+            case NK_FORMAT_STRING_PRETTIFY_PREFIXES_SI:
+            case NK_FORMAT_STRING_PRETTIFY_PREFIXES_BINARY:
             break;
-            case NK_TOKEN_PRETTIFY_TIME:
+            case NK_FORMAT_STRING_PRETTIFY_TIME:
                 if ( w != e )
                     token.prettify.time_format = w;
                 else
                     token.prettify.time_format = "%c";
                 w = e;
                 goto end_prettify;
-            case NK_TOKEN_PRETTIFY_DURATION:
-                token.prettify.duration_format = _nk_token_list_parse_enum(( w == e ), ( w == e ) ? g_strdup(NK_TOKEN_PRETTIFY_DURATION_DEFAULT) : w, '%', _nk_token_list_prettify_duration_tokens, G_N_ELEMENTS(_nk_token_list_prettify_duration_tokens), NULL, error);
+            case NK_FORMAT_STRING_PRETTIFY_DURATION:
+                token.prettify.duration_format = _nk_format_string_parse_enum(( w == e ), ( w == e ) ? g_strdup(NK_FORMAT_STRING_PRETTIFY_DURATION_DEFAULT) : w, '%', _nk_format_string_prettify_duration_tokens, G_N_ELEMENTS(_nk_format_string_prettify_duration_tokens), NULL, error);
                 if ( token.prettify.duration_format == NULL )
                     goto fail;
                 w = e;
@@ -552,7 +548,7 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
             default:
                 /* Just fail on malformed string */
                 *w = '\0';
-                g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_PRETIFFY, "Wrong prettify identifier: %s", m);
+                g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_PRETIFFY, "Wrong prettify identifier: %s", m);
                 goto fail;
             }
 
@@ -572,7 +568,7 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
                 token.prettify.width = g_ascii_strtoll(w, &ie, 10);
                 if ( ( errno != 0 ) || ( w == ie ) )
                 {
-                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_PRETIFFY, "Could not parse pretiffy width: %s", w);
+                    g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_PRETIFFY, "Could not parse pretiffy width: %s", w);
                     goto fail;
                 }
                 w = ie;
@@ -586,7 +582,7 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
                 token.prettify.precision = g_ascii_strtoll(w, &ie, 10);
                 if ( ( errno != 0 ) || ( w == ie ) )
                 {
-                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_PRETIFFY, "Could not parse pretiffy precision: %s", w);
+                    g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_PRETIFFY, "Could not parse pretiffy precision: %s", w);
                     goto fail;
                 }
                 w = ie;
@@ -595,7 +591,7 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
         end_prettify:
             if ( w != e )
             {
-                g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_WRONG_PRETIFFY, "Unexpected leftovers in prettify: %s", w);
+                g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_PRETIFFY, "Unexpected leftovers in prettify: %s", w);
                 goto fail;
             }
         }
@@ -610,10 +606,10 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
             {
                 ++c;
                 *m = '\0';
-            } while ( ( m = _nk_token_strchr_escape(m, e - m, '/', '\0') ) != NULL );
+            } while ( ( m = _nk_format_string_strchr_escape(m, e - m, '/', '\0') ) != NULL );
             c = ( c + 1 ) / 2 + 1;
 
-            token.replace = g_new(NkTokenRegex, c);
+            token.replace = g_new(NkFormatStringRegex, c);
             c = 0;
             do
             {
@@ -621,13 +617,13 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
                 token.replace[c].regex = g_regex_new(++w, G_REGEX_OPTIMIZE, 0, &_inner_error_);
                 if ( token.replace[c].regex == NULL )
                 {
-                    g_set_error(error, NK_TOKEN_ERROR, NK_TOKEN_ERROR_REGEX, "Wrong regex: %s", _inner_error_->message);
+                    g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_REGEX, "Wrong regex: %s", _inner_error_->message);
                     g_clear_error(&_inner_error_);
                     goto fail;
                 }
 
                 w = w + strlen(w) + 1;
-                token.replace[c].replacement = _nk_token_list_parse(FALSE, ( w > e ) ? "" : w, identifier, error);
+                token.replace[c].replacement = _nk_format_string_parse(FALSE, ( w > e ) ? "" : w, identifier, error);
                 if ( token.replace[c].replacement == NULL )
                     goto fail;
                 w += strlen(w);
@@ -645,10 +641,10 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
         ++self->size;
         if ( *string != '\0' )
             ++self->size;
-        self->tokens = g_renew(NkToken, self->tokens, self->size);
+        self->tokens = g_renew(NkFormatStringToken, self->tokens, self->size);
         if ( *string != '\0' )
         {
-            NkToken stoken = {
+            NkFormatStringToken stoken = {
                 .string = string
             };
             self->tokens[self->size - 2] = stoken;
@@ -657,8 +653,8 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
 
         string = w = next;
     }
-    self->tokens = g_renew(NkToken, self->tokens, ++self->size);
-    NkToken token = {
+    self->tokens = g_renew(NkFormatStringToken, self->tokens, ++self->size);
+    NkFormatStringToken token = {
         .string = string
     };
     self->tokens[self->size - 1] = token;
@@ -666,24 +662,24 @@ _nk_token_list_parse(gboolean owned, gchar *string, gunichar identifier, GError 
     return self;
 
 fail:
-    nk_token_list_unref(self);
+    nk_format_string_unref(self);
     return NULL;
 }
 
-NkTokenList *
-nk_token_list_parse(gchar *string, gunichar identifier, GError **error)
+NkFormatString *
+nk_format_string_parse(gchar *string, gunichar identifier, GError **error)
 {
-    return _nk_token_list_parse(TRUE, string, identifier, error);
+    return _nk_format_string_parse(TRUE, string, identifier, error);
 }
 
-NkTokenList *
-nk_token_list_parse_enum(gchar *string, gunichar identifier, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens, GError **error)
+NkFormatString *
+nk_format_string_parse_enum(gchar *string, gunichar identifier, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens, GError **error)
 {
-    return _nk_token_list_parse_enum(TRUE, string, identifier, tokens, size, ret_used_tokens, error);
+    return _nk_format_string_parse_enum(TRUE, string, identifier, tokens, size, ret_used_tokens, error);
 }
 
-NkTokenList *
-nk_token_list_ref(NkTokenList *self)
+NkFormatString *
+nk_format_string_ref(NkFormatString *self)
 {
     g_return_val_if_fail(self != NULL, NULL);
     ++self->ref_count;
@@ -691,7 +687,7 @@ nk_token_list_ref(NkTokenList *self)
 }
 
 static void
-_nk_token_list_free(NkTokenList *self)
+_nk_format_string_free(NkFormatString *self)
 {
     if ( self->owned )
         g_free(self->string);
@@ -700,21 +696,21 @@ _nk_token_list_free(NkTokenList *self)
     for ( i = 0 ; i < self->size ; ++i )
     {
         if ( self->tokens[i].substitute != NULL)
-            _nk_token_list_free(self->tokens[i].substitute);
+            _nk_format_string_free(self->tokens[i].substitute);
         else if ( self->tokens[i].range.length > 0 )
             g_free(self->tokens[i].range.values);
         else if ( self->tokens[i].replace != NULL )
         {
-            NkTokenRegex *regex;
+            NkFormatStringRegex *regex;
             for ( regex = self->tokens[i].replace ; regex->regex != NULL ; ++regex )
             {
                 g_regex_unref(regex->regex);
-                _nk_token_list_free(regex->replacement);
+                _nk_format_string_free(regex->replacement);
             }
             g_free(self->tokens[i].replace);
         }
         else if ( self->tokens[i].fallback != NULL )
-            _nk_token_list_free(self->tokens[i].fallback);
+            _nk_format_string_free(self->tokens[i].fallback);
     }
 
     g_free(self->tokens);
@@ -723,17 +719,17 @@ _nk_token_list_free(NkTokenList *self)
 }
 
 void
-nk_token_list_unref(NkTokenList *self)
+nk_format_string_unref(NkFormatString *self)
 {
     g_return_if_fail(self != NULL);
     if ( --self->ref_count > 0 )
         return;
 
-    _nk_token_list_free(self);
+    _nk_format_string_free(self);
 }
 
 static GVariant *
-_nk_token_list_search_data(GVariant *source, const gchar *key, gint64 index, const gchar **joiner)
+_nk_format_string_search_data(GVariant *source, const gchar *key, gint64 index, const gchar **joiner)
 {
     if ( source == NULL )
         return NULL;
@@ -794,7 +790,7 @@ _nk_token_list_search_data(GVariant *source, const gchar *key, gint64 index, con
 }
 
 static gboolean
-_nk_token_list_check_data(GVariant *data, const NkToken *token)
+_nk_format_string_check_data(GVariant *data, const NkFormatStringToken *part)
 {
     if ( data == NULL )
         return FALSE;
@@ -803,19 +799,19 @@ _nk_token_list_check_data(GVariant *data, const NkToken *token)
     {
         /* We want a boolean data to still be replaced if it’s not checked against */
         if ( ! g_variant_get_boolean(data) )
-            return ( ( token->fallback == NULL ) && ( token->substitute == NULL ) );
+            return ( ( part->fallback == NULL ) && ( part->substitute == NULL ) );
     }
 
     return TRUE;
 }
 
-static void _nk_token_list_replace(GString *string, const NkTokenList *self, NkTokenListReplaceCallback callback, gpointer user_data);
+static void _nk_format_string_replace(GString *string, const NkFormatString *self, NkFormatStringReplaceReferenceCallback callback, gpointer user_data);
 
 static void
-_nk_token_list_append_range(GString *string, GVariant *data, NkTokenRange *range)
+_nk_format_string_append_range(GString *string, GVariant *data, NkFormatStringRange *range)
 {
     gdouble value;
-    if ( ! _nk_token_double_from_variant(data, &value, NULL) )
+    if ( ! _nk_format_string_double_from_variant(data, &value, NULL) )
         return;
 
     gdouble v, r;
@@ -835,7 +831,7 @@ _nk_token_list_append_range(GString *string, GVariant *data, NkTokenRange *range
 }
 
 static void
-_nk_token_list_append_switch(GString *string, GVariant *data, NkTokenSwitch *switch_)
+_nk_format_string_append_switch(GString *string, GVariant *data, NkFormatStringSwitch *switch_)
 {
     if ( ! g_variant_is_of_type(data, G_VARIANT_TYPE_BOOLEAN) )
         return;
@@ -844,40 +840,40 @@ _nk_token_list_append_switch(GString *string, GVariant *data, NkTokenSwitch *swi
 }
 
 static GVariant *
-_nk_token_list_prettify_duration_callback(G_GNUC_UNUSED const gchar *token, guint64 value, gpointer user_data)
+_nk_format_string_prettify_duration_callback(G_GNUC_UNUSED const gchar *name, guint64 value, gpointer user_data)
 {
-    NkTokenListPrettifyDurationData *data = user_data;
-    switch ( (NkTokenListPrettifyDurationToken) value )
+    NkFormatStringPrettifyDurationData *data = user_data;
+    switch ( (NkFormatStringPrettifyDurationToken) value )
     {
-    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_WEEKS:
+    case NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_WEEKS:
         if ( data->w == 0 )
             return NULL;
         return g_variant_new_uint64(data->w);
-    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_DAYS:
+    case NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_DAYS:
         if ( data->d == 0 )
             return NULL;
         return g_variant_new_uint64(data->d);
-    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_HOURS:
+    case NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_HOURS:
         if ( data->h == 0 )
             return NULL;
         return g_variant_new_uint64(data->h);
-    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_MINUTES:
+    case NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_MINUTES:
         if ( data->m == 0 )
             return NULL;
         return g_variant_new_uint64(data->m);
-    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_SECONDS:
+    case NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_SECONDS:
         if ( data->s == 0 )
             return NULL;
         return g_variant_new_uint64(data->s);
-    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_MILLISECONDS:
+    case NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_MILLISECONDS:
         if ( data->ms == 0 )
             return NULL;
         return g_variant_new_uint16(data->ms);
-    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_MICROSECONDS:
+    case NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_MICROSECONDS:
         if ( data->us == 0 )
             return NULL;
         return g_variant_new_uint16(data->us);
-    case NK_TOKEN_PRETTIFY_DURATION_TOKEN_NANOSECONDS:
+    case NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_NANOSECONDS:
         if ( data->ns == 0 )
             return NULL;
         return g_variant_new_uint16(data->ns);
@@ -885,28 +881,28 @@ _nk_token_list_prettify_duration_callback(G_GNUC_UNUSED const gchar *token, guin
     return NULL;
 }
 
-static const gchar *_nk_token_prefixes_si_big[] = {
+static const gchar *_nk_format_string_prefixes_si_big[] = {
     "", "k", "M", "G", "T", "P", "E"
 };
-static const gchar *_nk_token_prefixes_si_small[] = {
+static const gchar *_nk_format_string_prefixes_si_small[] = {
     "", "m", "µ", "n", "p", "f", "a"
 };
-static const gchar *_nk_token_prefixes_binary[] = {
+static const gchar *_nk_format_string_prefixes_binary[] = {
     "", "Ki", "Mi", "Gi", "Ti"
 };
 
 static void
-_nk_token_list_append_prettify(GString *string, GVariant *data, NkTokenPrettify *prettify)
+_nk_format_string_append_prettify(GString *string, GVariant *data, NkFormatStringPrettify *prettify)
 {
     gdouble value;
-    if ( ! _nk_token_double_from_variant(data, &value, NULL) )
+    if ( ! _nk_format_string_double_from_variant(data, &value, NULL) )
         return;
 
     switch ( prettify->type )
     {
-    case NK_TOKEN_PRETTIFY_NONE:
+    case NK_FORMAT_STRING_PRETTIFY_NONE:
         g_return_if_reached();
-    case NK_TOKEN_PRETTIFY_FLOAT:
+    case NK_FORMAT_STRING_PRETTIFY_FLOAT:
     {
         gint precision = prettify->precision;
         if ( value == (gdouble) ( (gint64) value ) )
@@ -914,17 +910,17 @@ _nk_token_list_append_prettify(GString *string, GVariant *data, NkTokenPrettify 
         g_string_append_printf(string, prettify->format, prettify->width, precision, value, "");
     }
     break;
-    case NK_TOKEN_PRETTIFY_PREFIXES_SI:
+    case NK_FORMAT_STRING_PRETTIFY_PREFIXES_SI:
     {
         const gchar **prefix;
         if ( value == 0 )
-            prefix = _nk_token_prefixes_si_small; /* Empty string */
+            prefix = _nk_format_string_prefixes_si_small; /* Empty string */
         else if ( ( value > -1 ) && ( value < 1 ) )
         {
-            for ( prefix = _nk_token_prefixes_si_small ; ( value > -1 ) && ( value < 1 ) && ( prefix < ( _nk_token_prefixes_si_small + G_N_ELEMENTS(_nk_token_prefixes_si_small) ) ) ; ++prefix )
+            for ( prefix = _nk_format_string_prefixes_si_small ; ( value > -1 ) && ( value < 1 ) && ( prefix < ( _nk_format_string_prefixes_si_small + G_N_ELEMENTS(_nk_format_string_prefixes_si_small) ) ) ; ++prefix )
                 value *= 1000;
         }
-        else for ( prefix = _nk_token_prefixes_si_big ; ( value >= 1000 ) && ( prefix < ( _nk_token_prefixes_si_big + G_N_ELEMENTS(_nk_token_prefixes_si_big) ) ) ; ++prefix )
+        else for ( prefix = _nk_format_string_prefixes_si_big ; ( value >= 1000 ) && ( prefix < ( _nk_format_string_prefixes_si_big + G_N_ELEMENTS(_nk_format_string_prefixes_si_big) ) ) ; ++prefix )
             value /= 1000;
         gint precision = prettify->precision;
         if ( value == (gdouble) ( (gint64) value ) )
@@ -932,10 +928,10 @@ _nk_token_list_append_prettify(GString *string, GVariant *data, NkTokenPrettify 
         g_string_append_printf(string, prettify->format, prettify->width, precision, value, *prefix);
     }
     break;
-    case NK_TOKEN_PRETTIFY_PREFIXES_BINARY:
+    case NK_FORMAT_STRING_PRETTIFY_PREFIXES_BINARY:
     {
         const gchar **prefix;
-        for ( prefix = _nk_token_prefixes_binary ; ( value >= 1024 ) && ( prefix < ( _nk_token_prefixes_binary + G_N_ELEMENTS(_nk_token_prefixes_binary) ) ) ; ++prefix )
+        for ( prefix = _nk_format_string_prefixes_binary ; ( value >= 1024 ) && ( prefix < ( _nk_format_string_prefixes_binary + G_N_ELEMENTS(_nk_format_string_prefixes_binary) ) ) ; ++prefix )
             value /= 1024;
         gint precision = prettify->precision;
         if ( value == (gdouble) ( (gint64) value ) )
@@ -943,7 +939,7 @@ _nk_token_list_append_prettify(GString *string, GVariant *data, NkTokenPrettify 
         g_string_append_printf(string, prettify->format, prettify->width, precision, value, *prefix);
     }
     break;
-    case NK_TOKEN_PRETTIFY_TIME:
+    case NK_FORMAT_STRING_PRETTIFY_TIME:
     {
         GDateTime *time;
         gchar *tmp = NULL;
@@ -958,9 +954,9 @@ _nk_token_list_append_prettify(GString *string, GVariant *data, NkTokenPrettify 
         g_free(tmp);
     }
     break;
-    case NK_TOKEN_PRETTIFY_DURATION:
+    case NK_FORMAT_STRING_PRETTIFY_DURATION:
     {
-        NkTokenListPrettifyDurationData data = { .w = 0 };
+        NkFormatStringPrettifyDurationData data = { .w = 0 };
         guint64 s = (guint64) value;
         value -= s;
 
@@ -1008,14 +1004,14 @@ _nk_token_list_append_prettify(GString *string, GVariant *data, NkTokenPrettify 
             value -= ( data.ns / 1000000000. );
         }
 
-        _nk_token_list_replace(string, prettify->duration_format, _nk_token_list_prettify_duration_callback, &data);
+        _nk_format_string_replace(string, prettify->duration_format, _nk_format_string_prettify_duration_callback, &data);
     }
     break;
     }
 }
 
 static void
-_nk_token_list_append_data(GString *string, GVariant *data, const gchar *joiner)
+_nk_format_string_append_data(GString *string, GVariant *data, const gchar *joiner)
 {
     if ( g_variant_is_of_type(data, G_VARIANT_TYPE_ARRAY) )
     {
@@ -1027,7 +1023,7 @@ _nk_token_list_append_data(GString *string, GVariant *data, const gchar *joiner)
         gsize i;
         for ( i = 0 ; i < length ; ++i )
         {
-            _nk_token_list_append_data(string, g_variant_get_child_value(data, i), joiner);
+            _nk_format_string_append_data(string, g_variant_get_child_value(data, i), joiner);
             g_string_append(string, joiner);
         }
         g_string_truncate(string, string->len - jl);
@@ -1037,29 +1033,29 @@ _nk_token_list_append_data(GString *string, GVariant *data, const gchar *joiner)
     else if ( g_variant_is_of_type(data, G_VARIANT_TYPE_BOOLEAN) )
         g_string_append(string, g_variant_get_boolean(data) ? "true" : "false");
 
-#define _nk_token_list_check_type_with_format(l, U, GFormat) \
+#define _nk_format_string_check_type_with_format(l, U, GFormat) \
     else if ( g_variant_is_of_type(data, G_VARIANT_TYPE_##U) ) \
             g_string_append_printf(string, "%" GFormat, g_variant_get_##l(data))
-#define _nk_token_list_check_type(l, U) _nk_token_list_check_type_with_format(l, U, G_G##U##_FORMAT)
+#define _nk_format_string_check_type(l, U) _nk_format_string_check_type_with_format(l, U, G_G##U##_FORMAT)
 
-    _nk_token_list_check_type(int16, INT16);
-    _nk_token_list_check_type(int32, INT32);
-    _nk_token_list_check_type(int64, INT64);
-    _nk_token_list_check_type_with_format(byte, BYTE, "hhu");
-    _nk_token_list_check_type(uint16, UINT16);
-    _nk_token_list_check_type(uint32, UINT32);
-    _nk_token_list_check_type(uint64, UINT64);
-    _nk_token_list_check_type_with_format(double, DOUBLE, "lf");
+    _nk_format_string_check_type(int16, INT16);
+    _nk_format_string_check_type(int32, INT32);
+    _nk_format_string_check_type(int64, INT64);
+    _nk_format_string_check_type_with_format(byte, BYTE, "hhu");
+    _nk_format_string_check_type(uint16, UINT16);
+    _nk_format_string_check_type(uint32, UINT32);
+    _nk_format_string_check_type(uint64, UINT64);
+    _nk_format_string_check_type_with_format(double, DOUBLE, "lf");
 
-#undef _nk_token_list_check_type
-#undef _nk_token_list_check_type_with_format
+#undef _nk_format_string_check_type
+#undef _nk_format_string_check_type_with_format
 
     else
         g_variant_print_string(data, string, FALSE);
 }
 
 static void
-_nk_token_list_replace(GString *string, const NkTokenList *self, NkTokenListReplaceCallback callback, gpointer user_data)
+_nk_format_string_replace(GString *string, const NkFormatString *self, NkFormatStringReplaceReferenceCallback callback, gpointer user_data)
 {
     gsize i;
     for ( i = 0 ; i < self->size ; ++i )
@@ -1073,31 +1069,31 @@ _nk_token_list_replace(GString *string, const NkTokenList *self, NkTokenListRepl
         GVariant *data;
         const gchar *joiner = ", ";
         data = callback(self->tokens[i].name, self->tokens[i].value, user_data);
-        data = _nk_token_list_search_data(data, self->tokens[i].key, self->tokens[i].index, &joiner);
-        if ( _nk_token_list_check_data(data, &self->tokens[i]) )
+        data = _nk_format_string_search_data(data, self->tokens[i].key, self->tokens[i].index, &joiner);
+        if ( _nk_format_string_check_data(data, &self->tokens[i]) )
         {
             if ( self->tokens[i].substitute != NULL)
-                _nk_token_list_replace(string, self->tokens[i].substitute, callback, user_data);
+                _nk_format_string_replace(string, self->tokens[i].substitute, callback, user_data);
             else if ( self->tokens[i].range.length > 0 )
-                _nk_token_list_append_range(string, data, &self->tokens[i].range);
+                _nk_format_string_append_range(string, data, &self->tokens[i].range);
             else if ( self->tokens[i].switch_.true_ != NULL )
-                _nk_token_list_append_switch(string, data, &self->tokens[i].switch_);
-            else if ( self->tokens[i].prettify.type != NK_TOKEN_PRETTIFY_NONE )
-                _nk_token_list_append_prettify(string, data, &self->tokens[i].prettify);
+                _nk_format_string_append_switch(string, data, &self->tokens[i].switch_);
+            else if ( self->tokens[i].prettify.type != NK_FORMAT_STRING_PRETTIFY_NONE )
+                _nk_format_string_append_prettify(string, data, &self->tokens[i].prettify);
             else if ( self->tokens[i].replace != NULL )
             {
-                NkTokenRegex *regex;
+                NkFormatStringRegex *regex;
                 GString *tmp;
                 gchar *from;
                 gchar *to = NULL;
 
                 tmp = g_string_new("");
-                _nk_token_list_append_data(tmp, data, joiner);
+                _nk_format_string_append_data(tmp, data, joiner);
                 from = g_string_free(tmp, FALSE);
                 for ( regex = self->tokens[i].replace ; regex->regex != NULL ; ++regex )
                 {
                     gchar *replacement;
-                    replacement = nk_token_list_replace(regex->replacement, callback, user_data);
+                    replacement = nk_format_string_replace(regex->replacement, callback, user_data);
                     to = g_regex_replace(regex->regex, from, -1, 0, replacement, 0, NULL);
                     g_free(replacement);
                     g_free(from);
@@ -1110,16 +1106,16 @@ _nk_token_list_replace(GString *string, const NkTokenList *self, NkTokenListRepl
                 g_free(to);
             }
             else if ( ! self->tokens[i].no_data )
-                _nk_token_list_append_data(string, data, joiner);
+                _nk_format_string_append_data(string, data, joiner);
             g_variant_unref(data);
         }
         else if ( self->tokens[i].fallback != NULL )
-            _nk_token_list_replace(string, self->tokens[i].fallback, callback, user_data);
+            _nk_format_string_replace(string, self->tokens[i].fallback, callback, user_data);
     }
 }
 
 gchar *
-nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callback, gpointer user_data)
+nk_format_string_replace(const NkFormatString *self, NkFormatStringReplaceReferenceCallback callback, gpointer user_data)
 {
     g_return_val_if_fail(self != NULL, NULL);
     g_return_val_if_fail(callback != NULL, NULL);
@@ -1127,7 +1123,7 @@ nk_token_list_replace(const NkTokenList *self, NkTokenListReplaceCallback callba
     GString *string;
     string = g_string_sized_new(self->length);
 
-    _nk_token_list_replace(string, self, callback, user_data);
+    _nk_format_string_replace(string, self, callback, user_data);
 
     return g_string_free(string, FALSE);
 }

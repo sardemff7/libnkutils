@@ -35,7 +35,7 @@ nk_glib_min_version = '2.40'
 nk_options = []
 
 nk_modules = [
-    'token',
+    'format-string',
     'gtk-settings',
     'xdg-de',
     'xdg-theme',
@@ -47,7 +47,7 @@ nk_special_modules = [
     'bindings',
 ]
 nk_dependencies = [
-    [ 'token', 'enum' ],
+    [ 'format-string', 'enum' ],
     [ 'xdg-de', 'enum' ],
     [ 'xdg-theme', 'enum' ],
     [ 'xdg-theme', 'gtk-settings' ],
@@ -183,8 +183,8 @@ elif bindings
     libnkutils_bindings = declare_dependency(link_with: nk_lib, include_directories: nk_inc, dependencies: nk_deps_bindings, sources: nk_src)
 endif
 
-if token
-    executable('nk-token-replace', files('src/token-example.c'), dependencies: libnkutils)
+if format_string
+    executable('nk-format-string-replace', files('src/format-string-example.c'), dependencies: libnkutils)
 endif
 
 if xdg_theme
