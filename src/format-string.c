@@ -245,7 +245,7 @@ _nk_format_string_search_enum_tokens(NkFormatString *self, const gchar * const *
     {
         if ( self->tokens[i].name == NULL )
             continue;
-        if ( ! nk_enum_parse(self->tokens[i].name, tokens, size, FALSE, FALSE, &self->tokens[i].value) )
+        if ( ! nk_enum_parse(self->tokens[i].name, tokens, size, NK_ENUM_MATCH_FLAGS_NONE, &self->tokens[i].value) )
         {
             g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_UNKNOWN_TOKEN, "Unknown token: %s", self->tokens[i].name);
             return FALSE;

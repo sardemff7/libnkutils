@@ -39,15 +39,15 @@
 #include "nkutils-enum.h"
 
 static inline gint
-nk_str_equal(gboolean ignore_case, gboolean prefix, const gchar *token, const gchar *string)
+nk_str_equal(NkEnumMatchFlags flags, const gchar *token, const gchar *string)
 {
     if ( ( token == NULL ) || ( string == NULL ) || ( token == string ) )
         return ( token == string );
 
     gunichar wt = g_utf8_get_char(token), ws = g_utf8_get_char(string);
-    while ( wt != '\0' )
+    while ( ( wt != '\0' ) && ( ws != '\0' ) )
     {
-        if ( ignore_case )
+        if ( flags & NK_ENUM_MATCH_FLAGS_IGNORE_CASE )
         {
             wt = g_unichar_tolower(wt);
             ws = g_unichar_tolower(ws);
@@ -61,16 +61,20 @@ nk_str_equal(gboolean ignore_case, gboolean prefix, const gchar *token, const gc
         wt = g_utf8_get_char(token);
         ws = g_utf8_get_char(string);
     }
-    return ( prefix || ( ws == '\0' ) );
+    if ( flags & NK_ENUM_MATCH_FLAGS_PREFIX_STRING )
+        return ( wt == '\0' );
+    if ( flags & NK_ENUM_MATCH_FLAGS_PREFIX_VALUE )
+        return ( ws == '\0' );
+    return ( ws == wt );
 }
 
 gboolean
-nk_enum_parse(const gchar *string, const gchar * const *values, guint64 size, gboolean ignore_case, gboolean prefix, guint64 *value)
+nk_enum_parse(const gchar *string, const gchar * const *values, guint64 size, NkEnumMatchFlags flags, guint64 *value)
 {
     guint64 i;
     for ( i = 0 ; i < size ; ++i )
     {
-        if ( nk_str_equal(ignore_case, prefix, values[i], string) )
+        if ( nk_str_equal(flags, values[i], string) )
         {
             *value = i;
             return TRUE;

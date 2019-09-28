@@ -229,7 +229,7 @@ main(int argc, char *argv[])
     }
 
     guint64 template_value;
-    if ( ! nk_enum_parse(template, _nk_git_version_template_names, G_N_ELEMENTS(_nk_git_version_template_names), TRUE, FALSE, &template_value) )
+    if ( ! nk_enum_parse(template, _nk_git_version_template_names, G_N_ELEMENTS(_nk_git_version_template_names), NK_ENUM_MATCH_FLAGS_IGNORE_CASE, &template_value) )
     {
         ret = 5;
         g_warning("Unknown template: %s", template);

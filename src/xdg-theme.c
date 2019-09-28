@@ -389,7 +389,7 @@ _nk_xdg_theme_icon_subdir_new(GKeyFile *file, const gchar *subdir)
     if ( type != NULL )
     {
         guint64 value;
-        if ( nk_enum_parse(type, _nk_xdg_theme_icon_dir_type_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_type_names), TRUE, FALSE, &value) )
+        if ( nk_enum_parse(type, _nk_xdg_theme_icon_dir_type_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_type_names), NK_ENUM_MATCH_FLAGS_IGNORE_CASE, &value) )
             self->type = value;
         g_free(type);
     }
@@ -448,7 +448,7 @@ _nk_xdg_theme_icon_subdir_new(GKeyFile *file, const gchar *subdir)
     if ( context != NULL )
     {
         guint64 value;
-        if ( nk_enum_parse(context, _nk_xdg_theme_icon_dir_context_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_context_names), TRUE, FALSE, &value) )
+        if ( nk_enum_parse(context, _nk_xdg_theme_icon_dir_context_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_context_names), NK_ENUM_MATCH_FLAGS_IGNORE_CASE, &value) )
         {
             self->context = value;
             g_free(context);
@@ -981,7 +981,7 @@ nk_xdg_theme_get_icon(NkXdgThemeContext *context, const gchar * const *theme_nam
         .scale = scale,
         .extensions = ( symbolic ? _nk_xdg_theme_icon_symbolic_extensions : _nk_xdg_theme_icon_extensions ) + ( svg ? 0 : 1 ),
     };
-    if ( nk_enum_parse(context_name, _nk_xdg_theme_icon_dir_context_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_context_names), TRUE, FALSE, &value) )
+    if ( nk_enum_parse(context_name, _nk_xdg_theme_icon_dir_context_names, G_N_ELEMENTS(_nk_xdg_theme_icon_dir_context_names), NK_ENUM_MATCH_FLAGS_IGNORE_CASE, &value) )
         data.context = value;
 
     gchar *file;

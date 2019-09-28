@@ -303,7 +303,7 @@ _nk_bindings_parse_modifier(const gchar *string, xkb_mod_mask_t *mask)
 {
     guint64 value;
 
-    if ( ! nk_enum_parse(string, _nk_bindings_modifiers_names, G_N_ELEMENTS(_nk_bindings_modifiers_names), TRUE, FALSE, &value) )
+    if ( ! nk_enum_parse(string, _nk_bindings_modifiers_names, G_N_ELEMENTS(_nk_bindings_modifiers_names), NK_ENUM_MATCH_FLAGS_IGNORE_CASE, &value) )
         return FALSE;
 
     value %= NK_BINDINGS_NUM_MODIFIERS;
@@ -498,7 +498,7 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
                 }
                 button += NK_BINDINGS_MOUSE_BUTTON_EXTRA;
             }
-            else if ( ! nk_enum_parse(s, _nk_bindings_mouse_button_names, G_N_ELEMENTS(_nk_bindings_mouse_button_names), TRUE, FALSE, &button) )
+            else if ( ! nk_enum_parse(s, _nk_bindings_mouse_button_names, G_N_ELEMENTS(_nk_bindings_mouse_button_names), NK_ENUM_MATCH_FLAGS_IGNORE_CASE, &button) )
             {
                 g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_SYNTAX, "Syntax error in binding '%s': unknown mouse button %s", string, s);
                 return FALSE;
@@ -531,7 +531,7 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
             }
 
             guint64 scroll;
-            if ( ! nk_enum_parse(s, _nk_bindings_scroll_names, G_N_ELEMENTS(_nk_bindings_scroll_names), TRUE, FALSE, &scroll) )
+            if ( ! nk_enum_parse(s, _nk_bindings_scroll_names, G_N_ELEMENTS(_nk_bindings_scroll_names), NK_ENUM_MATCH_FLAGS_IGNORE_CASE, &scroll) )
             {
                 g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_SYNTAX, "Syntax error in binding '%s': unknown scroll direction %s", string, s);
                 return FALSE;

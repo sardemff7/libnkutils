@@ -110,7 +110,7 @@ nk_xdg_de_detect(void)
             g_snprintf(val, l, "%s", var);
             for ( i = 0 ; i < G_N_ELEMENTS(_nk_xdg_de_current_desktop_names) ; ++i )
             {
-                if ( nk_enum_parse(val, _nk_xdg_de_current_desktop_names[i].names, _nk_xdg_de_current_desktop_names[i].size, FALSE, FALSE, &value) )
+                if ( nk_enum_parse(val, _nk_xdg_de_current_desktop_names[i].names, _nk_xdg_de_current_desktop_names[i].size, NK_ENUM_MATCH_FLAGS_NONE, &value) )
                     _nk_xdg_de = i;
             }
         }
@@ -119,7 +119,7 @@ nk_xdg_de_detect(void)
     }
 
     var = g_getenv("XDG_SESSION_DESKTOP");
-    if ( ( var != NULL ) && nk_enum_parse(var, _nk_xdg_de_session_desktop_names, G_N_ELEMENTS(_nk_xdg_de_session_desktop_names), TRUE, TRUE, &value) )
+    if ( ( var != NULL ) && nk_enum_parse(var, _nk_xdg_de_session_desktop_names, G_N_ELEMENTS(_nk_xdg_de_session_desktop_names), NK_ENUM_MATCH_FLAGS_IGNORE_CASE|NK_ENUM_MATCH_FLAGS_PREFIX_STRING, &value) )
     {
         _nk_xdg_de = value;
         return _nk_xdg_de;
@@ -140,7 +140,7 @@ nk_xdg_de_detect(void)
     }
 
     var = g_getenv("DESKTOP_SESSION");
-    if ( ( var != NULL ) && nk_enum_parse(var, _nk_xdg_de_desktop_session_names, G_N_ELEMENTS(_nk_xdg_de_desktop_session_names), FALSE, FALSE, &value) )
+    if ( ( var != NULL ) && nk_enum_parse(var, _nk_xdg_de_desktop_session_names, G_N_ELEMENTS(_nk_xdg_de_desktop_session_names), NK_ENUM_MATCH_FLAGS_NONE, &value) )
     {
         _nk_xdg_de = value;
         return _nk_xdg_de;

@@ -46,8 +46,7 @@ static const gchar * const _nk_enum_tests_values[_MAX_VALUES] = {
 
 typedef struct {
     const gchar *string;
-    gboolean ignore_case;
-    gboolean prefix;
+    NkEnumMatchFlags flags;
     gboolean ret;
     NkEnumTestValues value;
     const gchar * const values[_MAX_VALUES];
@@ -61,8 +60,7 @@ static const struct {
         .testpath = "/nkutils/enum/full/exists",
         .data = {
             .string = "center",
-            .ignore_case = FALSE,
-            .prefix = FALSE,
+            .flags = NK_ENUM_MATCH_FLAGS_NONE,
             .ret = TRUE,
             .value = CENTER,
         }
@@ -71,8 +69,7 @@ static const struct {
         .testpath = "/nkutils/enum/full/missing",
         .data = {
             .string = "Center",
-            .ignore_case = FALSE,
-            .prefix = FALSE,
+            .flags = NK_ENUM_MATCH_FLAGS_NONE,
             .ret = FALSE,
             .value = _MAX_VALUES,
         }
@@ -81,38 +78,97 @@ static const struct {
         .testpath = "/nkutils/enum/full/case",
         .data = {
             .string = "Center",
-            .ignore_case = TRUE,
-            .prefix = FALSE,
+            .flags = NK_ENUM_MATCH_FLAGS_IGNORE_CASE,
             .ret = TRUE,
             .value = CENTER,
         }
     },
     {
-        .testpath = "/nkutils/enum/prefix/full",
+        .testpath = "/nkutils/enum/prefix-string/exists/full",
         .data = {
             .string = "center",
-            .ignore_case = FALSE,
-            .prefix = TRUE,
+            .flags = NK_ENUM_MATCH_FLAGS_PREFIX_STRING,
             .ret = TRUE,
             .value = CENTER,
         }
     },
     {
-        .testpath = "/nkutils/enum/prefix/prefix",
+        .testpath = "/nkutils/enum/prefix-string/exists/prefix",
         .data = {
-            .string = "cen",
-            .ignore_case = FALSE,
-            .prefix = TRUE,
+            .string = "centerxxx",
+            .flags = NK_ENUM_MATCH_FLAGS_PREFIX_STRING,
+            .ret = TRUE,
+            .value = CENTER,
+        }
+    },
+    {
+        .testpath = "/nkutils/enum/prefix-string/exists/no-prefix",
+        .data = {
+            .string = "centerxxx",
+            .flags = NK_ENUM_MATCH_FLAGS_NONE,
             .ret = FALSE,
             .value = _MAX_VALUES,
         }
     },
     {
-        .testpath = "/nkutils/enum/prefix/no-prefix",
+        .testpath = "/nkutils/enum/prefix-string/missing/prefix",
         .data = {
             .string = "cen",
-            .ignore_case = FALSE,
-            .prefix = FALSE,
+            .flags = NK_ENUM_MATCH_FLAGS_PREFIX_STRING,
+            .ret = FALSE,
+            .value = _MAX_VALUES,
+        }
+    },
+    {
+        .testpath = "/nkutils/enum/prefix-string/missing/no-prefix",
+        .data = {
+            .string = "cen",
+            .flags = NK_ENUM_MATCH_FLAGS_NONE,
+            .ret = FALSE,
+            .value = _MAX_VALUES,
+        }
+    },
+    {
+        .testpath = "/nkutils/enum/prefix-value/exists/full",
+        .data = {
+            .string = "center",
+            .flags = NK_ENUM_MATCH_FLAGS_PREFIX_VALUE,
+            .ret = TRUE,
+            .value = CENTER,
+        }
+    },
+    {
+        .testpath = "/nkutils/enum/prefix-value/exists/prefix",
+        .data = {
+            .string = "cen",
+            .flags = NK_ENUM_MATCH_FLAGS_PREFIX_VALUE,
+            .ret = TRUE,
+            .value = CENTER,
+        }
+    },
+    {
+        .testpath = "/nkutils/enum/prefix-value/exists/no-prefix",
+        .data = {
+            .string = "cen",
+            .flags = NK_ENUM_MATCH_FLAGS_NONE,
+            .ret = FALSE,
+            .value = _MAX_VALUES,
+        }
+    },
+    {
+        .testpath = "/nkutils/enum/prefix-value/missing/prefix",
+        .data = {
+            .string = "centerxxx",
+            .flags = NK_ENUM_MATCH_FLAGS_PREFIX_VALUE,
+            .ret = FALSE,
+            .value = _MAX_VALUES,
+        }
+    },
+    {
+        .testpath = "/nkutils/enum/prefix-value/missing/no-prefix",
+        .data = {
+            .string = "centerxxx",
+            .flags = NK_ENUM_MATCH_FLAGS_NONE,
             .ret = FALSE,
             .value = _MAX_VALUES,
         }
@@ -126,7 +182,7 @@ _nk_enum_tests_func(gconstpointer user_data)
 
     guint64 value = _MAX_VALUES;
     gboolean r;
-    r = nk_enum_parse(data->string, _nk_enum_tests_values, _MAX_VALUES, data->ignore_case, data->prefix, &value);
+    r = nk_enum_parse(data->string, _nk_enum_tests_values, _MAX_VALUES, data->flags, &value);
     if ( data->ret )
         g_assert_true(r);
     else

@@ -26,6 +26,13 @@
 #ifndef __NK_UTILS_ENUM_H__
 #define __NK_UTILS_ENUM_H__
 
-gboolean nk_enum_parse(const gchar *string, const gchar * const *values, guint64 size, gboolean ignore_case, gboolean prefix, guint64 *value);
+typedef enum {
+    NK_ENUM_MATCH_FLAGS_NONE          = 0,
+    NK_ENUM_MATCH_FLAGS_IGNORE_CASE   = (1 << 1),
+    NK_ENUM_MATCH_FLAGS_PREFIX_VALUE  = (1 << 2),
+    NK_ENUM_MATCH_FLAGS_PREFIX_STRING = (1 << 3),
+} NkEnumMatchFlags;
+
+gboolean nk_enum_parse(const gchar *string, const gchar * const *values, guint64 size, NkEnumMatchFlags flags, guint64 *value);
 
 #endif /* __NK_UTILS_ENUM_H__ */
