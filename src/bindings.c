@@ -568,7 +568,7 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
         {
             if  ( last_keysym == XKB_KEY_NoSymbol )
             {
-                g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_ALREADY_REGISTERED, "No keysym found for binding '%s'", string);
+                g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_UNKNOWN_KEYSYM, "No keysym found for binding '%s'", string);
                 return FALSE;
             }
             keysym = last_keysym;

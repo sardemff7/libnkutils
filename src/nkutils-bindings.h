@@ -59,7 +59,7 @@ typedef enum {
 
 typedef enum {
     NK_BINDINGS_ERROR_SYNTAX,
-    NK_BINDINGS_ERROR_NOTHING,
+    NK_BINDINGS_ERROR_UNKNOWN_KEYSYM,
     NK_BINDINGS_ERROR_ALREADY_REGISTERED,
 } NkBindingsError;
 #define NK_BINDINGS_ERROR (nk_bindings_error())
