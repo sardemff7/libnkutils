@@ -476,7 +476,7 @@ _nk_format_string_parse(gboolean owned, gchar *string, gunichar identifier, GErr
                 e = _nk_format_string_strchr_escape(w, e - w, '}', '{');
                 if ( e == NULL )
                 {
-                    g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_RANGE, "Missing switch close bracket: %s", w);
+                    g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_SWITCH, "Missing switch close bracket: %s", w);
                     goto fail;
                 }
                 *e = '\0';
