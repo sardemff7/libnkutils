@@ -27,38 +27,38 @@
 <refentry>
     <refsect2 id="nk-format-string-reference-description">
         <para>
-            References use a shell-like format: <userinput>${<replaceable>reference-name</replaceable>}</userinput>.
+            References use a shell-like format: <code>${<replaceable>reference-name</replaceable>}</code>.
             Each reference is resolved to a data that is substitued to the reference at the corresponding place in the string.
             The <replaceable>reference-name</replaceable> can be composed of alphabetic characters, dashes (<literal>'-'</literal>) and underscores (<literal>'_'</literal>).
         </para>
         <para>
-            You can use an array-like syntax for some values: <userinput>${<replaceable>reference-name</replaceable>[<replaceable>key</replaceable>]}</userinput>.
+            You can use an array-like syntax for some values: <code>${<replaceable>reference-name</replaceable>[<replaceable>key</replaceable>]}</code>.
             The <replaceable>key</replaceable> can be a name or a number depending on the data pointed by <replaceable>reference-name</replaceable>.
             You can use fallback values, substitute values or regexes on array members.
         </para>
         <para>
             You can use a fallback value if the data resolves to <literal>nothing</literal> or <literal>false</literal>.
-            The syntax is: <userinput>${<replaceable>reference-name</replaceable>:-<replaceable>fallback-value</replaceable>}</userinput>.
+            The syntax is: <code>${<replaceable>reference-name</replaceable>:-<replaceable>fallback-value</replaceable>}</code>.
         </para>
         <para>
             You can use a substitute value if (and only if) the data resolves to <literal>something</literal> or <literal>true</literal>.
-            The syntax is: <userinput>${<replaceable>reference-name</replaceable>:+<replaceable>substitute-value</replaceable>}</userinput>.
+            The syntax is: <code>${<replaceable>reference-name</replaceable>:+<replaceable>substitute-value</replaceable>}</code>.
         </para>
         <para>
             You can use a substitute value if (and only if) the data resolves to <literal>nothing</literal> or <literal>false</literal>.
-            The syntax is: <userinput>${<replaceable>reference-name</replaceable>:!<replaceable>substitute-value</replaceable>}</userinput>.
+            The syntax is: <code>${<replaceable>reference-name</replaceable>:!<replaceable>substitute-value</replaceable>}</code>.
         </para>
         <para>
             You can use a switch substitute if the data resolves to <type>a boolean</type>.
-            The syntax is: <userinput>${<replaceable>reference-name</replaceable>:{<replaceable>separator</replaceable><replaceable>value-if-false</replaceable><replaceable>separator</replaceable><replaceable>value-if-true</replaceable>}}</userinput>.
+            The syntax is: <code>${<replaceable>reference-name</replaceable>:{<replaceable>separator</replaceable><replaceable>value-if-false</replaceable><replaceable>separator</replaceable><replaceable>value-if-true</replaceable>}}</code>.
         </para>
         <para>
             You can use a range substitute if the data resolves to <type>a number</type>.
-            The syntax is: <userinput>${<replaceable>reference-name</replaceable>:[<replaceable>separator</replaceable><replaceable>range-start</replaceable><replaceable>separator</replaceable><replaceable>range-end</replaceable><repeatable><replaceable>separator</replaceable><replaceable>substitute-value</replaceable></repeatable>]}</userinput>.
+            The syntax is: <code>${<replaceable>reference-name</replaceable>:[<replaceable>separator</replaceable><replaceable>range-start</replaceable><replaceable>separator</replaceable><replaceable>range-end</replaceable><optional><replaceable>separator</replaceable><replaceable>substitute-value</replaceable>…</optional>]}</code>.
         </para>
         <para>
             You can use a prettify flag to make a big value more readable.
-            The syntax is: <userinput>${<replaceable>reference-name</replaceable>(<replaceable>flag</replaceable><optional>addition</optional>)]}</userinput>.
+            The syntax is: <code>${<replaceable>reference-name</replaceable>(<replaceable>flag</replaceable><optional><replaceable>addition</replaceable></optional>)]}</code>.
             The following flags are supported:
         </para>
         <variablelist>
@@ -66,8 +66,8 @@
                 <term><literal>f</literal></term>
                 <listitem>
                     <para>Work on <type>a number</type>. It will display the value as a float, allowing for extra formatting, as with printf:</para>
-                    <para>Optionally, you can add a width (optionally with zero-padding): <userinput><optional>0</optional><replaceable>width</replaceable></userinput></para>
-                    <para>Optionally, you can add a precision: <userinput>.<replaceable>presicion</replaceable></userinput></para>
+                    <para>Optionally, you can add a width (optionally with zero-padding): <code><optional>0</optional><replaceable>width</replaceable></code></para>
+                    <para>Optionally, you can add a precision: <code>.<replaceable>presicion</replaceable></code></para>
                 </listitem>
             </varlistentry>
 
@@ -111,9 +111,9 @@
         </variablelist>
         <para>
             You can replace parts of the data using the regex mechanism.
-            The syntax is: <userinput>${<replaceable>reference-name</replaceable>/<replaceable>regex</replaceable>/<replaceable>replacement</replaceable>}</userinput>.
+            The syntax is: <code>${<replaceable>reference-name</replaceable>/<replaceable>regex</replaceable>/<replaceable>replacement</replaceable>}</code>.
             The <replaceable>replacement</replaceable> part is optional (including the preceding forward slash). If it is omitted, matching parts of the data will simply be removed.
-            You can repeat the <userinput>/<replaceable>regex</replaceable>/<replaceable>replacement</replaceable></userinput> part to replace as many patterns as you like.
+            You can repeat the <code>/<replaceable>regex</replaceable>/<replaceable>replacement</replaceable></code> part to replace as many patterns as you like.
             Each pattern is matched against the previous replacement so be careful in your order.
         </para>
         <para>Examples (with data and resolved string):</para>
@@ -267,8 +267,8 @@
         <para>Here is a quick description:</para>
         <variablelist>
             <varlistentry>
-                <term><userinput>#<replaceable>RR</replaceable><replaceable>GG</replaceable><replaceable>BB</replaceable><optional><replaceable>AA</replaceable></optional></userinput></term>
-                <term><userinput>#<replaceable>R</replaceable><replaceable>G</replaceable><replaceable>B</replaceable><optional><replaceable>A</replaceable></optional></userinput></term>
+                <term><code>#<replaceable>RR</replaceable><replaceable>GG</replaceable><replaceable>BB</replaceable><optional><replaceable>AA</replaceable></optional></code></term>
+                <term><code>#<replaceable>R</replaceable><replaceable>G</replaceable><replaceable>B</replaceable><optional><replaceable>A</replaceable></optional></code></term>
                 <listitem>
                     <para>Each value is an <type>hexadecimal</type> value in the <literal>0x00</literal>-<literal>0xff</literal> range.</para>
                     <para>The alpha value is an extension of the CSS3 notation and is optional.</para>
@@ -277,8 +277,8 @@
             </varlistentry>
 
             <varlistentry>
-                <term><userinput>rgb(<replaceable>red</replaceable>, <replaceable>green</replaceable>, <replaceable>blue</replaceable>)</userinput></term>
-                <term><userinput>rgba(<replaceable>red</replaceable>, <replaceable>green</replaceable>, <replaceable>blue</replaceable>, <replaceable>alpha</replaceable>)</userinput></term>
+                <term><code>rgb(<replaceable>red</replaceable>, <replaceable>green</replaceable>, <replaceable>blue</replaceable>)</code></term>
+                <term><code>rgba(<replaceable>red</replaceable>, <replaceable>green</replaceable>, <replaceable>blue</replaceable>, <replaceable>alpha</replaceable>)</code></term>
                 <listitem>
                     <para>Each colour value can be an <type>number</type> in the <literal>0</literal>-<literal>255</literal> range or a <type>percentage</type> value.</para>
                     <para>The alpha value is a <type>floating point</type> or a <type>percentage</type> value.</para>
@@ -286,21 +286,21 @@
             </varlistentry>
 
             <varlistentry>
-                <term><userinput>hsl(<replaceable>hue</replaceable>, <replaceable>saturation</replaceable>, <replaceable>lightness</replaceable>)</userinput></term>
-                <term><userinput>hsla(<replaceable>hue</replaceable>, <replaceable>saturation</replaceable>, <replaceable>lightness</replaceable>, <replaceable>alpha</replaceable>)</userinput></term>
+                <term><code>hsl(<replaceable>hue</replaceable>, <replaceable>saturation</replaceable>, <replaceable>lightness</replaceable>)</code></term>
+                <term><code>hsla(<replaceable>hue</replaceable>, <replaceable>saturation</replaceable>, <replaceable>lightness</replaceable>, <replaceable>alpha</replaceable>)</code></term>
                 <listitem>
-                    <para>Hue is an <type>angle</type> either in <type>degrees</type> (unit <userinput>deg</userinput> or no unit), <type>gradians</type> (unit <userinput>grab</userinput>), <type>radians</type> (unit <userinput>rad</userinput>) or <type>turns</type> (unit <userinput>turn</userinput>, a <type>floating point number</type> from <literal>0</literal> to <literal>1</literal>).</para>
+                    <para>Hue is an <type>angle</type> either in <type>degrees</type> (unit <code>deg</code> or no unit), <type>gradians</type> (unit <code>grab</code>), <type>radians</type> (unit <code>rad</code>) or <type>turns</type> (unit <code>turn</code>, a <type>floating point number</type> from <literal>0</literal> to <literal>1</literal>).</para>
                     <para>The saturation and lightness values are <type>percentage</type> values.</para>
-                    <para>The alpha value is the same as the <userinput>rgba()</userinput> notation.</para>
+                    <para>The alpha value is the same as the <code>rgba()</code> notation.</para>
                 </listitem>
             </varlistentry>
 
             <varlistentry>
-                <term><userinput>hwb(<replaceable>hue</replaceable>, <replaceable>whiteness</replaceable>, <replaceable>blackness</replaceable><optional>, <replaceable>alpha</replaceable></optional>)</userinput></term>
+                <term><code>hwb(<replaceable>hue</replaceable>, <replaceable>whiteness</replaceable>, <replaceable>blackness</replaceable><optional>, <replaceable>alpha</replaceable></optional>)</code></term>
                 <listitem>
-                    <para>Hue is the same as the <userinput>hsl()</userinput> notation.</para>
+                    <para>Hue is the same as the <code>hsl()</code> notation.</para>
                     <para>The whiteness and blackness values are <type>percentage</type> values.</para>
-                    <para>The alpha value is the same as the <userinput>rgba()</userinput> notation.</para>
+                    <para>The alpha value is the same as the <code>rgba()</code> notation.</para>
                 </listitem>
             </varlistentry>
         </variablelist>
@@ -312,6 +312,8 @@
         <para>
             The <type>binding string</type> format supports two (and a half) notations. It can be either <literal><replaceable>Modifier</replaceable>-<replaceable>Modifier</replaceable>-<replaceable>Bind</replaceable></literal>
             or the <ulink url="https://developer.gnome.org/gtk3/stable/gtk3-Keyboard-Accelerators.html#gtk-accelerator-parse">GTK+ accelerator format</ulink>.
+        </para>
+        <para>
             The bind can either be a keysym name, a keycode in square brackets (e.g. <literal>[10]</literal>) or a mouse button specification (e.g. <literal>MousePrimary</literal> or <literal>MouseDPrimary</literal> for double click).
         </para>
     </refsect2>
