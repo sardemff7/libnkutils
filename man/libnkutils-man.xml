@@ -34,7 +34,8 @@
         <para>
             You can use an array-like syntax for some values: <code>${<replaceable>reference-name</replaceable>[<replaceable>key</replaceable>]}</code>.
             The <replaceable>key</replaceable> can be a name or a number depending on the data pointed by <replaceable>reference-name</replaceable>.
-            You can use fallback values, substitute values or regexes on array members.
+            If <replaceable>key</replaceable> starts with a <literal>@</literal>, then the remaining is used as a join value.
+            You can use fallback values, substitute values or regexes on array members. In case of joined values, such operations are done on the joined values as a whole.
         </para>
         <para>
             You can use a fallback value if the data resolves to <literal>nothing</literal> or <literal>false</literal>.
