@@ -250,7 +250,8 @@ _nk_format_string_search_enum_tokens(NkFormatString *self, const gchar * const *
             g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_UNKNOWN_TOKEN, "Unknown token: %s", self->tokens[i].name);
             return FALSE;
         }
-        *used_tokens |= (1 << self->tokens[i].value);
+        if ( used_tokens != NULL )
+            *used_tokens |= (1 << self->tokens[i].value);
 
         if ( self->tokens[i].fallback != NULL )
             _nk_format_string_search_enum_tokens(self->tokens[i].fallback, tokens, size, used_tokens, error);
@@ -268,7 +269,7 @@ _nk_format_string_search_enum_tokens(NkFormatString *self, const gchar * const *
 
 static NkFormatString *_nk_format_string_parse(gboolean owned, gchar *string, gunichar identifier, GError **error);
 static NkFormatString *
-_nk_format_string_parse_enum(gboolean owned, gchar *string, gunichar identifier, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens, GError **error)
+_nk_format_string_parse_enum(gboolean owned, gchar *string, gunichar identifier, const gchar * const *tokens, guint64 size, guint64 *used_tokens, GError **error)
 {
     g_return_val_if_fail(string != NULL, NULL);
 
@@ -278,15 +279,9 @@ _nk_format_string_parse_enum(gboolean owned, gchar *string, gunichar identifier,
     if ( self == NULL )
         return NULL;
 
-    guint64 used_tokens = 0;
-    if ( ! _nk_format_string_search_enum_tokens(self, tokens, size, &used_tokens, error) )
-        goto fail;
-    if ( ret_used_tokens != NULL )
-        *ret_used_tokens = used_tokens;
+    if ( _nk_format_string_search_enum_tokens(self, tokens, size, used_tokens, error) )
+        return self;
 
-    return self;
-
-fail:
     nk_format_string_unref(self);
     return NULL;
 }
@@ -675,7 +670,16 @@ nk_format_string_parse(gchar *string, gunichar identifier, GError **error)
 NkFormatString *
 nk_format_string_parse_enum(gchar *string, gunichar identifier, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens, GError **error)
 {
-    return _nk_format_string_parse_enum(TRUE, string, identifier, tokens, size, ret_used_tokens, error);
+    g_return_val_if_fail(ret_used_tokens == NULL || size <= 64, NULL);
+
+    guint64 used_tokens = 0;
+    NkFormatString *self;
+    self = _nk_format_string_parse_enum(TRUE, string, identifier, tokens, size, ( ret_used_tokens != NULL ) ? &used_tokens : NULL, error);
+    if ( self == NULL )
+        return NULL;
+    if ( ret_used_tokens != NULL )
+        *ret_used_tokens = used_tokens;
+    return self;
 }
 
 NkFormatString *
