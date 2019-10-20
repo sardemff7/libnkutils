@@ -58,6 +58,18 @@
 #define NK_BUTTON_TO_BINDING(mask, button) _NK_VALUE_TO_BINDING(mask, button)
 #define NK_SCROLL_TO_BINDING(mask, axis, step) _NK_VALUE_TO_BINDING(mask, (axis << 1) + ( (step < 0) ? 0 : 1 ))
 
+typedef enum {
+    NK_BINDINGS_MODIFIER_SHIFT,
+    NK_BINDINGS_MODIFIER_CONTROL,
+    NK_BINDINGS_MODIFIER_ALT,
+    NK_BINDINGS_MODIFIER_SUPER,
+    NK_BINDINGS_MODIFIER_META,
+    NK_BINDINGS_MODIFIER_HYPER,
+#define NK_BINDINGS_NUM_MODIFIERS 6
+} NkBindingsModifiers;
+
+#define NK_BINDINGS_MODIFIER_MASK(m) (1 << (m))
+
 struct _NkBindings {
     guint64 double_click_delay;
     GList *scopes;

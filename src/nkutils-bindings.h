@@ -32,16 +32,6 @@ typedef struct _NkBindings NkBindings;
 typedef struct _NkBindingsSeat NkBindingsSeat;
 
 typedef enum {
-    NK_BINDINGS_MODIFIER_SHIFT,
-    NK_BINDINGS_MODIFIER_CONTROL,
-    NK_BINDINGS_MODIFIER_ALT,
-    NK_BINDINGS_MODIFIER_SUPER,
-    NK_BINDINGS_MODIFIER_META,
-    NK_BINDINGS_MODIFIER_HYPER,
-#define NK_BINDINGS_NUM_MODIFIERS 6
-} NkBindingsModifiers;
-
-typedef enum {
     NK_BINDINGS_KEY_STATE_PRESS,
     NK_BINDINGS_KEY_STATE_PRESSED,
     NK_BINDINGS_KEY_STATE_RELEASE,
@@ -51,8 +41,6 @@ typedef enum {
     NK_BINDINGS_BUTTON_STATE_PRESS,
     NK_BINDINGS_BUTTON_STATE_RELEASE,
 } NkBindingsButtonState;
-
-#define NK_BINDINGS_MODIFIER_MASK(m) (1 << (m))
 
 typedef enum {
     NK_BINDINGS_MOUSE_BUTTON_PRIMARY,
