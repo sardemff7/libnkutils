@@ -261,8 +261,8 @@
         <title>Colour strings</title>
 
         <para>
-            The <type>colour string</type> format is borrowed from the <ulink url="https://www.w3.org/TR/css-color-4/">CSS4 colour values</ulink>.
-            Hexadecimal (<literal>#</literal>-prefixed) and decimal (<literal>rgb()</literal> format) RGB(A) notations are supported.
+            The <type>colour string</type> format is borrowed from the <ulink url="https://www.w3.org/TR/css-color-4/">CSS4 Color values</ulink>.
+            Hexadecimal (<literal>#</literal>-prefixed), <literal>rgb()</literal> RGB(A), <literal>hsl()</literal> HSL(A), <literal>hwb()</literal> HWB and colour names notations are supported.
         </para>
 
         <para>Here is a quick description:</para>
@@ -302,6 +302,20 @@
                     <para>Hue is the same as the <code>hsl()</code> notation.</para>
                     <para>The whiteness and blackness values are <type>percentage</type> values.</para>
                     <para>The alpha value is the same as the <code>rgba()</code> notation.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>a CSS4-defined colour name</term>
+                <listitem>
+                    <para>One of the named colour from the <ulink url="https://www.w3.org/TR/css-color-4/#named-color">CSS4 Color names list</ulink>.</para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><code>transparent</code></term>
+                <listitem>
+                    <para>Special colour treated as <code>rgba(0, 0, 0, 0)</code>.</para>
                 </listitem>
             </varlistentry>
         </variablelist>
