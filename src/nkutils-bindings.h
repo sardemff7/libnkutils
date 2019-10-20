@@ -68,6 +68,8 @@ GQuark nk_bindings_error(void);
 NkBindings *nk_bindings_new(guint64 double_click_delay);
 void nk_bindings_free(NkBindings *bindings);
 
+#define NK_BINDINGS_BINDING_TRIGGERED TRUE
+#define NK_BINDINGS_BINDING_NOT_TRIGGERED FALSE
 typedef gboolean (*NkBindingsCallback)(guint64 scope, gpointer target, gpointer user_data);
 gboolean nk_bindings_add_binding(NkBindings *bindings, guint64 scope, const gchar *string, NkBindingsCallback callback, gpointer user_data, GDestroyNotify notify, GError **error);
 void nk_bindings_reset_bindings(NkBindings *bindings);

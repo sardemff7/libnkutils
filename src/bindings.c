@@ -964,12 +964,12 @@ nk_bindings_seat_handle_button(NkBindingsSeat *self, gpointer target, NkBindings
     if ( last_timestamp != NULL )
         time -= *last_timestamp;
     if ( ! _nk_bindings_try_button_bindings(self->bindings, self, target, &binding_, time) )
-        return FALSE;
+        return NK_BINDINGS_BINDING_NOT_TRIGGERED;
     if ( last_timestamp == NULL )
         g_hash_table_insert(self->last_timestamps, binding_, g_memdup(&timestamp, sizeof(guint64)));
     else
         *last_timestamp = timestamp;
-    return TRUE;
+    return NK_BINDINGS_BINDING_TRIGGERED;
 }
 
 gboolean
@@ -988,11 +988,11 @@ nk_bindings_seat_handle_scroll(NkBindingsSeat *self, gpointer target, NkBindings
     binding = _nk_bindings_try_scroll_bindings(self->bindings, self, target, binding_);
 
     if ( binding == NULL )
-        return FALSE;
+        return NK_BINDINGS_BINDING_NOT_TRIGGERED;
 
     for ( step = ABS(step) ; step > 1 ; --step )
         _nk_bindings_seat_binding_trigger(self, binding, target, TRUE);
-    return TRUE;
+    return NK_BINDINGS_BINDING_TRIGGERED;
 }
 
 void
