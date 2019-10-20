@@ -46,16 +46,19 @@ typedef struct {
 } NkBindingsTestFixture;
 
 typedef struct {
+    guint64 scope;
     const gchar *binding;
     guint64 trigger;
 } NkBindingsTestBinding;
 
 typedef struct {
     NkBindingsTestFixture *fixture;
+    guint64 scope;
     guint64 trigger;
 } NkBindingsTestBindingSlice;
 
 typedef struct {
+    guint64 scope;
     xkb_keycode_t key;
     NkBindingsKeyState state;
     gboolean fail;
@@ -461,14 +464,25 @@ _nk_bindings_tests_setup(NkBindingsTestFixture *fixture, G_GNUC_UNUSED gconstpoi
 }
 
 static gboolean
-_nk_bindings_tests_callback(guint64 scope, gpointer target, gpointer user_data)
+_nk_bindings_tests_check_callback(guint64 scope, gpointer target, gpointer user_data)
 {
     NkBindingsTestBindingSlice *slice = user_data;
-    g_assert_cmpuint(scope, ==, 0);
+    g_assert_null(target);
+
+    if ( slice->scope != scope )
+        return NK_BINDINGS_BINDING_NOT_TRIGGERED;
+
+    return NK_BINDINGS_BINDING_TRIGGERED;
+}
+
+static void
+_nk_bindings_tests_trigger_callback(guint64 scope, gpointer target, gpointer user_data)
+{
+    NkBindingsTestBindingSlice *slice = user_data;
+    g_assert_cmpuint(scope, ==, slice->scope);
     g_assert_null(target);
 
     slice->fixture->triggered = slice->trigger;
-    return TRUE;
 }
 
 static void
@@ -484,8 +498,9 @@ _nk_bindings_tests_func(NkBindingsTestFixture *fixture, gconstpointer user_data)
         gboolean ret;
 
         slice->fixture = fixture;
+        slice->scope = binding->scope;
         slice->trigger = binding->trigger;
-        ret = nk_bindings_add_binding(fixture->bindings, 0, binding->binding, _nk_bindings_tests_callback, slice++, NULL, &error);
+        ret = nk_bindings_add_binding(fixture->bindings, binding->scope, binding->binding, _nk_bindings_tests_check_callback, _nk_bindings_tests_trigger_callback, slice++, NULL, &error);
 
         g_assert_true(ret);
         g_assert_no_error(error);

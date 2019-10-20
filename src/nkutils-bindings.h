@@ -70,8 +70,9 @@ void nk_bindings_free(NkBindings *bindings);
 
 #define NK_BINDINGS_BINDING_TRIGGERED TRUE
 #define NK_BINDINGS_BINDING_NOT_TRIGGERED FALSE
-typedef gboolean (*NkBindingsCallback)(guint64 scope, gpointer target, gpointer user_data);
-gboolean nk_bindings_add_binding(NkBindings *bindings, guint64 scope, const gchar *string, NkBindingsCallback callback, gpointer user_data, GDestroyNotify notify, GError **error);
+typedef gboolean (*NkBindingsCheckCallback)(guint64 scope, gpointer target, gpointer user_data);
+typedef void (*NkBindingsTriggerCallback)(guint64 scope, gpointer target, gpointer user_data);
+gboolean nk_bindings_add_binding(NkBindings *bindings, guint64 scope, const gchar *string, NkBindingsCheckCallback check_callback, NkBindingsTriggerCallback trigger_callback, gpointer user_data, GDestroyNotify notify, GError **error);
 void nk_bindings_reset_bindings(NkBindings *bindings);
 
 NkBindingsSeat *nk_bindings_seat_new(NkBindings *bindings, enum xkb_context_flags flags);

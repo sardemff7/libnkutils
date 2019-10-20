@@ -196,7 +196,8 @@ typedef struct {
 } NkBindingsScope;
 
 typedef struct {
-    NkBindingsCallback callback;
+    NkBindingsCheckCallback check_callback;
+    NkBindingsTriggerCallback trigger_callback;
     gpointer user_data;
     GDestroyNotify notify;
 } NkBindingsBindingBase;
@@ -441,15 +442,15 @@ _nk_bindings_parse_modifier(const gchar *string, xkb_mod_mask_t *mask)
 /**
  * NK_BINDINGS_BINDING_TRIGGERED:
  *
- * Return value for #NkBindingsCallback if the binding was valid.
+ * Return value for #NkBindingsCheckCallback if the binding was valid.
  */
 /**
  * NK_BINDINGS_BINDING_NOT_TRIGGERED:
  *
- * Return value for #NkBindingsCallback if the binding was not valid.
+ * Return value for #NkBindingsCheckCallback if the binding was not valid.
  */
 /**
- * NkBindingsCallback:
+ * NkBindingsCheckCallback:
  * @scope: the scope this binding was
  * @target: the target passed to nk_bindings_seat_handle_key() and others
  * @user_data: user_data passed to nk_bindings_add_binding()
@@ -458,8 +459,8 @@ _nk_bindings_parse_modifier(const gchar *string, xkb_mod_mask_t *mask)
  * It is up to the caller to check in @scope and @target matches a valid
  * situation in the application.
  *
- * If the binding is valid, the application can do the relevant actions
- * and return %NK_BINDINGS_BINDING_TRIGGERED.
+ * If the binding is valid, the application must return
+ * %NK_BINDINGS_BINDING_TRIGGERED.
  *
  * If not, returns %NK_BINDINGS_BINDING_NOT_TRIGGERED and the next scope is
  * checked in the #NkBindings context.
@@ -468,11 +469,24 @@ _nk_bindings_parse_modifier(const gchar *string, xkb_mod_mask_t *mask)
  * %NK_BINDINGS_BINDING_NOT_TRIGGERED otherwise
  */
 /**
+ * NkBindingsTriggerCallback:
+ * @scope: the scope this binding was
+ * @target: the target passed to nk_bindings_seat_handle_key() and others
+ * @user_data: user_data passed to nk_bindings_add_binding()
+ *
+ * This function is called when a binding is triggered.
+ * At this point, @scope and @target where checked already
+ * (see #NkBindingsCheckCallback) and you can expect them to be a valid match.
+ *
+ * The application can do the relevant actions.
+ */
+/**
  * nk_bindings_add_binding:
  * @bindings: an #NkBindings context
  * @scope: an opaque scope ID
  * @string: a binding string
- * @callback: the callback to call when the binding might be triggered
+ * @check_callback: the callback to call when the binding might be triggered
+ * @trigger_callback: the callback to call when the binding is triggered
  * @user_data: user_data for @callback
  * @notify: (nullable): function to call to free @user_data when freeing the binding
  * @error: return location for a #GError, or %NULL
@@ -481,14 +495,17 @@ _nk_bindings_parse_modifier(const gchar *string, xkb_mod_mask_t *mask)
  *
  * The @scope is fully opaque to #NkBindings.
  * Scopes are ordered higher-first and checked in order.
- * See #NkBindingsCallback.
+ * See #NkBindingsCheckCallback and #NkBindingsTriggerCallback.
  *
  * Returns: %TRUE on success, %FALSE on error
  */
 gboolean
-nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string, NkBindingsCallback callback, gpointer user_data, GDestroyNotify notify, GError **error)
+nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string, NkBindingsCheckCallback check_callback, NkBindingsTriggerCallback trigger_callback, gpointer user_data, GDestroyNotify notify, GError **error)
 {
     g_return_val_if_fail(self != NULL, FALSE);
+    g_return_val_if_fail(string != NULL, FALSE);
+    g_return_val_if_fail(check_callback != NULL, FALSE);
+    g_return_val_if_fail(trigger_callback != NULL, FALSE);
     g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
 
     gboolean on_release = FALSE;
@@ -747,14 +764,15 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
 
     NkBindingsBindingBase *base = on_release ? &binding->release.base : &binding->press.base;
 
-    if ( base->callback != NULL )
+    if ( base->trigger_callback != NULL )
     {
         g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_ALREADY_REGISTERED, "There is already a binding matching '%s'", string);
         return FALSE;
     }
 
     binding->scope = scope_id;
-    base->callback = callback;
+    base->check_callback = check_callback;
+    base->trigger_callback = trigger_callback;
     base->user_data = user_data;
     base->notify = notify;
 
@@ -781,14 +799,19 @@ _nk_bindings_seat_binding_trigger(NkBindingsSeat *self, NkBindingsBinding *bindi
         return FALSE;
 
     gboolean handled = FALSE;
-    gboolean has_press = ( binding->press.base.callback != NULL );
+    gboolean has_press = ( binding->press.base.check_callback != NULL );
     gboolean on_release_waiting = ( g_list_find(self->on_release, binding) != NULL );
     if ( trigger && has_press )
-        handled = binding->press.base.callback(binding->scope, target, binding->press.base.user_data);
-    if ( ( ! on_release_waiting ) && ( binding->release.base.callback != NULL ) && ( handled || ( ! trigger ) || ( ! has_press ) ) )
     {
-        self->on_release = g_list_prepend(self->on_release, binding);
-        on_release_waiting = TRUE;
+        handled = binding->press.base.check_callback(binding->scope, target, binding->press.base.user_data);
+        if ( handled )
+            binding->press.base.trigger_callback(binding->scope, target, binding->press.base.user_data);
+    }
+    if ( ( ! on_release_waiting ) && ( binding->release.base.check_callback != NULL ) && ( handled || ( ! trigger ) || ( ! has_press ) ) )
+    {
+        on_release_waiting = binding->release.base.check_callback(binding->scope, target, binding->release.base.user_data);
+        if ( on_release_waiting )
+            self->on_release = g_list_prepend(self->on_release, binding);
     }
 
     return ( handled || on_release_waiting );
@@ -1043,7 +1066,7 @@ _nk_bindings_seat_free_on_release(NkBindingsSeat *self, gpointer target, gboolea
     {
         NkBindingsBinding *binding = link->data;
         if ( trigger )
-            binding->release.base.callback(binding->scope, target, binding->release.base.user_data);
+            binding->release.base.trigger_callback(binding->scope, target, binding->release.base.user_data);
         g_list_free_1(link);
     }
     self->on_release = NULL;
@@ -1059,7 +1082,7 @@ _nk_bindings_seat_free_on_release(NkBindingsSeat *self, gpointer target, gboolea
  * Handles a key press/release event on @target. @target is usually the widget the event occured on.
  *
  * If the event might trigger a binding, the corresponding callback will be called.
- * See #NkBindingsCallback and nk_bindings_add_binding().
+ * See #NkBindingsCheckCallback, #NkBindingsTriggerCallback and nk_bindings_add_binding().
  *
  * If no binding was triggered and the event resulted in text, said text is returned.
  *
@@ -1188,7 +1211,7 @@ nk_bindings_seat_handle_key_with_modmask(NkBindingsSeat *self, gpointer target, 
  * Handles a button press/release event on @target. @target is usually the widget the event occured on.
  *
  * If the event might trigger a binding, the corresponding callback will be called.
- * See #NkBindingsCallback and nk_bindings_add_binding().
+ * See #NkBindingsCheckCallback, #NkBindingsTriggerCallback and nk_bindings_add_binding().
  *
  * Returns: %NK_BINDINGS_BINDING_TRIGGERED if a binding was triggered,
  * %NK_BINDINGS_BINDING_NOT_TRIGGERED otherwise
@@ -1234,7 +1257,7 @@ nk_bindings_seat_handle_button(NkBindingsSeat *self, gpointer target, NkBindings
  * Handles a scroll event on @target. @target is usually the widget the event occured on.
  *
  * If the event might trigger a binding, the corresponding callback will be called @step times.
- * See #NkBindingsCallback and nk_bindings_add_binding().
+ * See #NkBindingsCheckCallback, #NkBindingsTriggerCallback and nk_bindings_add_binding().
  *
  * A negative value of @step means up or left scrolling, a positive value means down or right scrolling.
  *
@@ -1278,7 +1301,7 @@ nk_bindings_seat_handle_scroll(NkBindingsSeat *self, gpointer target, NkBindings
  * Handles a modifiers mask event on @target. @target is usually the widget the event occured on.
  *
  * If the event might trigger a binding, the corresponding callback will be called.
- * See #NkBindingsCallback and nk_bindings_add_binding().
+ * See #NkBindingsCheckCallback, #NkBindingsTriggerCallback and nk_bindings_add_binding().
  *
  * Only on-release bindings may be triggered by this function.
  *
