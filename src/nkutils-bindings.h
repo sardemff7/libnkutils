@@ -54,8 +54,8 @@ typedef enum {
 typedef enum {
     NK_BINDINGS_SCROLL_AXIS_VERTICAL,
     NK_BINDINGS_SCROLL_AXIS_HORIZONTAL,
-#define NK_BINDINGS_SCROLL_NUM_AXIS 2
 } NkBindingsScrollAxis;
+#define NK_BINDINGS_SCROLL_NUM_AXIS 2
 
 typedef enum {
     NK_BINDINGS_ERROR_SYNTAX,

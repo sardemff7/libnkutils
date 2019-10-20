@@ -38,6 +38,24 @@
 
 #include "nkutils-enum.h"
 
+/**
+ * SECTION: nkutils-enum
+ * @title: Enum
+ * @short_description: enum parsing
+ *
+ * A trivial module to compare a string to a list of them to find the corresponding enumeration value.
+ */
+
+/**
+ * NkEnumMatchFlags:
+ * @NK_ENUM_MATCH_FLAGS_NONE: No flags, full case-sensitive matching
+ * @NK_ENUM_MATCH_FLAGS_IGNORE_CASE: Case-insensitive matching
+ * @NK_ENUM_MATCH_FLAGS_PREFIX_STRING: Matches if the enum value name is a prefix to the string
+ * @NK_ENUM_MATCH_FLAGS_PREFIX_VALUE: Matches if the string is a prefix to the enum value name
+ *
+ * Flags which modify string matching.
+ */
+
 static inline gint
 nk_str_equal(NkEnumMatchFlags flags, const gchar *token, const gchar *string)
 {
@@ -68,6 +86,22 @@ nk_str_equal(NkEnumMatchFlags flags, const gchar *token, const gchar *string)
     return ( ws == wt );
 }
 
+/**
+ * nk_enum_parse:
+ * @string: a string
+ * @values: (array length=size): a list of strings representing the enum names
+ * @size: the size of @values
+ * @flags: #NkEnumMatchFlags to modify matching behaviour
+ * @value: (out): the enum value
+ *
+ * Searches in @values if a string is matching @string.
+ *
+ * If the function returns %TRUE, @value will be set to the index of the matching string from @values.
+ *
+ * If the function returns %FALSE, @value is left untouched.
+ *
+ * Returns: %TRUE if @string matches an enum name, %FALSE otherwise
+ */
 gboolean
 nk_enum_parse(const gchar *string, const gchar * const *values, guint64 size, NkEnumMatchFlags flags, guint64 *value)
 {

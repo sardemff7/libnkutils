@@ -39,6 +39,27 @@
 
 #include "nkutils-colour.h"
 
+/**
+ * SECTION: nkutils-colour
+ * @title: Colour
+ * @short_description: colour parsing and string generation
+ *
+ * This module parses a wide range of text representation of a colour.
+ * It supports a subset of the [CSS4 Color values](https://www.w3.org/TR/css-color-4/).
+ *
+ * It can also generate some of them.
+ */
+
+/**
+ * NkColour:
+ * @red: the red component
+ * @green: the green component
+ * @blue: the blue component
+ * @alpha: the alpha component
+ *
+ * A structure holding the red, green, blue and alpha values of a colour.
+ */
+
 #define DMODULO(d, m) ( (d) - (guint64) (d) + ( (guint64) (d) % (m) ) )
 
 #define RGB_TO_COLOUR(r, g, b) { .red = (gdouble) (r) / 255., .green = (gdouble) (g) / 255., .blue = (gdouble) (b) / 255., .alpha = 1. }
@@ -441,6 +462,22 @@ _nk_colour_search_named(NkColour *colour, const gchar *name)
     return FALSE;
 }
 
+/**
+ * nk_colour_parse:
+ * @string: a string representing a colour
+ * @colour: (out caller-allocates): the corresponding #NkColour
+ *
+ * Tries to parse @string to fill @colour.
+ *
+ * Accepted formats are a subset of the [CSS4 Color values](https://www.w3.org/TR/css-color-4/)
+ * recommendation. Colour names, &num;hex, rgb&lpar;&rpar;, hsl&lpar;&rpar; and hwb&lpar;&rpar; notations are supported.
+ *
+ * If the function returns %TRUE, @colour is filled with the parsed values.
+ *
+ * If the function returns %FALSE, @colour is left untouched.
+ *
+ * Returns: %TRUE if @string represents a valid colour, %FALSE otherwise.
+ */
 gboolean
 nk_colour_parse(const gchar *s, NkColour *colour)
 {
@@ -599,6 +636,14 @@ nk_colour_parse(const gchar *s, NkColour *colour)
     return TRUE;
 }
 
+/**
+ * nk_colour_to_hex:
+ * @colour: an #NkColour
+ *
+ * Generates a string representing the colour in CSS &num;hexadecimal notation.
+ *
+ * Returns: the &num;hexadecimal string for @colour
+ */
 #define HEX_COLOUR_MAXLEN 10 /* strlen("#rrggbbaa") + 1 */
 const gchar *
 nk_colour_to_hex(const NkColour *colour)
@@ -616,6 +661,15 @@ nk_colour_to_hex(const NkColour *colour)
     return string;
 }
 
+/**
+ * nk_colour_to_rgba:
+ * @colour: an #NkColour
+ *
+ * Generates a string representing the colour in CSS rgb&lpar;&rpar; notation.
+ * Will generate an rgba&lpar;&rpar; string if @colour.alpha is not 0.
+ *
+ * Returns: the rgb&lpar;&rpar; string for @colour
+ */
 #define COLOUR_DOUBLE_RGBA_MAXLEN 64 /* strlen("rgba(255.0000000000,255.0000000000,255.0000000000,0.0000000000)") + 1 */
 const gchar *
 nk_colour_to_rgba(const NkColour *colour)

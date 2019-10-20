@@ -55,7 +55,7 @@
         </para>
         <para>
             You can use a range substitute if the data resolves to <type>a number</type>.
-            The syntax is: <code>${<replaceable>reference-name</replaceable>:[<replaceable>separator</replaceable><replaceable>range-start</replaceable><replaceable>separator</replaceable><replaceable>range-end</replaceable><optional><replaceable>separator</replaceable><replaceable>substitute-value</replaceable>…</optional>]}</code> (spaces added for readability only, they are not ignored when parsed, the external square brackets <literal>[]</literal> are literals here).
+            The syntax is: <code>${<replaceable>reference-name</replaceable>:[<replaceable>separator</replaceable> <replaceable>range-start</replaceable> <replaceable>separator</replaceable> <replaceable>range-end</replaceable> <optional><replaceable>separator</replaceable> <replaceable>substitute-value</replaceable>…</optional>]}</code> (spaces added for readability only, they are not ignored when parsed, the external square brackets <literal>[]</literal> are literals here).
         </para>
         <para>
             You can use a prettify flag to make a big value more readable.

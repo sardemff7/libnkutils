@@ -40,6 +40,28 @@
 #include "nkutils-enum.h"
 #include "nkutils-xdg-de.h"
 
+/**
+ * SECTION: nkutils-xdg-de
+ * @title: Desktop environment
+ * @short_description: DE detection
+ *
+ * This trivial module implements detection of the current DE based on well-known environment variables.
+ *
+ * It uses `$XDG_CURRENT_DESKTOP` from the
+ * [Desktop Entry Specification](https://specifications.freedesktop.org/desktop-entry-spec/latest/)
+ * and other environment-specific variables.
+ */
+
+/**
+ * NkXdgDe:
+ * @NK_XDG_DE_NONE: The generic/none DE
+ * @NK_XDG_DE_GNOME: GNOME
+ * @NK_XDG_DE_KDE: KDE
+ * @NK_XDG_DE_I3: i3 window manager
+ *
+ * The detected desktop environment.
+ */
+
 static const gchar * const _nk_xdg_de_current_desktop_generic_names[] = {
     "generic",
     NULL
@@ -85,6 +107,16 @@ static const gchar * const _nk_xdg_de_desktop_session_names[] = {
     [NK_XDG_DE_I3] = "i3",
 };
 
+/**
+ * nk_xdg_de_detect:
+ *
+ * Checks for well-known environment variables to detect the current desktop environment.
+ *
+ * Once checked, the value will not change, so make sure to call this function after any
+ * needed environment manipulation.
+ *
+ * Returns: an #NkXdgDe value corresponding to the current desktop environment
+ */
 NkXdgDe
 nk_xdg_de_detect(void)
 {

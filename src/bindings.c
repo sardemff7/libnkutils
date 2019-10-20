@@ -48,6 +48,90 @@
 #include "nkutils-enum.h"
 #include "nkutils-bindings.h"
 
+/**
+ * SECTION: nkutils-bindings
+ * @title: Bindings
+ * @short_description: xkbcommon-based GUI bindings support
+ *
+ * A bindings module for xkbcommon-based GUI applications and toolkit.
+ * It allows minimalist applications to support non-trivial bindings.
+ *
+ *
+ * You can define scopes, which are opaque values that you can associate with anything relevant to your UI (like type of widgets, or input modes).
+ * Each scope can then have any number of bindings.
+ *
+ * A binding is a description of a user action, like a keyboard shortcut, a mouse click or scroll.
+ * For now, keyboard and mouse are supported devices, modifiers are supported (for both keyboard and mouse actions).
+ * In the future, touch-based input may be supported, as well as sequences (Emacs-style keyboard bindings).
+ */
+
+/**
+ * NkBindingsKeyState:
+ * @NK_BINDINGS_KEY_STATE_PRESS: the key is being pressed
+ * @NK_BINDINGS_KEY_STATE_PRESSED: the key was already pressed
+ * @NK_BINDINGS_KEY_STATE_RELEASE: the key is being released
+ *
+ * An enumeration describing a key state.
+ *
+ * %NK_BINDINGS_KEY_STATE_PRESSED is to be used for keyboard
+ * focus-in-like events when you get a list of already pressed keys
+ * that should not trigger on-press bindings.
+ * See nk_bindings_seat_handle_key().
+ */
+
+/**
+ * NkBindingsButtonState:
+ * @NK_BINDINGS_BUTTON_STATE_PRESS: the button is being pressed
+ * @NK_BINDINGS_BUTTON_STATE_RELEASE: the button is being released
+ *
+ * An enumeration describing a mouse button state.
+ */
+
+/**
+ * NkBindingsMouseButton:
+ * @NK_BINDINGS_MOUSE_BUTTON_PRIMARY: the primary mouse button (“left click” for right-handed people)
+ * @NK_BINDINGS_MOUSE_BUTTON_SECONDARY: the secondary mouse button (“right click” for right-handed people)
+ * @NK_BINDINGS_MOUSE_BUTTON_MIDDLE: the middle mouse button (“wheel click”)
+ * @NK_BINDINGS_MOUSE_BUTTON_BACK: the first commonly-available extra button, usually known as “back”
+ * @NK_BINDINGS_MOUSE_BUTTON_FORWARD: the second commonly-available extra button, usually known as “forward”
+ * @NK_BINDINGS_MOUSE_BUTTON_EXTRA: the first value for any button after the commonly-available first five
+ *
+ * An enumeration describing a mouse button.
+ *
+ * Mice may have an arbritrary number of extra buttons,
+ * which will be mapped to values starting at
+ * %NK_BINDINGS_MOUSE_BUTTON_EXTRA.
+ */
+
+/**
+ * NkBindingsScrollAxis:
+ * @NK_BINDINGS_SCROLL_AXIS_VERTICAL: scroll along the vertical axis
+ * @NK_BINDINGS_SCROLL_AXIS_HORIZONTAL: scroll along the horizontal axis
+ *
+ * An enumeration describing the scroll direction.
+ */
+/**
+ * NK_BINDINGS_SCROLL_NUM_AXIS:
+ *
+ * The number of scroll axis currently supported.
+ */
+
+/**
+ * NK_BINDINGS_ERROR:
+ *
+ * Error domain for binding specification parsing.
+ * Errors in this domain will be from the #NkBindingsError enum.
+ * See #GError for information on error domains.
+ */
+/**
+ * NkBindingsError:
+ * @NK_BINDINGS_ERROR_SYNTAX: Error syntax in the binding string
+ * @NK_BINDINGS_ERROR_UNKNOWN_KEYSYM: Keysym used in the binding string is unknown to xkbcommon
+ * @NK_BINDINGS_ERROR_ALREADY_REGISTERED: The binding was already registered
+ *
+ * Error codes returned when adding a binding to an #NkBindings context.
+ */
+
 #define NK_BINDINGS_DEFAULT_DOUBLE_CLICK_DELAY 200
 
 #define NK_BINDINGS_MAX_ALIASES 4 /* For Alt */
@@ -70,12 +154,22 @@ typedef enum {
 
 #define NK_BINDINGS_MODIFIER_MASK(m) (1 << (m))
 
+/**
+ * NkBindings:
+ *
+ * An opaque structure holding all the bindings and seats.
+ */
 struct _NkBindings {
     guint64 double_click_delay;
     GList *scopes;
     GList *seats;
 };
 
+/**
+ * NkBindingsSeat:
+ *
+ * An opaque structure holding all the seat state.
+ */
 struct _NkBindingsSeat {
     NkBindings *bindings;
     GList *link;
@@ -189,6 +283,19 @@ _nk_bindings_scope_free(gpointer data)
     g_slice_free(NkBindingsScope, scope);
 }
 
+/**
+ * nk_bindings_new:
+ * @double_click_delay: the application default double-click delay, 0 for the default
+ *
+ * Creates a new #NkBindings context.
+ *
+ * Any relevant setting will be retrieved from the Desktop Environment
+ * when possible, then from GTK settings.
+ * If none is available, the application settings passed as parameters
+ * will be used, with a fallback if the value is unusable.
+ *
+ * Returns: (transfer full): a new #NkBindings
+ */
 NkBindings *
 nk_bindings_new(guint64 double_click_delay)
 {
@@ -238,6 +345,13 @@ nk_bindings_new(guint64 double_click_delay)
 }
 
 static void _nk_bindings_seat_free(gpointer data);
+
+/**
+ * nk_bindings_free:
+ * @bindings: an #NkBindings context
+ *
+ * Frees the #NkBindings context and all its seats.
+ */
 void
 nk_bindings_free(NkBindings *self)
 {
@@ -324,6 +438,53 @@ _nk_bindings_parse_modifier(const gchar *string, xkb_mod_mask_t *mask)
     return TRUE;
 }
 
+/**
+ * NK_BINDINGS_BINDING_TRIGGERED:
+ *
+ * Return value for #NkBindingsCallback if the binding was valid.
+ */
+/**
+ * NK_BINDINGS_BINDING_NOT_TRIGGERED:
+ *
+ * Return value for #NkBindingsCallback if the binding was not valid.
+ */
+/**
+ * NkBindingsCallback:
+ * @scope: the scope this binding was
+ * @target: the target passed to nk_bindings_seat_handle_key() and others
+ * @user_data: user_data passed to nk_bindings_add_binding()
+ *
+ * This function is called when a binding might be triggered.
+ * It is up to the caller to check in @scope and @target matches a valid
+ * situation in the application.
+ *
+ * If the binding is valid, the application can do the relevant actions
+ * and return %NK_BINDINGS_BINDING_TRIGGERED.
+ *
+ * If not, returns %NK_BINDINGS_BINDING_NOT_TRIGGERED and the next scope is
+ * checked in the #NkBindings context.
+ *
+ * Returns: %NK_BINDINGS_BINDING_TRIGGERED if the binding was valid,
+ * %NK_BINDINGS_BINDING_NOT_TRIGGERED otherwise
+ */
+/**
+ * nk_bindings_add_binding:
+ * @bindings: an #NkBindings context
+ * @scope: an opaque scope ID
+ * @string: a binding string
+ * @callback: the callback to call when the binding might be triggered
+ * @user_data: user_data for @callback
+ * @notify: (nullable): function to call to free @user_data when freeing the binding
+ * @error: return location for a #GError, or %NULL
+ *
+ * Adds a binding to the @bindings context.
+ *
+ * The @scope is fully opaque to #NkBindings.
+ * Scopes are ordered higher-first and checked in order.
+ * See #NkBindingsCallback.
+ *
+ * Returns: %TRUE on success, %FALSE on error
+ */
 gboolean
 nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string, NkBindingsCallback callback, gpointer user_data, GDestroyNotify notify, GError **error)
 {
@@ -600,6 +761,12 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
     return TRUE;
 }
 
+/**
+ * nk_bindings_reset_bindings:
+ * @bindings: an #NkBindings context
+ *
+ * Removes all bindings from the @bindings context.
+ */
 void
 nk_bindings_reset_bindings(NkBindings *self)
 {
@@ -690,6 +857,19 @@ _nk_bindings_try_scroll_bindings(NkBindings *self, NkBindingsSeat *seat, gpointe
     return NULL;
 }
 
+/**
+ * nk_bindings_seat_new:
+ * @bindings: an #NkBindings context
+ * @flags: flags for the #xkb_context_t
+ *
+ * Creates a new #NkBindingsSeat in the context to handle
+ * the state of a set of devices.
+ *
+ * You must call nk_bindings_seat_update_keymap() with non-%NULL
+ * values before any call to nk_bindings_seat_handle_key() and others.
+ *
+ * Returns: (transfer full): a new #NkBindingsSeat
+ */
 NkBindingsSeat *
 nk_bindings_seat_new(NkBindings *bindings, enum xkb_context_flags flags)
 {
@@ -730,6 +910,14 @@ _nk_bindings_seat_free(gpointer data)
     g_free(self);
 }
 
+/**
+ * nk_bindings_seat_free:
+ * @seat: an #NkBindingsSeat
+ *
+ * Frees the @seat and all its state.
+ *
+ * This will not trigger and pending on-release binding.
+ */
 void
 nk_bindings_seat_free(NkBindingsSeat *self)
 {
@@ -757,6 +945,17 @@ _nk_bindings_seat_find_modifier(NkBindingsSeat *self, NkBindingsModifiers modifi
     va_end(names);
 }
 
+/**
+ * nk_bindings_seat_update_keymap:
+ * @seat: an #NkBindingsSeat
+ * @keymap: (nullable): an #xkb_keymap
+ * @state: (nullable): an #xkb_state
+ *
+ * Updates the @keymap and @state of this @seat.
+ *
+ * Both @keymap and @state can either be %NULL to clear the state
+ * or non-%NULL to update/create it.
+ */
 void
 nk_bindings_seat_update_keymap(NkBindingsSeat *self, struct xkb_keymap *keymap, struct xkb_state *state)
 {
@@ -788,6 +987,14 @@ nk_bindings_seat_update_keymap(NkBindingsSeat *self, struct xkb_keymap *keymap, 
     _nk_bindings_seat_find_modifier(self, NK_BINDINGS_MODIFIER_HYPER, "Hyper", NULL);
 }
 
+/**
+ * nk_bindings_seat_get_context:
+ * @seat: an #NkBindingsSeat
+ *
+ * Gets the #xkb_context of the @seat.
+ *
+ * Returns: (transfer none): the #xkb_context of the seat
+ */
 struct xkb_context *
 nk_bindings_seat_get_context(NkBindingsSeat *self)
 {
@@ -842,6 +1049,22 @@ _nk_bindings_seat_free_on_release(NkBindingsSeat *self, gpointer target, gboolea
     self->on_release = NULL;
 }
 
+/**
+ * nk_bindings_seat_handle_key:
+ * @seat: an #NkBindingsSeat
+ * @target: an opaque target pointer
+ * @key: the key code being modified
+ * @state: the #NkBindingsKeyState
+ *
+ * Handles a key press/release event on @target. @target is usually the widget the event occured on.
+ *
+ * If the event might trigger a binding, the corresponding callback will be called.
+ * See #NkBindingsCallback and nk_bindings_add_binding().
+ *
+ * If no binding was triggered and the event resulted in text, said text is returned.
+ *
+ * Returns: (nullable): the entered text if relevant, or %NULL
+ */
 gchar *
 nk_bindings_seat_handle_key(NkBindingsSeat *self, gpointer target, xkb_keycode_t keycode, NkBindingsKeyState state)
 {
@@ -912,6 +1135,19 @@ nk_bindings_seat_handle_key(NkBindingsSeat *self, gpointer target, xkb_keycode_t
     return tmp;
 }
 
+/**
+ * nk_bindings_seat_handle_key_with_modmask:
+ * @seat: an #NkBindingsSeat
+ * @modmask: an #xkb_mod_mask_t for the event
+ * @target: an opaque target pointer
+ * @key: the key code being modified
+ * @state: the #NkBindingsKeyState
+ *
+ * A variant of nk_bindings_seat_handle_key() for cases where you get a @modmask with the event
+ * instead on relying on the current state (i.e. in the X11 world).
+ *
+ * Returns: (nullable): the entered text if relevant, or %NULL
+ */
 gchar *
 nk_bindings_seat_handle_key_with_modmask(NkBindingsSeat *self, gpointer target, xkb_mod_mask_t modmask, xkb_keycode_t keycode, NkBindingsKeyState state)
 {
@@ -941,6 +1177,22 @@ nk_bindings_seat_handle_key_with_modmask(NkBindingsSeat *self, gpointer target, 
     return ret;
 }
 
+/**
+ * nk_bindings_seat_handle_button:
+ * @seat: an #NkBindingsSeat
+ * @target: an opaque target pointer
+ * @button: an #NkBindingsMouseButton
+ * @state: the #NkBindingsButtonState
+ * @timestamp: the timestamp for when the evnte occured
+ *
+ * Handles a button press/release event on @target. @target is usually the widget the event occured on.
+ *
+ * If the event might trigger a binding, the corresponding callback will be called.
+ * See #NkBindingsCallback and nk_bindings_add_binding().
+ *
+ * Returns: %NK_BINDINGS_BINDING_TRIGGERED if a binding was triggered,
+ * %NK_BINDINGS_BINDING_NOT_TRIGGERED otherwise
+ */
 gboolean
 nk_bindings_seat_handle_button(NkBindingsSeat *self, gpointer target, NkBindingsMouseButton button, NkBindingsButtonState state, guint64 timestamp)
 {
@@ -972,6 +1224,23 @@ nk_bindings_seat_handle_button(NkBindingsSeat *self, gpointer target, NkBindings
     return NK_BINDINGS_BINDING_TRIGGERED;
 }
 
+/**
+ * nk_bindings_seat_handle_scroll:
+ * @seat: an #NkBindingsSeat
+ * @target: an opaque target pointer
+ * @axis: an #NkBindingsScrollAxis
+ * @steps: the number of steps of the scroll
+ *
+ * Handles a scroll event on @target. @target is usually the widget the event occured on.
+ *
+ * If the event might trigger a binding, the corresponding callback will be called @step times.
+ * See #NkBindingsCallback and nk_bindings_add_binding().
+ *
+ * A negative value of @step means up or left scrolling, a positive value means down or right scrolling.
+ *
+ * Returns: %NK_BINDINGS_BINDING_TRIGGERED if a binding was triggered,
+ * %NK_BINDINGS_BINDING_NOT_TRIGGERED otherwise
+ */
 gboolean
 nk_bindings_seat_handle_scroll(NkBindingsSeat *self, gpointer target, NkBindingsScrollAxis axis, gint32 step)
 {
@@ -995,6 +1264,28 @@ nk_bindings_seat_handle_scroll(NkBindingsSeat *self, gpointer target, NkBindings
     return NK_BINDINGS_BINDING_TRIGGERED;
 }
 
+/**
+ * nk_bindings_seat_update_mask:
+ * @seat: an #NkBindingsSeat
+ * @target: an opaque target pointer
+ * @depressed_mods: see description
+ * @latched_mods: see description
+ * @locked_mods: see description
+ * @depressed_layout: see description
+ * @latched_layout: see description
+ * @locked_layout: see description
+ *
+ * Handles a modifiers mask event on @target. @target is usually the widget the event occured on.
+ *
+ * If the event might trigger a binding, the corresponding callback will be called.
+ * See #NkBindingsCallback and nk_bindings_add_binding().
+ *
+ * Only on-release bindings may be triggered by this function.
+ *
+ * See xkb_state_update_mask() for more information about
+ * @depressed_mods, @latched_mods, @locked_mods, @depressed_layout, @latched_layout, @locked_layout.
+ * Most of the time you should just pass the values you got with your event, using 0 for missing values.
+ */
 void
 nk_bindings_seat_update_mask(NkBindingsSeat *self, gpointer target, xkb_mod_mask_t depressed_mods, xkb_mod_mask_t latched_mods, xkb_mod_mask_t locked_mods, xkb_layout_index_t depressed_layout, xkb_layout_index_t latched_layout, xkb_layout_index_t locked_layout)
 {
@@ -1015,6 +1306,12 @@ nk_bindings_seat_update_mask(NkBindingsSeat *self, gpointer target, xkb_mod_mask
     }
 }
 
+/**
+ * nk_bindings_seat_reset:
+ * @seat: an #NkBindingsSeat
+ *
+ * Reset any pending on-release bindings on the @seat.
+ */
 void
 nk_bindings_seat_reset(NkBindingsSeat *self)
 {

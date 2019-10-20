@@ -39,8 +39,72 @@
 #include "nkutils-uuid.h"
 #include "uuid-internal.h"
 
+/**
+ * SECTION: nkutils-uuid
+ * @title: UUID
+ * @short_description: v4 (random) and v5 (namespace) UUID generation
+ *
+ * An abstraction API for UUID generation. It uses `libuuid` or `apr-util` as available.
+ */
+
+/**
+ * NkUuid:
+ * @data: the UUID has raw bytes
+ * @string: the UUID as a string using the xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx format
+ *
+ * A structure holding the UUID as both raw bytes and string format.
+ */
+
+/**
+ * NK_UUID_LENGTH:
+ *
+ * The size in bytes of an UUID.
+ */
+
+/**
+ * NK_UUID_FORMATTED_LENGTH:
+ *
+ * The size in characters of the string format of an UUID.
+ */
+
+/**
+ * NK_UUID_INIT:
+ *
+ * You can use this macro to initialize an #NkUuid structure:
+ * |[<!-- language="C" -->
+ * NkUuid uuid = NK_UUID_INIT;
+ * ]|
+ */
+
+/**
+ * nk_uuid_generate:
+ * @uuid: (out caller-allocates): an #NkUuid
+ *
+ * Generates a v4 (random) UUID.
+ */
+
+/**
+ * nk_uuid_parse:
+ * @uuid: (out caller-allocates): an #NkUuid
+ * @string: a string containing an UUID in the xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx format
+ *
+ * Parses an UUID stirng.
+ *
+ * Returns: %TRUE if parsing succeeded, %FALSE otherwise
+ */
+
 #define SHA1_SIZE 20
 
+/**
+ * nk_uuid_from_name:
+ * @uuid: (inout): an #NkUuid
+ * @name: an arbritrary name
+ * @length: the length of @name. If @length &lt; 0,
+ *
+ * Generates a v5 (namespace) UUID.
+ *
+ * @uuid must contains the namespace UUID and will be updated to the new UUID.
+ */
 void
 nk_uuid_from_name(NkUuid *self, const gchar *name, gssize length)
 {

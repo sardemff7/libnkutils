@@ -44,6 +44,21 @@
 #include "nkutils-xdg-de.h"
 #include "nkutils-xdg-theme.h"
 
+/**
+ * SECTION: nkutils-xdg-theme
+ * @title: XDG Icon and Sound theme
+ * @short_description: implementation of lookup algorithm for icon and sound themes
+ *
+ * An implementation of the
+ * [Icon theme](https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html#icon_lookup)
+ * and [Sound theme](http://0pointer.de/public/sound-theme-spec.html#sound_lookup)
+ * specifications lookup algorithm&lpar;s&rpar;.
+ *
+ * These are usually implemented in the GUI toolkit, which is inconvenient for
+ * minimalist applications using either no toolkit or their own internal one.
+ */
+
+
 typedef enum {
     TYPE_ICON,
     TYPE_SOUND,
@@ -84,6 +99,11 @@ typedef struct {
     gchar *gtk_theme;
 } NkXdgThemeTypeContext;
 
+/**
+ * NkXdgThemeContext:
+ *
+ * An opaque structure holding all the cached information about XDG Icon and Sound themes.
+ */
 struct _NkXdgThemeContext {
     NkXdgThemeTypeContext types[NUM_TYPES];
 };
@@ -674,6 +694,28 @@ _nk_xdg_theme_get_theme(NkXdgThemeTypeContext *self, const gchar *name)
     return _nk_xdg_theme_load_theme(self, name);
 }
 
+/**
+ * nk_xdg_theme_context_new:
+ * @icon_fallback_themes: (array zero-terminated=1): A list of fallback themes for icon lookup
+ * @sound_fallback_themes: (array zero-terminated=1): A list of fallback themes for sound lookup
+ *
+ * Creates a new #NkXdgThemeContext.
+ *
+ * Both @icon_fallback_themes and @sound_fallback_themes must exists until the #NkXdgThemeContext is freed.
+ * It is recommended to use static const lists.
+ *
+ * In addition to the application fallback themes in arguments, the Desktop Environment and GTK themes will be used.
+ *
+ * Here is the full lookup list:
+ *
+ * - Themes passed to nk_xdg_theme_get_icon() or nk_xdg_theme_get_sound()
+ * - Desktop Environment theme if found
+ * - GTK theme if found
+ * - Application fallback themes
+ * - Specification fallback theme ("hicolor" for icons and "freedesktop" for sounds)
+ *
+ * Returns: (transfer full): a new #NkXdgThemeContext
+ */
 NkXdgThemeContext *
 nk_xdg_theme_context_new(const gchar * const *icon_fallback_themes, const gchar * const *sound_fallback_themes)
 {
@@ -699,6 +741,12 @@ nk_xdg_theme_context_new(const gchar * const *icon_fallback_themes, const gchar 
     return context;
 }
 
+/**
+ * nk_xdg_theme_context_free:
+ * @context: an #NkXdgThemeContext
+ *
+ * Frees @context.
+ */
 void
 nk_xdg_theme_context_free(NkXdgThemeContext *context)
 {
@@ -882,6 +930,15 @@ _nk_xdg_theme_foreach_noop(G_GNUC_UNUSED NkXdgThemeTheme *theme, G_GNUC_UNUSED g
     return FALSE;
 }
 
+/**
+ * nk_xdg_theme_preload_themes_icon:
+ * @context: an #NkXdgThemeContext
+ * @themes: (array zero-terminated=1): a list of themes
+ *
+ * Preloads icon themes metedata.
+ *
+ * The preloaded themes will be the one from @themes and the one from @context (see nk_xdg_theme_context_new()).
+ */
 void
 nk_xdg_theme_preload_themes_icon(NkXdgThemeContext *context, const gchar * const *theme_names)
 {
@@ -963,6 +1020,31 @@ _nk_xdg_theme_icon_find_file(NkXdgThemeTheme *self, const gchar * const *names, 
     return TRUE;
 }
 
+/**
+ * nk_xdg_theme_get_icon:
+ * @context: an #NkXdgThemeContext
+ * @themes: (array zero-terminated=1): a list of themes
+ * @context_name: the context name
+ * @name: the name of the icon to search for
+ * @size: the wanted size of the icon
+ * @scale: the scale the icon will be used on
+ * @svg: whether to search for SVG icons or not
+ *
+ * Searches @name in @themes and @context themes (see nk_xdg_theme_context_new()).
+ *
+ * @size is directly linked to your usage of the icon.
+ * (E.g. 32 for a small toolbar or 256 for an application grid.)
+ *
+ * If your output is an HiDPI monitor, *do not* increase the @size manually, and instead use a higher @scale.
+ * @scale refers to the pixel density of your display.
+ *
+ * If your rendering engine support SVG, you can pass %TRUE to @svg.
+ *
+ * See the [Icon theme specification](https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html#icon_lookup)
+ * for the full algorithm.
+ *
+ * Returns: (nullable): the full path to the icon file, or %NULL if not found
+ */
 gchar *
 nk_xdg_theme_get_icon(NkXdgThemeContext *context, const gchar * const *theme_names, const gchar *context_name, const gchar *name, gint size, gint scale, gboolean svg)
 {
@@ -1036,6 +1118,15 @@ _nk_xdg_theme_sound_find_file(NkXdgThemeTheme *self, const gchar * const *names,
     return _nk_xdg_theme_sound_find_file(self, names, "stereo", ret);
 }
 
+/**
+ * nk_xdg_theme_preload_themes_sound:
+ * @context: an #NkXdgThemeContext
+ * @themes: (array zero-terminated=1): a list of themes
+ *
+ * Preloads sound themes metedata.
+ *
+ * The preloaded themes will be the one from @themes and the one from @context (see nk_xdg_theme_context_new()).
+ */
 void
 nk_xdg_theme_preload_themes_sound(NkXdgThemeContext *context, const gchar * const *theme_names)
 {
@@ -1046,6 +1137,27 @@ nk_xdg_theme_preload_themes_sound(NkXdgThemeContext *context, const gchar * cons
     _nk_xdg_theme_foreach_theme(self, theme_names, NK_XDG_THEME_SOUND_FALLBACK_THEME, _nk_xdg_theme_foreach_noop, NULL, NULL);
 }
 
+/**
+ * nk_xdg_theme_get_sound:
+ * @context: an #NkXdgThemeContext
+ * @themes: (array zero-terminated=1): a list of themes
+ * @name: the name of the sound to search for
+ * @profile: the output profile
+ * @locale: (nullable): a locale for sound localization
+ *
+ * Searches @name in @themes and @context themes (see nk_xdg_theme_context_new()).
+ *
+ * @profile may be "stereo" or "5.1" or any profile the themes are expected to support.
+ *
+ * Some sounds may be to be localized, and you may use @locale for that.
+ * If @locale is %NULL, the current locale will be used.
+ * If localized sound is not found, fallbacks to "C".
+ *
+ * See the [Sound theme specification](http://0pointer.de/public/sound-theme-spec.html#sound_lookup)
+ * for the full algorithm.
+ *
+ * Returns: (nullable): the full path to the sound file, or %NULL if not found
+ */
 gchar *
 nk_xdg_theme_get_sound(NkXdgThemeContext *context, const gchar * const *theme_names, const gchar *name, const gchar *profile, const gchar *locale)
 {

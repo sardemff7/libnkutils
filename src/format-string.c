@@ -41,6 +41,39 @@
 
 #include "nkutils-format-string.h"
 
+/**
+ * SECTION: nkutils-format-string
+ * @title: Format strings
+ * @short_description: powerful format strings engine
+ *
+ * A format string is a string that can contains shell-like references (e.g. `${reference}`).
+ *
+ * At runtime, the references are replaced by data (as #GVariant) using nk_format_string_replace().
+ * A number of operations can be applied to the data before the addition to the final string.
+ *
+ * See [Format strings format][libnkutils-Format-string-format] for a full reference.
+ */
+
+/**
+ * NK_FORMAT_STRING_ERROR:
+ *
+ * Error domain for #NkFormatString parsing.
+ * Errors in this domain will be from the #NkFormatStringError enum.
+ * See #GError for information on error domains.
+ */
+/**
+ * NkFormatStringError:
+ * @NK_FORMAT_STRING_ERROR_WRONG_KEY: Wrong index value in `${reference[index]}` notation
+ * @NK_FORMAT_STRING_ERROR_UNKNOWN_MODIFIER: Unknown modifier in `${reference:modifier}` notation
+ * @NK_FORMAT_STRING_ERROR_WRONG_RANGE: Error in `${reference:[;range]}` notation
+ * @NK_FORMAT_STRING_ERROR_WRONG_SWITCH: Error in `${reference:{;true;false}}` notation
+ * @NK_FORMAT_STRING_ERROR_WRONG_PRETIFFY: Error in `${reference(prettify)}` notation
+ * @NK_FORMAT_STRING_ERROR_REGEX: Wrong regex in `${reference/regex/replacement}` notation
+ * @NK_FORMAT_STRING_ERROR_UNKNOWN_TOKEN: Unknown token in enum-based format list
+ *
+ * Error codes returned by parsing an #NkFormatString.
+ */
+
 #define NK_FORMAT_STRING_PRETTIFY_DURATION_DEFAULT "%{weeks:+%{weeks} week%{weeks:[;2;2;;s]} }%{days:+%{days} day%{days:[;2;2;;s]} }%{hours:+%{hours} hour%{hours:[;2;2;;s]} }%{minutes:+%{minutes} minute%{minutes:[;2;2;;s]} }%{seconds:-0} second%{seconds:[;2;2;;s]}"
 
 typedef struct {
@@ -121,6 +154,11 @@ typedef struct {
     gboolean no_data;
 } NkFormatStringToken;
 
+/**
+ * NkFormatString:
+ *
+ * An opaque structure holding the format string.
+ */
 struct _NkFormatString {
     guint64 ref_count;
     gboolean owned;
@@ -661,12 +699,45 @@ fail:
     return NULL;
 }
 
+/**
+ * nk_format_string_parse:
+ * @string: (transfer full): a format string
+ * @identifier: the reference identifier character (e.g. '$')
+ * @error: return location for a #GError, or %NULL
+ *
+ * Parses @string
+ *
+ * Returns: (transfer full): an #NkFormatString, %NULL on error
+ */
 NkFormatString *
 nk_format_string_parse(gchar *string, gunichar identifier, GError **error)
 {
     return _nk_format_string_parse(TRUE, string, identifier, error);
 }
 
+/**
+ * nk_format_string_parse_enum:
+ * @string: (transfer full): a format string
+ * @identifier: the reference identifier character (e.g. '$')
+ * @tokens: (array length=size): a list of tokens
+ * @size: the size of @tokens
+ * @used_tokens: (out) (nullable): return location for the used tokens mask
+ * @error: return location for a #GError, or %NULL
+ *
+ * Parses @string as nk_format_string_parse().
+ *
+ * Once parsed, each reference is checked against @tokens
+ *
+ * If @used_tokens is non-%NULL, @size must be inferior or equal to 64.
+ *
+ * If the function returns an #NkFormatString, @used_tokens is filled with a bitfield
+ * corresponding to all used tokens. Each bit set to 1 at position `x` (`1 << x`)
+ * means the token `x` was used.
+ *
+ * If the function returns %NULL, @used_tokens is left untouched.
+ *
+ * Returns: (transfer full): an #NkFormatString, %NULL on error
+ */
 NkFormatString *
 nk_format_string_parse_enum(gchar *string, gunichar identifier, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens, GError **error)
 {
@@ -682,6 +753,14 @@ nk_format_string_parse_enum(gchar *string, gunichar identifier, const gchar * co
     return self;
 }
 
+/**
+ * nk_format_string_ref:
+ * @format_string: an #NkFormatString
+ *
+ * Increments the reference counter of @format_string.
+ *
+ * Returns: (transfer full): the #NkFormatString
+ */
 NkFormatString *
 nk_format_string_ref(NkFormatString *self)
 {
@@ -722,6 +801,13 @@ _nk_format_string_free(NkFormatString *self)
     g_free(self);
 }
 
+/**
+ * nk_format_string_unref:
+ * @format_string: an #NkFormatString
+ *
+ * Decrements the reference counter of @format_string.
+ * If it reaches 0, free @format_string.
+ */
 void
 nk_format_string_unref(NkFormatString *self)
 {
@@ -1118,6 +1204,33 @@ _nk_format_string_replace(GString *string, const NkFormatString *self, NkFormatS
     }
 }
 
+/**
+ * NkFormatStringReplaceReferenceCallback:
+ * @name: the reference name
+ * @value: the reference value (for enum-based #NkFormatString only)
+ * @user_data: user_data passed to nk_format_string_replace()
+ *
+ * Retrieve the data referenced in the format string.
+ *
+ * The function should return a #GVariant containing the data referenced by name or value.
+ *
+ * If the return value is a floating reference (see g_variant_ref_sink()),
+ * the #NkFormatString takes ownership of it.
+ *
+ * Returns: (nullable): a #GVariant containing the referenced data, may be %NULL if no data
+ */
+/**
+ * nk_format_string_replace:
+ * @format_string: an #NkFormatString
+ * @callback: an #NkFormatStringReplaceReferenceCallback used to retrieve replacement data
+ * @user_data: user_data for @callback
+ *
+ * Replaces all references in @format_string by data retrieved by @callback.
+ *
+ * See #NkFormatStringReplaceReferenceCallback.
+ *
+ * Returns: the result string
+ */
 gchar *
 nk_format_string_replace(const NkFormatString *self, NkFormatStringReplaceReferenceCallback callback, gpointer user_data)
 {
