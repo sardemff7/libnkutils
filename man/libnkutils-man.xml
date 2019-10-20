@@ -257,7 +257,7 @@
         <title>Colour strings</title>
 
         <para>
-            The <type>colour string</type> format is borrowed from the <ulink url="https://www.w3.org/TR/css-color-4/#hex-notation">CSS4 colour values</ulink>.
+            The <type>colour string</type> format is borrowed from the <ulink url="https://www.w3.org/TR/css-color-4/">CSS4 colour values</ulink>.
             Hexadecimal (<literal>#</literal>-prefixed) and decimal (<literal>rgb()</literal> format) RGB(A) notations are supported.
         </para>
 
