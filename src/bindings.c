@@ -1112,7 +1112,18 @@ nk_bindings_seat_handle_key(NkBindingsSeat *self, gpointer target, xkb_keycode_t
 
     gboolean regular_press = ( state == NK_BINDINGS_KEY_STATE_PRESS );
 
+    xkb_mod_mask_t effective, not_consumed;
+    _nk_bindings_seat_get_modifiers_masks(self, keycode, &effective, &not_consumed);
+
 #ifdef NK_XKBCOMMON_HAS_COMPOSE
+    if ( ( self->compose.state == NULL ) || ( xkb_compose_state_get_status(self->compose.state) != XKB_COMPOSE_COMPOSING ) )
+    {
+#endif /* NK_XKBCOMMON_HAS_COMPOSE */
+        if ( _nk_bindings_try_key_bindings(self->bindings, self, target, NK_KEYCODE_TO_BINDING(effective, keycode), NK_KEYSYM_TO_BINDING(not_consumed, keysym), regular_press) )
+            return NULL;
+#ifdef NK_XKBCOMMON_HAS_COMPOSE
+    }
+
     if ( regular_press && ( self->compose.state != NULL ) && ( keysym != XKB_KEY_NoSymbol ) && ( xkb_compose_state_feed(self->compose.state, keysym) == XKB_COMPOSE_FEED_ACCEPTED ) )
     {
         switch ( xkb_compose_state_get_status(self->compose.state) )
@@ -1135,12 +1146,6 @@ nk_bindings_seat_handle_key(NkBindingsSeat *self, gpointer target, xkb_keycode_t
         }
     }
 #endif /* NK_XKBCOMMON_HAS_COMPOSE */
-
-    xkb_mod_mask_t effective, not_consumed;
-    _nk_bindings_seat_get_modifiers_masks(self, keycode, &effective, &not_consumed);
-
-    if ( _nk_bindings_try_key_bindings(self->bindings, self, target, NK_KEYCODE_TO_BINDING(effective, keycode), NK_KEYSYM_TO_BINDING(not_consumed, keysym), regular_press) )
-        return NULL;
 
     if ( ! regular_press )
         return NULL;
