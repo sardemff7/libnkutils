@@ -30,7 +30,9 @@ project('libnkutils', 'c',
     ],
 )
 
-nk_glib_min_version = '2.40'
+nk_glib_min_major='2'
+nk_glib_min_minor='40'
+nk_glib_min_version='.'.join([nk_glib_min_major, nk_glib_min_minor])
 
 nk_options = []
 
@@ -62,6 +64,7 @@ nk_args = [
     '-DSRCDIR="@0@"'.format(meson.current_source_dir()),
     '-DSYSCONFDIR="@0@"'.format(join_paths(get_option('prefix'), get_option('sysconfdir'))),
     '-DDATADIR="@0@"'.format(join_paths(get_option('prefix'), get_option('datadir'))),
+    '-DGLIB_VERSION_MIN_REQUIRED=(G_ENCODE_VERSION(@0@,@1@))'.format(nk_glib_min_major, nk_glib_min_minor),
 ]
 nk_deps = [ dependency('glib-2.0', version: '>= @0@'.format(nk_glib_min_version)) ]
 
