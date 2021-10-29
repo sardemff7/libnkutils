@@ -62,8 +62,8 @@ typedef enum {
     NK_BINDINGS_ERROR_UNKNOWN_KEYSYM,
     NK_BINDINGS_ERROR_ALREADY_REGISTERED,
 } NkBindingsError;
-#define NK_BINDINGS_ERROR (nk_bindings_error())
-GQuark nk_bindings_error(void);
+#define NK_BINDINGS_ERROR (nk_bindings_error_quark())
+GQuark nk_bindings_error_quark(void);
 
 NkBindings *nk_bindings_new(guint64 double_click_delay);
 void nk_bindings_free(NkBindings *bindings);

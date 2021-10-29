@@ -265,11 +265,7 @@ static const gchar * const _nk_bindings_scroll_names[] = {
     [NK_SCROLL_TO_BINDING(0, NK_BINDINGS_SCROLL_AXIS_HORIZONTAL,  1)] = "Right",
 };
 
-GQuark
-nk_bindings_error(void)
-{
-    return g_quark_from_static_string("nk_bindings_error-quark");
-}
+G_DEFINE_QUARK(nk_bindings_error-quark, nk_bindings_error)
 
 static void
 _nk_bindings_scope_free(gpointer data)
