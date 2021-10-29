@@ -57,7 +57,7 @@
  */
 
 static inline gint
-nk_str_equal(NkEnumMatchFlags flags, const gchar *token, const gchar *string)
+_nk_str_equal(NkEnumMatchFlags flags, const gchar *token, const gchar *string)
 {
     if ( ( token == NULL ) || ( string == NULL ) || ( token == string ) )
         return ( token == string );
@@ -108,7 +108,7 @@ nk_enum_parse(const gchar *string, const gchar * const *values, guint64 size, Nk
     guint64 i;
     for ( i = 0 ; i < size ; ++i )
     {
-        if ( nk_str_equal(flags, values[i], string) )
+        if ( _nk_str_equal(flags, values[i], string) )
         {
             *value = i;
             return TRUE;
