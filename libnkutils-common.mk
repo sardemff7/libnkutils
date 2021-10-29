@@ -225,7 +225,7 @@ endif
 	$(_NKUTILS_INTERNAL_TEST_LIBS)
 
 # format-string
-%C%_tests_format-string_test_SOURCES = \
+%C%_tests_format_string_test_SOURCES = \
 	%D%/tests/format-string.c
 
 %C%_tests_format_string_test_CFLAGS = \
