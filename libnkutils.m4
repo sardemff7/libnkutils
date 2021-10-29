@@ -1,7 +1,7 @@
 dnl
 dnl libnkutils - Miscellaneous utilities
 dnl
-dnl Copyright © 2011-2017 Quentin "Sardem FF7" Glidic
+dnl Copyright © 2011-2021 Quentin "Sardem FF7" Glidic
 dnl
 dnl Permission is hereby granted, free of charge, to any person obtaining a copy
 dnl of this software and associated documentation files (the "Software"), to deal
