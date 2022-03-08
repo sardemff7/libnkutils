@@ -249,14 +249,11 @@ main(int argc, char *argv[])
     NkGitVersionData data = { .data = { NULL } };
 
     git_dir = g_build_filename(work_tree, ".git", NULL);
-    if ( ! g_file_test(git_dir, G_FILE_TEST_IS_DIR) )
+    if ( ! g_file_test(git_dir, G_FILE_TEST_EXISTS) )
     {
-        if ( g_file_test(git_dir, G_FILE_TEST_EXISTS) )
-        {
-            ret = 3;
-            g_warning("Git directory '%s' exists but is not a directory", git_dir);
-            goto fail;
-        }
+        ret = 3;
+        g_warning("Git directory '%s' does not exists", git_dir);
+        goto fail;
     }
     else if ( ! g_file_test(git, G_FILE_TEST_IS_EXECUTABLE) )
     {
