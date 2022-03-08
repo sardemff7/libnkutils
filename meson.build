@@ -73,6 +73,7 @@ nk_args = [
     '-DSYSCONFDIR="@0@"'.format(join_paths(get_option('prefix'), get_option('sysconfdir'))),
     '-DDATADIR="@0@"'.format(join_paths(get_option('prefix'), get_option('datadir'))),
     '-DGLIB_VERSION_MIN_REQUIRED=(G_ENCODE_VERSION(@0@,@1@))'.format(nk_glib_min_major, nk_glib_min_minor),
+    '-DNK_EXPORT=',
 ]
 nk_deps = [ dependency('glib-2.0', version: '>= @0@'.format(nk_glib_min_version)) ]
 if need_native

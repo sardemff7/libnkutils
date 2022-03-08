@@ -478,7 +478,7 @@ _nk_colour_search_named(NkColour *colour, const gchar *name)
  *
  * Returns: %TRUE if @string represents a valid colour, %FALSE otherwise.
  */
-gboolean
+NK_EXPORT gboolean
 nk_colour_parse(const gchar *s, NkColour *colour)
 {
     if ( _nk_colour_scanner == NULL )
@@ -645,7 +645,7 @@ nk_colour_parse(const gchar *s, NkColour *colour)
  * Returns: the &num;hexadecimal string for @colour
  */
 #define HEX_COLOUR_MAXLEN 10 /* strlen("#rrggbbaa") + 1 */
-const gchar *
+NK_EXPORT const gchar *
 nk_colour_to_hex(const NkColour *colour)
 {
     guint8 red   = (guint8) ( colour->red   * 255. + 0.5 );
@@ -671,7 +671,7 @@ nk_colour_to_hex(const NkColour *colour)
  * Returns: the rgb&lpar;&rpar; string for @colour
  */
 #define COLOUR_DOUBLE_RGBA_MAXLEN 64 /* strlen("rgba(255.0000000000,255.0000000000,255.0000000000,0.0000000000)") + 1 */
-const gchar *
+NK_EXPORT const gchar *
 nk_colour_to_rgba(const NkColour *colour)
 {
     gdouble red   = colour->red   * 255.;

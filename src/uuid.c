@@ -105,7 +105,7 @@
  *
  * @uuid must contains the namespace UUID and will be updated to the new UUID.
  */
-void
+NK_EXPORT void
 nk_uuid_from_name(NkUuid *self, const gchar *name, gssize length)
 {
     if ( length < 0 )

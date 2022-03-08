@@ -265,6 +265,7 @@ static const gchar * const _nk_bindings_scroll_names[] = {
     [NK_SCROLL_TO_BINDING(0, NK_BINDINGS_SCROLL_AXIS_HORIZONTAL,  1)] = "Right",
 };
 
+NK_EXPORT
 G_DEFINE_QUARK(nk_bindings_error-quark, nk_bindings_error)
 
 static void
@@ -293,7 +294,7 @@ _nk_bindings_scope_free(gpointer data)
  *
  * Returns: (transfer full): a new #NkBindings
  */
-NkBindings *
+NK_EXPORT NkBindings *
 nk_bindings_new(guint64 double_click_delay)
 {
     NkBindings *self;
@@ -349,7 +350,7 @@ static void _nk_bindings_seat_free(gpointer data);
  *
  * Frees the #NkBindings context and all its seats.
  */
-void
+NK_EXPORT void
 nk_bindings_free(NkBindings *self)
 {
     if ( self == NULL )
@@ -495,7 +496,7 @@ _nk_bindings_parse_modifier(const gchar *string, xkb_mod_mask_t *mask)
  *
  * Returns: %TRUE on success, %FALSE on error
  */
-gboolean
+NK_EXPORT gboolean
 nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string, NkBindingsCheckCallback check_callback, NkBindingsTriggerCallback trigger_callback, gpointer user_data, GDestroyNotify notify, GError **error)
 {
     g_return_val_if_fail(self != NULL, FALSE);
@@ -781,7 +782,7 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
  *
  * Removes all bindings from the @bindings context.
  */
-void
+NK_EXPORT void
 nk_bindings_reset_bindings(NkBindings *self)
 {
     g_list_free_full(self->scopes, _nk_bindings_scope_free);
@@ -889,7 +890,7 @@ _nk_bindings_try_scroll_bindings(NkBindings *self, NkBindingsSeat *seat, gpointe
  *
  * Returns: (transfer full): a new #NkBindingsSeat
  */
-NkBindingsSeat *
+NK_EXPORT NkBindingsSeat *
 nk_bindings_seat_new(NkBindings *bindings, enum xkb_context_flags flags)
 {
     struct xkb_context *context;
@@ -937,7 +938,7 @@ _nk_bindings_seat_free(gpointer data)
  *
  * This will not trigger and pending on-release binding.
  */
-void
+NK_EXPORT void
 nk_bindings_seat_free(NkBindingsSeat *self)
 {
     if ( self == NULL )
@@ -975,7 +976,7 @@ _nk_bindings_seat_find_modifier(NkBindingsSeat *self, NkBindingsModifiers modifi
  * Both @keymap and @state can either be %NULL to clear the state
  * or non-%NULL to update/create it.
  */
-void
+NK_EXPORT void
 nk_bindings_seat_update_keymap(NkBindingsSeat *self, struct xkb_keymap *keymap, struct xkb_state *state)
 {
     g_return_if_fail(self != NULL);
@@ -1014,7 +1015,7 @@ nk_bindings_seat_update_keymap(NkBindingsSeat *self, struct xkb_keymap *keymap, 
  *
  * Returns: (transfer none): the #xkb_context of the seat
  */
-struct xkb_context *
+NK_EXPORT struct xkb_context *
 nk_bindings_seat_get_context(NkBindingsSeat *self)
 {
     return self->context;
@@ -1084,7 +1085,7 @@ _nk_bindings_seat_free_on_release(NkBindingsSeat *self, gpointer target, gboolea
  *
  * Returns: (nullable): the entered text if relevant, or %NULL
  */
-gchar *
+NK_EXPORT gchar *
 nk_bindings_seat_handle_key(NkBindingsSeat *self, gpointer target, xkb_keycode_t keycode, NkBindingsKeyState state)
 {
     g_return_val_if_fail(self != NULL, NULL);
@@ -1172,7 +1173,7 @@ nk_bindings_seat_handle_key(NkBindingsSeat *self, gpointer target, xkb_keycode_t
  *
  * Returns: (nullable): the entered text if relevant, or %NULL
  */
-gchar *
+NK_EXPORT gchar *
 nk_bindings_seat_handle_key_with_modmask(NkBindingsSeat *self, gpointer target, xkb_mod_mask_t modmask, xkb_keycode_t keycode, NkBindingsKeyState state)
 {
     g_return_val_if_fail(self != NULL, NULL);
@@ -1217,7 +1218,7 @@ nk_bindings_seat_handle_key_with_modmask(NkBindingsSeat *self, gpointer target, 
  * Returns: %NK_BINDINGS_BINDING_TRIGGERED if a binding was triggered,
  * %NK_BINDINGS_BINDING_NOT_TRIGGERED otherwise
  */
-gboolean
+NK_EXPORT gboolean
 nk_bindings_seat_handle_button(NkBindingsSeat *self, gpointer target, NkBindingsMouseButton button, NkBindingsButtonState state, guint64 timestamp)
 {
     g_return_val_if_fail(self != NULL, FALSE);
@@ -1265,7 +1266,7 @@ nk_bindings_seat_handle_button(NkBindingsSeat *self, gpointer target, NkBindings
  * Returns: %NK_BINDINGS_BINDING_TRIGGERED if a binding was triggered,
  * %NK_BINDINGS_BINDING_NOT_TRIGGERED otherwise
  */
-gboolean
+NK_EXPORT gboolean
 nk_bindings_seat_handle_scroll(NkBindingsSeat *self, gpointer target, NkBindingsScrollAxis axis, gint32 step)
 {
     g_return_val_if_fail(self != NULL, FALSE);
@@ -1310,7 +1311,7 @@ nk_bindings_seat_handle_scroll(NkBindingsSeat *self, gpointer target, NkBindings
  * @depressed_mods, @latched_mods, @locked_mods, @depressed_layout, @latched_layout, @locked_layout.
  * Most of the time you should just pass the values you got with your event, using 0 for missing values.
  */
-void
+NK_EXPORT void
 nk_bindings_seat_update_mask(NkBindingsSeat *self, gpointer target, xkb_mod_mask_t depressed_mods, xkb_mod_mask_t latched_mods, xkb_mod_mask_t locked_mods, xkb_layout_index_t depressed_layout, xkb_layout_index_t latched_layout, xkb_layout_index_t locked_layout)
 {
     g_return_if_fail(self != NULL);
@@ -1336,7 +1337,7 @@ nk_bindings_seat_update_mask(NkBindingsSeat *self, gpointer target, xkb_mod_mask
  *
  * Reset any pending on-release bindings on the @seat.
  */
-void
+NK_EXPORT void
 nk_bindings_seat_reset(NkBindingsSeat *self)
 {
     g_return_if_fail(self != NULL);

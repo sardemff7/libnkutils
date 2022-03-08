@@ -117,7 +117,7 @@ static const gchar * const _nk_xdg_de_desktop_session_names[] = {
  *
  * Returns: an #NkXdgDe value corresponding to the current desktop environment
  */
-NkXdgDe
+NK_EXPORT NkXdgDe
 nk_xdg_de_detect(void)
 {
     static NkXdgDe _nk_xdg_de = NK_XDG_DE_NONE - 1;

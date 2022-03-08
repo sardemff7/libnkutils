@@ -53,6 +53,7 @@ _NKUTILS_INTERNAL_CFLAGS = \
 	-DSRCDIR=\"$(srcdir)/%D%\" \
 	-DSYSCONFDIR=\"$(sysconfdir)\" \
 	-DDATADIR=\"$(datadir)\" \
+	-DNK_EXPORT= \
 	$(null)
 
 NKUTILS_LIBS = \

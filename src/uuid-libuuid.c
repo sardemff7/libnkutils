@@ -46,14 +46,14 @@ nk_uuid_update_string(NkUuid *self)
     uuid_unparse_lower(self->data, self->string);
 }
 
-void
+NK_EXPORT void
 nk_uuid_generate(NkUuid *self)
 {
     uuid_generate(self->data);
     nk_uuid_update_string(self);
 }
 
-gboolean
+NK_EXPORT gboolean
 nk_uuid_parse(NkUuid *self, const gchar *string)
 {
     if ( uuid_parse(string, self->data) < 0 )

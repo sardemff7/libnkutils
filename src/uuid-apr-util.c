@@ -46,14 +46,14 @@ nk_uuid_update_string(NkUuid *self)
     apr_uuid_format(self->string, (apr_uuid_t *) self);
 }
 
-void
+NK_EXPORT void
 nk_uuid_generate(NkUuid *self)
 {
     apr_uuid_get((apr_uuid_t *) self);
     nk_uuid_update_string(self);
 }
 
-gboolean
+NK_EXPORT gboolean
 nk_uuid_parse(NkUuid *self, const gchar *string)
 {
     if ( apr_uuid_parse((apr_uuid_t *) self, string) != APR_SUCCESS )

@@ -716,7 +716,7 @@ _nk_xdg_theme_get_theme(NkXdgThemeTypeContext *self, const gchar *name)
  *
  * Returns: (transfer full): a new #NkXdgThemeContext
  */
-NkXdgThemeContext *
+NK_EXPORT NkXdgThemeContext *
 nk_xdg_theme_context_new(const gchar * const *icon_fallback_themes, const gchar * const *sound_fallback_themes)
 {
     const gchar * const *fallbacks[NUM_TYPES] = {
@@ -747,7 +747,7 @@ nk_xdg_theme_context_new(const gchar * const *icon_fallback_themes, const gchar 
  *
  * Frees @context.
  */
-void
+NK_EXPORT void
 nk_xdg_theme_context_free(NkXdgThemeContext *context)
 {
     NkXdgThemeThemeType type;
@@ -939,7 +939,7 @@ _nk_xdg_theme_foreach_noop(G_GNUC_UNUSED NkXdgThemeTheme *theme, G_GNUC_UNUSED g
  *
  * The preloaded themes will be the one from @themes and the one from @context (see nk_xdg_theme_context_new()).
  */
-void
+NK_EXPORT void
 nk_xdg_theme_preload_themes_icon(NkXdgThemeContext *context, const gchar * const *theme_names)
 {
     g_return_if_fail(context != NULL);
@@ -1045,7 +1045,7 @@ _nk_xdg_theme_icon_find_file(NkXdgThemeTheme *self, const gchar * const *names, 
  *
  * Returns: (nullable): the full path to the icon file, or %NULL if not found
  */
-gchar *
+NK_EXPORT gchar *
 nk_xdg_theme_get_icon(NkXdgThemeContext *context, const gchar * const *theme_names, const gchar *context_name, const gchar *name, gint size, gint scale, gboolean svg)
 {
     g_return_val_if_fail(context != NULL, NULL);
@@ -1127,7 +1127,7 @@ _nk_xdg_theme_sound_find_file(NkXdgThemeTheme *self, const gchar * const *names,
  *
  * The preloaded themes will be the one from @themes and the one from @context (see nk_xdg_theme_context_new()).
  */
-void
+NK_EXPORT void
 nk_xdg_theme_preload_themes_sound(NkXdgThemeContext *context, const gchar * const *theme_names)
 {
     g_return_if_fail(context != NULL);
@@ -1158,7 +1158,7 @@ nk_xdg_theme_preload_themes_sound(NkXdgThemeContext *context, const gchar * cons
  *
  * Returns: (nullable): the full path to the sound file, or %NULL if not found
  */
-gchar *
+NK_EXPORT gchar *
 nk_xdg_theme_get_sound(NkXdgThemeContext *context, const gchar * const *theme_names, const gchar *name, const gchar *profile, const gchar *locale)
 {
     g_return_val_if_fail(context != NULL, NULL);

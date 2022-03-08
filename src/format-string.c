@@ -169,6 +169,7 @@ struct _NkFormatString {
 };
 
 
+NK_EXPORT
 G_DEFINE_QUARK(nk_format_string_error-quark, nk_format_string_error)
 
 static gchar *
@@ -709,7 +710,7 @@ fail:
  *
  * Returns: (transfer full): an #NkFormatString, %NULL on error
  */
-NkFormatString *
+NK_EXPORT NkFormatString *
 nk_format_string_parse(gchar *string, gunichar identifier, GError **error)
 {
     return _nk_format_string_parse(TRUE, string, identifier, error);
@@ -738,7 +739,7 @@ nk_format_string_parse(gchar *string, gunichar identifier, GError **error)
  *
  * Returns: (transfer full): an #NkFormatString, %NULL on error
  */
-NkFormatString *
+NK_EXPORT NkFormatString *
 nk_format_string_parse_enum(gchar *string, gunichar identifier, const gchar * const *tokens, guint64 size, guint64 *ret_used_tokens, GError **error)
 {
     g_return_val_if_fail(ret_used_tokens == NULL || size <= 64, NULL);
@@ -761,7 +762,7 @@ nk_format_string_parse_enum(gchar *string, gunichar identifier, const gchar * co
  *
  * Returns: (transfer full): the #NkFormatString
  */
-NkFormatString *
+NK_EXPORT NkFormatString *
 nk_format_string_ref(NkFormatString *self)
 {
     g_return_val_if_fail(self != NULL, NULL);
@@ -808,7 +809,7 @@ _nk_format_string_free(NkFormatString *self)
  * Decrements the reference counter of @format_string.
  * If it reaches 0, free @format_string.
  */
-void
+NK_EXPORT void
 nk_format_string_unref(NkFormatString *self)
 {
     g_return_if_fail(self != NULL);
@@ -1231,7 +1232,7 @@ _nk_format_string_replace(GString *string, const NkFormatString *self, NkFormatS
  *
  * Returns: the result string
  */
-gchar *
+NK_EXPORT gchar *
 nk_format_string_replace(const NkFormatString *self, NkFormatStringReplaceReferenceCallback callback, gpointer user_data)
 {
     g_return_val_if_fail(self != NULL, NULL);

@@ -102,7 +102,7 @@ _nk_str_equal(NkEnumMatchFlags flags, const gchar *token, const gchar *string)
  *
  * Returns: %TRUE if @string matches an enum name, %FALSE otherwise
  */
-gboolean
+NK_EXPORT gboolean
 nk_enum_parse(const gchar *string, const gchar * const *values, guint64 size, NkEnumMatchFlags flags, guint64 *value)
 {
     guint64 i;

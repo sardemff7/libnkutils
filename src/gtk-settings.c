@@ -121,7 +121,7 @@ _nk_gtk_settings_getter_boolean(gpointer ret_, GKeyFile *settings, const gchar *
     return ( error == NULL );
 }
 
-gboolean
+NK_EXPORT gboolean
 nk_gtk_settings_get_boolean(gboolean *value, const gchar *keys[NK_GTK_SETTINGS_NUM_VERSION])
 {
     return _nk_gtk_settings_get(value, keys, _nk_gtk_settings_getter_boolean);
@@ -142,7 +142,7 @@ _nk_gtk_settings_getter_uint64(gpointer ret_, GKeyFile *settings, const gchar *g
     return ( error == NULL );
 }
 
-gboolean
+NK_EXPORT gboolean
 nk_gtk_settings_get_uint64(guint64 *value, const gchar *keys[NK_GTK_SETTINGS_NUM_VERSION])
 {
     return _nk_gtk_settings_get(value, keys, _nk_gtk_settings_getter_uint64);
@@ -163,7 +163,7 @@ _nk_gtk_settings_getter_string(gpointer ret_, GKeyFile *settings, const gchar *g
     return ( error == NULL );
 }
 
-gboolean
+NK_EXPORT gboolean
 nk_gtk_settings_get_string(gchar **value, const gchar *keys[NK_GTK_SETTINGS_NUM_VERSION])
 {
     return _nk_gtk_settings_get(value, keys, _nk_gtk_settings_getter_string);
