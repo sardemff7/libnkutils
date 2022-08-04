@@ -109,6 +109,13 @@
                     <para>The default format is <literal>%{weeks:+%{weeks} week%{weeks:[;2;2;;s]} }%{days:+%{days} day%{days:[;2;2;;s]} }%{hours:+%{hours} hour%{hours:[;2;2;;s]} }%{minutes:+%{minutes} minute%{minutes:[;2;2;;s]} }%{seconds:-0} second%{seconds:[;2;2;;s]}</literal>.</para>
                 </listitem>
             </varlistentry>
+
+            <varlistentry>
+                <term><literal>j</literal></term>
+                <listitem>
+                    <para>Work on <type>a string</type>. The string will be escaped to be usable in a JSON string.</para>
+                </listitem>
+            </varlistentry>
         </variablelist>
         <para>
             You can replace parts of the data using the regex mechanism.

@@ -717,6 +717,54 @@ static const struct {
         }
     },
     {
+        .testpath = "/nkutils/name/prettify/json/nothing-to-escape",
+        .data = {
+            .identifier = '$',
+            .source = "\"${text(j)}\"",
+            .data = {
+                { .name = "text", .content = "'some basic text'" },
+                { .name = NULL }
+            },
+            .result = "\"some basic text\""
+        }
+    },
+    {
+        .testpath = "/nkutils/name/prettify/json/quotes",
+        .data = {
+            .identifier = '$',
+            .source = "\"${text(j)}\"",
+            .data = {
+                { .name = "text", .content = "'some text with \"quotes\"'" },
+                { .name = NULL }
+            },
+            .result = "\"some text with \\\"quotes\\\"\""
+        }
+    },
+    {
+        .testpath = "/nkutils/name/prettify/json/linefeed",
+        .data = {
+            .identifier = '$',
+            .source = "\"${text(j)}\"",
+            .data = {
+                { .name = "text", .content = "'some\nmultiline\ntext'" },
+                { .name = NULL }
+            },
+            .result = "\"some\\nmultiline\\ntext\""
+        }
+    },
+    {
+        .testpath = "/nkutils/name/prettify/json/backslash",
+        .data = {
+            .identifier = '$',
+            .source = "\"${text(j)}\"",
+            .data = {
+                { .name = "text", .content = "'some maybe-escaped\\\\ntext'" },
+                { .name = NULL }
+            },
+            .result = "\"some maybe-escaped\\\\ntext\""
+        }
+    },
+    {
         .testpath = "/nkutils/name/replace/full",
         .data = {
             .identifier = '$',

@@ -95,6 +95,7 @@ typedef enum {
     NK_FORMAT_STRING_PRETTIFY_PREFIXES_BINARY = 'b',
     NK_FORMAT_STRING_PRETTIFY_TIME = 't',
     NK_FORMAT_STRING_PRETTIFY_DURATION = 'd',
+    NK_FORMAT_STRING_PRETTIFY_JSON = 'j',
 } NkFormatStringPrettifyType;
 
 typedef struct {
@@ -126,6 +127,22 @@ static const gchar * const _nk_format_string_prettify_duration_tokens[] = {
     [NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_MILLISECONDS] = "milliseconds",
     [NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_MICROSECONDS] = "microseconds",
     [NK_FORMAT_STRING_PRETTIFY_DURATION_TOKEN_NANOSECONDS] = "nanoseconds",
+};
+
+typedef enum {
+    NK_FORMAT_STRING_PRETTIFY_INPUT_NONE,
+    NK_FORMAT_STRING_PRETTIFY_INPUT_NUMBER,
+    NK_FORMAT_STRING_PRETTIFY_INPUT_STRING,
+} NkFormatStringPrettifyInput;
+
+static const NkFormatStringPrettifyInput _nk_format_string_prettify_inputs[] = {
+    [NK_FORMAT_STRING_PRETTIFY_NONE] = NK_FORMAT_STRING_PRETTIFY_INPUT_NONE,
+    [NK_FORMAT_STRING_PRETTIFY_FLOAT] = NK_FORMAT_STRING_PRETTIFY_INPUT_NUMBER,
+    [NK_FORMAT_STRING_PRETTIFY_PREFIXES_SI] = NK_FORMAT_STRING_PRETTIFY_INPUT_NUMBER,
+    [NK_FORMAT_STRING_PRETTIFY_PREFIXES_BINARY] = NK_FORMAT_STRING_PRETTIFY_INPUT_NUMBER,
+    [NK_FORMAT_STRING_PRETTIFY_TIME] = NK_FORMAT_STRING_PRETTIFY_INPUT_NUMBER,
+    [NK_FORMAT_STRING_PRETTIFY_DURATION] = NK_FORMAT_STRING_PRETTIFY_INPUT_NUMBER,
+    [NK_FORMAT_STRING_PRETTIFY_JSON] = NK_FORMAT_STRING_PRETTIFY_INPUT_STRING,
 };
 
 typedef struct {
@@ -579,6 +596,13 @@ _nk_format_string_parse(gboolean owned, gchar *string, gunichar identifier, GErr
                     goto fail;
                 w = e;
                 goto end_prettify;
+            case NK_FORMAT_STRING_PRETTIFY_JSON:
+                if ( w != e )
+                {
+                    g_set_error(error, NK_FORMAT_STRING_ERROR, NK_FORMAT_STRING_ERROR_WRONG_PRETIFFY, "Could not parse pretiffy width: %s", w);
+                    goto fail;
+                }
+                goto end_prettify;
             default:
                 /* Just fail on malformed string */
                 *w = '\0';
@@ -985,9 +1009,20 @@ static const gchar *_nk_format_string_prefixes_binary[] = {
 static void
 _nk_format_string_append_prettify(GString *string, GVariant *data, NkFormatStringPrettify *prettify)
 {
-    gdouble number_value;
-    if ( ! _nk_format_string_double_from_variant(data, &number_value, NULL) )
-        return;
+    gdouble number_value = 0;
+    const gchar *string_value = NULL;
+    switch ( _nk_format_string_prettify_inputs[prettify->type] )
+    {
+    case NK_FORMAT_STRING_PRETTIFY_INPUT_NONE:
+        g_return_if_reached();
+    case NK_FORMAT_STRING_PRETTIFY_INPUT_NUMBER:
+        if ( ! _nk_format_string_double_from_variant(data, &number_value, NULL) )
+            return;
+    break;
+    case NK_FORMAT_STRING_PRETTIFY_INPUT_STRING:
+        string_value = g_variant_get_string(data, NULL);
+    break;
+    }
 
     switch ( prettify->type )
     {
@@ -1096,6 +1131,35 @@ _nk_format_string_append_prettify(GString *string, GVariant *data, NkFormatStrin
         }
 
         _nk_format_string_replace(string, prettify->duration_format, _nk_format_string_prettify_duration_callback, &data);
+    }
+    break;
+    case NK_FORMAT_STRING_PRETTIFY_JSON:
+    {
+        /* Reserve (almost all) the needed space */
+        gsize string_len = string->len;
+        gsize value_len = g_utf8_strlen(string_value, -1);
+        g_string_set_size(string, string_len + value_len);
+        g_string_truncate(string, string_len);
+
+        /* Now we append characters */
+        for ( const gchar *w = string_value, *e = string_value + value_len ; w < e ; w = g_utf8_next_char(w) )
+        {
+            gunichar c = g_utf8_get_char(w);
+            switch ( c )
+            {
+            case '"':
+                g_string_append(string, "\\\"");
+            break;
+            case '\n':
+                g_string_append(string, "\\n");
+            break;
+            case '\\':
+                g_string_append(string, "\\\\");
+            break;
+            default:
+                g_string_append_unichar(string, c);
+            }
+        }
     }
     break;
     }
