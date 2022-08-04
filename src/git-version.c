@@ -133,7 +133,11 @@ _nk_git_version_run_git(gchar *git, gchar *git_dir, gchar *work_tree, gchar **to
     }
     g_strfreev(args);
 
+#if GLIB_CHECK_VERSION(2,70,0)
+    if ( ! g_spawn_check_wait_status(status, &error) )
+#else /* ! GLIB_CHECK_VERSION(2,70,0) */
     if ( ! g_spawn_check_exit_status(status, &error) )
+#endif /* ! GLIB_CHECK_VERSION(2,70,0) */
     {
         g_warning("Git exited with an error: %s", error->message);
         g_warning("    %s", err);
