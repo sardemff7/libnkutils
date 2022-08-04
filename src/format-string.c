@@ -985,8 +985,8 @@ static const gchar *_nk_format_string_prefixes_binary[] = {
 static void
 _nk_format_string_append_prettify(GString *string, GVariant *data, NkFormatStringPrettify *prettify)
 {
-    gdouble value;
-    if ( ! _nk_format_string_double_from_variant(data, &value, NULL) )
+    gdouble number_value;
+    if ( ! _nk_format_string_double_from_variant(data, &number_value, NULL) )
         return;
 
     switch ( prettify->type )
@@ -996,45 +996,45 @@ _nk_format_string_append_prettify(GString *string, GVariant *data, NkFormatStrin
     case NK_FORMAT_STRING_PRETTIFY_FLOAT:
     {
         gint precision = prettify->precision;
-        if ( value == (gdouble) ( (gint64) value ) )
+        if ( number_value == (gdouble) ( (gint64) number_value ) )
             precision = MAX(0, precision);
-        g_string_append_printf(string, prettify->format, prettify->width, precision, value, "");
+        g_string_append_printf(string, prettify->format, prettify->width, precision, number_value, "");
     }
     break;
     case NK_FORMAT_STRING_PRETTIFY_PREFIXES_SI:
     {
         const gchar **prefix;
-        if ( value == 0 )
+        if ( number_value == 0 )
             prefix = _nk_format_string_prefixes_si_small; /* Empty string */
-        else if ( ( value > -1 ) && ( value < 1 ) )
+        else if ( ( number_value > -1 ) && ( number_value < 1 ) )
         {
-            for ( prefix = _nk_format_string_prefixes_si_small ; ( value > -1 ) && ( value < 1 ) && ( prefix < ( _nk_format_string_prefixes_si_small + G_N_ELEMENTS(_nk_format_string_prefixes_si_small) ) ) ; ++prefix )
-                value *= 1000;
+            for ( prefix = _nk_format_string_prefixes_si_small ; ( number_value > -1 ) && ( number_value < 1 ) && ( prefix < ( _nk_format_string_prefixes_si_small + G_N_ELEMENTS(_nk_format_string_prefixes_si_small) ) ) ; ++prefix )
+                number_value *= 1000;
         }
-        else for ( prefix = _nk_format_string_prefixes_si_big ; ( value >= 1000 ) && ( prefix < ( _nk_format_string_prefixes_si_big + G_N_ELEMENTS(_nk_format_string_prefixes_si_big) ) ) ; ++prefix )
-            value /= 1000;
+        else for ( prefix = _nk_format_string_prefixes_si_big ; ( number_value >= 1000 ) && ( prefix < ( _nk_format_string_prefixes_si_big + G_N_ELEMENTS(_nk_format_string_prefixes_si_big) ) ) ; ++prefix )
+            number_value /= 1000;
         gint precision = prettify->precision;
-        if ( value == (gdouble) ( (gint64) value ) )
+        if ( number_value == (gdouble) ( (gint64) number_value ) )
             precision = MAX(0, precision);
-        g_string_append_printf(string, prettify->format, prettify->width, precision, value, *prefix);
+        g_string_append_printf(string, prettify->format, prettify->width, precision, number_value, *prefix);
     }
     break;
     case NK_FORMAT_STRING_PRETTIFY_PREFIXES_BINARY:
     {
         const gchar **prefix;
-        for ( prefix = _nk_format_string_prefixes_binary ; ( value >= 1024 ) && ( prefix < ( _nk_format_string_prefixes_binary + G_N_ELEMENTS(_nk_format_string_prefixes_binary) ) ) ; ++prefix )
-            value /= 1024;
+        for ( prefix = _nk_format_string_prefixes_binary ; ( number_value >= 1024 ) && ( prefix < ( _nk_format_string_prefixes_binary + G_N_ELEMENTS(_nk_format_string_prefixes_binary) ) ) ; ++prefix )
+            number_value /= 1024;
         gint precision = prettify->precision;
-        if ( value == (gdouble) ( (gint64) value ) )
+        if ( number_value == (gdouble) ( (gint64) number_value ) )
             precision = MAX(0, precision);
-        g_string_append_printf(string, prettify->format, prettify->width, precision, value, *prefix);
+        g_string_append_printf(string, prettify->format, prettify->width, precision, number_value, *prefix);
     }
     break;
     case NK_FORMAT_STRING_PRETTIFY_TIME:
     {
         GDateTime *time;
         gchar *tmp = NULL;
-        time = g_date_time_new_from_unix_local(value);
+        time = g_date_time_new_from_unix_local(number_value);
         if ( time != NULL )
         {
             tmp = g_date_time_format(time, prettify->time_format);
@@ -1048,8 +1048,8 @@ _nk_format_string_append_prettify(GString *string, GVariant *data, NkFormatStrin
     case NK_FORMAT_STRING_PRETTIFY_DURATION:
     {
         NkFormatStringPrettifyDurationData data = { .w = 0 };
-        guint64 s = (guint64) value;
-        value -= s;
+        guint64 s = (guint64) number_value;
+        number_value -= s;
 
         if ( s > 604800 )
         {
@@ -1077,22 +1077,22 @@ _nk_format_string_append_prettify(GString *string, GVariant *data, NkFormatStrin
 
         data.s = s;
 
-        if ( value >= 0.001 )
+        if ( number_value >= 0.001 )
         {
-            data.ms = (guint16) ( value * 1000 );
-            value -= ( data.ms / 1000. );
+            data.ms = (guint16) ( number_value * 1000 );
+            number_value -= ( data.ms / 1000. );
         }
 
-        if ( value >= 0.000001 )
+        if ( number_value >= 0.000001 )
         {
-            data.us = (guint16) ( value * 1000000 );
-            value -= ( data.us / 1000000. );
+            data.us = (guint16) ( number_value * 1000000 );
+            number_value -= ( data.us / 1000000. );
         }
 
-        if ( value >= 0.000000001 )
+        if ( number_value >= 0.000000001 )
         {
-            data.ns = (guint16) ( value * 1000000000 );
-            value -= ( data.ns / 1000000000. );
+            data.ns = (guint16) ( number_value * 1000000000 );
+            number_value -= ( data.ns / 1000000000. );
         }
 
         _nk_format_string_replace(string, prettify->duration_format, _nk_format_string_prettify_duration_callback, &data);
