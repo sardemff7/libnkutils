@@ -107,13 +107,15 @@ typedef struct {
 
 
 static gchar *
-_nk_git_version_run_git(gchar *git, gchar *work_tree, gchar **token_args)
+_nk_git_version_run_git(gchar *git, gchar *git_dir, gchar *work_tree, gchar **token_args)
 {
     gsize size = g_strv_length(token_args);
     gsize i = 0, j;
-    gchar **args = g_new0(gchar *, size + 3 + 1);
+    gchar **args = g_new0(gchar *, size + 5 + 1);
     args[i++] = g_strdup(git);
-    args[i++] = g_strdup("-C");
+    args[i++] = g_strdup("--git-dir");
+    args[i++] = g_strdup(git_dir);
+    args[i++] = g_strdup("--work-tree");
     args[i++] = g_strdup(work_tree);
     for ( j = 0 ; j < size ; ++j )
         args[i++] = g_strdup(token_args[j]);
@@ -145,7 +147,7 @@ _nk_git_version_run_git(gchar *git, gchar *work_tree, gchar **token_args)
 }
 
 static gboolean
-_nk_git_version_get_data(NkGitVersionData *data, guint64 used_tokens, gchar *git, gchar *work_tree)
+_nk_git_version_get_data(NkGitVersionData *data, guint64 used_tokens, gchar *git, gchar *git_dir, gchar *work_tree)
 {
     guint64 token;
     for ( token = 0 ; token < NK_GIT_VERSION_NUM_TOKENS ; ++token )
@@ -154,7 +156,7 @@ _nk_git_version_get_data(NkGitVersionData *data, guint64 used_tokens, gchar *git
             continue;
 
         gchar *value;
-        value = _nk_git_version_run_git(git, work_tree, _nk_git_version_token_commands[token]);
+        value = _nk_git_version_run_git(git, git_dir, work_tree, _nk_git_version_token_commands[token]);
         if ( value == NULL )
             return FALSE;
 
@@ -264,7 +266,7 @@ main(int argc, char *argv[])
             goto fail;
         }
     }
-    else if ( ! _nk_git_version_get_data(&data, used_tokens, git, work_tree) )
+    else if ( ! _nk_git_version_get_data(&data, used_tokens, git, git_dir, work_tree) )
         goto fail;
 
     new_contents = nk_format_string_replace(format_string, _nk_git_version_replace_reference, &data);
