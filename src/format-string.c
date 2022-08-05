@@ -209,7 +209,7 @@ _nk_format_string_strchr_escape(gchar *s, gsize l, gunichar c, gunichar pair_c)
             if ( wc == '\\' )
                 /* Escaping a backslash, avoid escaping the next char */
                 wc = '\0';
-            else if ( wc == c )
+            else if ( ( wc == c ) || ( wc == pair_c ) )
             {
                 w = g_utf8_prev_char(w);
                 pc = wc;

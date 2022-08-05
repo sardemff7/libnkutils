@@ -1028,6 +1028,54 @@ static const struct {
             .result = "Some value"
         }
     },
+    {
+        .testpath = "/nkutils/format-string/bug/pairing/non-escaped-unpair",
+        .data = {
+            .identifier = '$',
+            .source = "${variable:+{}",
+            .data = {
+                { .name = "variable", .content = "true" },
+                { .name = NULL }
+            },
+            .result = "${variable:+{}"
+        }
+    },
+    {
+        .testpath = "/nkutils/format-string/bug/pairing/escaped-unpair",
+        .data = {
+            .identifier = '$',
+            .source = "${variable:+\\{}",
+            .data = {
+                { .name = "variable", .content = "true" },
+                { .name = NULL }
+            },
+            .result = "{"
+        }
+    },
+    {
+        .testpath = "/nkutils/format-string/bug/pairing/escaped-pair",
+        .data = {
+            .identifier = '$',
+            .source = "${variable:+\\{\\}}",
+            .data = {
+                { .name = "variable", .content = "true" },
+                { .name = NULL }
+            },
+            .result = "{}"
+        }
+    },
+    {
+        .testpath = "/nkutils/format-string/bug/pairing/unescaped-pair",
+        .data = {
+            .identifier = '$',
+            .source = "${variable:+{}}",
+            .data = {
+                { .name = "variable", .content = "true" },
+                { .name = NULL }
+            },
+            .result = "{}"
+        }
+    },
 };
 
 static GVariant *
