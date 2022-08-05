@@ -54,7 +54,7 @@ static const struct {
     NkFormatStringTestData data;
 } _nk_format_string_tests_list[] = {
     {
-        .testpath = "/nkutils/name/basic",
+        .testpath = "/nkutils/format-string/basic",
         .data = {
             .identifier = '$',
             .source = "You can make ${recipe} with ${fruit}.",
@@ -67,7 +67,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/basic/dash-underscore",
+        .testpath = "/nkutils/format-string/basic/dash-underscore",
         .data = {
             .identifier = '$',
             .source = "You can make ${recipe_name} with ${fruit-name}.",
@@ -80,7 +80,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/basic/unicode",
+        .testpath = "/nkutils/format-string/basic/unicode",
         .data = {
             .identifier = '$',
             .source = "You can make ${recette} with ${ingrédient}.",
@@ -93,7 +93,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/basic/boolean/true",
+        .testpath = "/nkutils/format-string/basic/boolean/true",
         .data = {
             .identifier = '$',
             .source = "You are ${bool}.",
@@ -105,7 +105,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/basic/boolean/false",
+        .testpath = "/nkutils/format-string/basic/boolean/false",
         .data = {
             .identifier = '$',
             .source = "You are ${bool}.",
@@ -117,7 +117,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/basic/wrong/1",
+        .testpath = "/nkutils/format-string/basic/wrong/1",
         .data = {
             .identifier = '$',
             .source = "You can make ${recipe} with $fruit.",
@@ -130,7 +130,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/basic/wrong/2",
+        .testpath = "/nkutils/format-string/basic/wrong/2",
         .data = {
             .identifier = '$',
             .source = "$fruit is good.",
@@ -143,7 +143,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/key/index/positive",
+        .testpath = "/nkutils/format-string/key/index/positive",
         .data = {
             .identifier = '$',
             .source = "You can make a ${recipe[0]} with ${fruit}.",
@@ -156,7 +156,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/key/index/negative",
+        .testpath = "/nkutils/format-string/key/index/negative",
         .data = {
             .identifier = '$',
             .source = "You can make a ${recipe[-1]} with ${fruit}.",
@@ -169,7 +169,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/key/name",
+        .testpath = "/nkutils/format-string/key/name",
         .data = {
             .identifier = '$',
             .source = "You can make a ${recipe[icecream]} with ${fruit}.",
@@ -182,7 +182,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/key/name/modifier",
+        .testpath = "/nkutils/format-string/key/name/modifier",
         .data = {
             .identifier = '$',
             .source = "You can make a ${recipe[cake]:-banana cake} with ${fruit}.",
@@ -195,7 +195,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/key/join/default",
+        .testpath = "/nkutils/format-string/key/join/default",
         .data = {
             .identifier = '$',
             .source = "You can make [${recipes[@]}] with ${fruit}.",
@@ -208,7 +208,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/key/join/custom",
+        .testpath = "/nkutils/format-string/key/join/custom",
         .data = {
             .identifier = '$',
             .source = "You can make [${recipes[@; ]}] with ${fruit}.",
@@ -221,7 +221,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/key/join/replace",
+        .testpath = "/nkutils/format-string/key/join/replace",
         .data = {
             .identifier = '$',
             .source = "You can make [${recipes[@@]/@/], [}] with ${fruit}.",
@@ -234,7 +234,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/wrong/modifier",
+        .testpath = "/nkutils/format-string/wrong/modifier",
         .data = {
             .identifier = '$',
             .source = "You can make a ${recipe} with ${fruit::}.",
@@ -242,7 +242,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/wrong/key/index",
+        .testpath = "/nkutils/format-string/wrong/key/index",
         .data = {
             .identifier = '$',
             .source = "You can make a ${recipe[18446744073709551616]} with ${fruit}.",
@@ -250,7 +250,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/wrong/key",
+        .testpath = "/nkutils/format-string/wrong/key",
         .data = {
             .identifier = '$',
             .source = "You can make a ${recipe[|]} with ${fruit}.",
@@ -258,7 +258,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/wrong/regex/pattern",
+        .testpath = "/nkutils/format-string/wrong/regex/pattern",
         .data = {
             .identifier = '$',
             .source = "You can make a ${recipe/[} with ${fruit}.",
@@ -266,7 +266,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/wrong/regex/replace",
+        .testpath = "/nkutils/format-string/wrong/regex/replace",
         .data = {
             .identifier = '$',
             .source = "You can make ${recipe/a/\\gwrong} with ${fruit}.",
@@ -279,7 +279,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/fallback/with",
+        .testpath = "/nkutils/format-string/fallback/with",
         .data = {
             .identifier = '$',
             .source = "I want to eat ${fruit:-an apple}.",
@@ -291,7 +291,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/fallback/without",
+        .testpath = "/nkutils/format-string/fallback/without",
         .data = {
             .identifier = '$',
             .source = "I want to eat ${fruit:-an apple}.",
@@ -302,7 +302,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/fallback/boolean/true",
+        .testpath = "/nkutils/format-string/fallback/boolean/true",
         .data = {
             .identifier = '$',
             .source = "I want to eat a ${good:-bad} banana.",
@@ -314,7 +314,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/fallback/boolean/false",
+        .testpath = "/nkutils/format-string/fallback/boolean/false",
         .data = {
             .identifier = '$',
             .source = "I want to eat a ${good:-bad} banana.",
@@ -326,7 +326,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/fallback/recurse",
+        .testpath = "/nkutils/format-string/fallback/recurse",
         .data = {
             .identifier = '$',
             .source = "I want to eat ${fruit:-${vegetable}}.",
@@ -338,7 +338,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/substitute/with",
+        .testpath = "/nkutils/format-string/substitute/with",
         .data = {
             .identifier = '$',
             .source = "You can make a ${adjective:+(}${adjective}${adjective:+) }${recipe} with ${fruit}${addition:+ and }${addition}.",
@@ -353,7 +353,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/substitute/without",
+        .testpath = "/nkutils/format-string/substitute/without",
         .data = {
             .identifier = '$',
             .source = "You can make a ${adjective:+(}${adjective}${adjective:+) }${recipe} with ${fruit}${addition:+ and }${addition}.",
@@ -366,7 +366,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/substitute/boolean/true",
+        .testpath = "/nkutils/format-string/substitute/boolean/true",
         .data = {
             .identifier = '$',
             .source = "You can make a ${good:+good }${recipe} with ${fruit}${addition:+ and }${addition}.",
@@ -380,7 +380,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/substitute/boolean/false",
+        .testpath = "/nkutils/format-string/substitute/boolean/false",
         .data = {
             .identifier = '$',
             .source = "You can make a ${good:+good }${recipe} with ${fruit}${addition:+ and }${addition}.",
@@ -394,7 +394,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/anti-substitute/with",
+        .testpath = "/nkutils/format-string/anti-substitute/with",
         .data = {
             .identifier = '$',
             .source = "I want to eat a ${adjective:!sweat }lemon.",
@@ -406,7 +406,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/anti-substitute/without",
+        .testpath = "/nkutils/format-string/anti-substitute/without",
         .data = {
             .identifier = '$',
             .source = "I want to eat a ${adjective:!sweat }lemon.",
@@ -417,7 +417,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/anti-substitute/boolean/true",
+        .testpath = "/nkutils/format-string/anti-substitute/boolean/true",
         .data = {
             .identifier = '$',
             .source = "I want to eat a ${good:!bad }lemon.",
@@ -429,7 +429,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/anti-substitute/boolean/false",
+        .testpath = "/nkutils/format-string/anti-substitute/boolean/false",
         .data = {
             .identifier = '$',
             .source = "I want to eat a ${good:!bad }lemon.",
@@ -441,7 +441,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/switch/true",
+        .testpath = "/nkutils/format-string/switch/true",
         .data = {
             .identifier = '$',
             .source = "Active: ${active:{;yes;no}}.",
@@ -453,7 +453,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/switch/false",
+        .testpath = "/nkutils/format-string/switch/false",
         .data = {
             .identifier = '$',
             .source = "Active: ${active:{;yes;no}}.",
@@ -465,7 +465,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/range/symbol",
+        .testpath = "/nkutils/format-string/range/symbol",
         .data = {
             .identifier = '$',
             .source = "Dice roll gave: ${dice:[;1;byte 6;⚀;⚁;⚂;⚃;⚄;⚅]}.",
@@ -477,7 +477,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/range/text",
+        .testpath = "/nkutils/format-string/range/text",
         .data = {
             .identifier = '$',
             .source = "Signal strength: ${signal:[;0;100;low;medium;high;full]}.",
@@ -489,7 +489,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/range/plural/singular",
+        .testpath = "/nkutils/format-string/range/plural/singular",
         .data = {
             .identifier = '$',
             .source = "${quantity} unit${quantity:[;2;2;;s]}",
@@ -501,7 +501,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/range/plural/plural",
+        .testpath = "/nkutils/format-string/range/plural/plural",
         .data = {
             .identifier = '$',
             .source = "${quantity} unit${quantity:[;2;2;;s]}",
@@ -513,7 +513,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/range/middle-split",
+        .testpath = "/nkutils/format-string/range/middle-split",
         .data = {
             .identifier = '$',
             .source = "Signal strength: ${signal:[;0;100;bad;good]}.",
@@ -525,7 +525,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/range/double",
+        .testpath = "/nkutils/format-string/range/double",
         .data = {
             .identifier = '$',
             .source = "${coin:[;0.0;1.0;heads;tails]}",
@@ -537,7 +537,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/float/width",
+        .testpath = "/nkutils/format-string/prettify/float/width",
         .data = {
             .identifier = '$',
             .source = "${value(f4)}",
@@ -549,7 +549,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/float/0-padding",
+        .testpath = "/nkutils/format-string/prettify/float/0-padding",
         .data = {
             .identifier = '$',
             .source = "${value(f04)}",
@@ -561,7 +561,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/float/precision",
+        .testpath = "/nkutils/format-string/prettify/float/precision",
         .data = {
             .identifier = '$',
             .source = "${value(f.5)}",
@@ -573,7 +573,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/prefixes/si/big",
+        .testpath = "/nkutils/format-string/prettify/prefixes/si/big",
         .data = {
             .identifier = '$',
             .source = "${value(p)}",
@@ -585,7 +585,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/prefixes/si/small",
+        .testpath = "/nkutils/format-string/prettify/prefixes/si/small",
         .data = {
             .identifier = '$',
             .source = "${value(p)}",
@@ -597,7 +597,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/prefixes/si/zero",
+        .testpath = "/nkutils/format-string/prettify/prefixes/si/zero",
         .data = {
             .identifier = '$',
             .source = "${value(p)}",
@@ -609,7 +609,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/prefixes/si/with-precision",
+        .testpath = "/nkutils/format-string/prettify/prefixes/si/with-precision",
         .data = {
             .identifier = '$',
             .source = "${value(p.1)}",
@@ -621,7 +621,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/prefixes/si/2-precision",
+        .testpath = "/nkutils/format-string/prettify/prefixes/si/2-precision",
         .data = {
             .identifier = '$',
             .source = "${value(p.2)}",
@@ -633,7 +633,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/prefixes/si/0-precision",
+        .testpath = "/nkutils/format-string/prettify/prefixes/si/0-precision",
         .data = {
             .identifier = '$',
             .source = "${value(p.0)}",
@@ -645,7 +645,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/prefixes/binary/big",
+        .testpath = "/nkutils/format-string/prettify/prefixes/binary/big",
         .data = {
             .identifier = '$',
             .source = "${value(b)}",
@@ -657,7 +657,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/prefixes/binary/zero",
+        .testpath = "/nkutils/format-string/prettify/prefixes/binary/zero",
         .data = {
             .identifier = '$',
             .source = "${value(b)}",
@@ -669,7 +669,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/time/default",
+        .testpath = "/nkutils/format-string/prettify/time/default",
         .data = {
             .identifier = '$',
             .source = "${timestamp(t)}",
@@ -681,7 +681,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/time/with-format",
+        .testpath = "/nkutils/format-string/prettify/time/with-format",
         .data = {
             .identifier = '$',
             .source = "${timestamp(t%F %T)}",
@@ -693,7 +693,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/duration/default",
+        .testpath = "/nkutils/format-string/prettify/duration/default",
         .data = {
             .identifier = '$',
             .source = "${duration(d)}",
@@ -705,7 +705,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/duration/with-format",
+        .testpath = "/nkutils/format-string/prettify/duration/with-format",
         .data = {
             .identifier = '$',
             .source = "${duration(d%{weeks}w %{days}d %{hours(f02)}:%{minutes(f02)}:%{seconds(f02)})}",
@@ -717,7 +717,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/json/nothing-to-escape",
+        .testpath = "/nkutils/format-string/prettify/json/nothing-to-escape",
         .data = {
             .identifier = '$',
             .source = "\"${text(j)}\"",
@@ -729,7 +729,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/json/quotes",
+        .testpath = "/nkutils/format-string/prettify/json/quotes",
         .data = {
             .identifier = '$',
             .source = "\"${text(j)}\"",
@@ -741,7 +741,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/json/linefeed",
+        .testpath = "/nkutils/format-string/prettify/json/linefeed",
         .data = {
             .identifier = '$',
             .source = "\"${text(j)}\"",
@@ -753,7 +753,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/prettify/json/backslash",
+        .testpath = "/nkutils/format-string/prettify/json/backslash",
         .data = {
             .identifier = '$',
             .source = "\"${text(j)}\"",
@@ -765,7 +765,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/full",
+        .testpath = "/nkutils/format-string/replace/full",
         .data = {
             .identifier = '$',
             .source = "You can make a ${recipe/split/cream} with ${fruit}.",
@@ -778,7 +778,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/missing",
+        .testpath = "/nkutils/format-string/replace/missing",
         .data = {
             .identifier = '$',
             .source = "You can make a ${recipe} with ${fruit}${addition/^/ and }.",
@@ -791,7 +791,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/capture",
+        .testpath = "/nkutils/format-string/replace/capture",
         .data = {
             .identifier = '$',
             .source = "You can make a ${adjective/(.+)/(\\1) }${recipe} with ${fruit}${addition/^/ and }.",
@@ -806,7 +806,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/before-after/with",
+        .testpath = "/nkutils/format-string/replace/before-after/with",
         .data = {
             .identifier = '$',
             .source = "You can make a ${adjective/^/(/$/) }${recipe} with ${fruit}${addition/^/ and }.",
@@ -821,7 +821,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/before-after/without",
+        .testpath = "/nkutils/format-string/replace/before-after/without",
         .data = {
             .identifier = '$',
             .source = "You can make a ${adjective/^/(/$/) }${recipe} with ${fruit}${addition/^/ and }.",
@@ -834,7 +834,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/remove",
+        .testpath = "/nkutils/format-string/replace/remove",
         .data = {
             .identifier = '$',
             .source = "You can make a ${recipe/ split} with ${fruit}.",
@@ -847,7 +847,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/multiple",
+        .testpath = "/nkutils/format-string/replace/multiple",
         .data = {
             .identifier = '$',
             .source = "You can make ${recipe/a banana/an apple pie/ split} with ${fruit/.+/apples}.",
@@ -860,7 +860,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/braces/paired",
+        .testpath = "/nkutils/format-string/replace/braces/paired",
         .data = {
             .identifier = '$',
             .source = "You can make a ${adjective/.{2}$/y/^/(/$/) }${recipe} with ${fruit}${addition/\\{//\\}//^/ and }.",
@@ -875,7 +875,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/braces/opening",
+        .testpath = "/nkutils/format-string/replace/braces/opening",
         .data = {
             .identifier = '$',
             .source = "You can make a ${adjective/.{2}$/y/^/(/$/) }${recipe} with ${fruit}${addition/\\{//^/ and }.",
@@ -890,7 +890,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/braces/closing",
+        .testpath = "/nkutils/format-string/replace/braces/closing",
         .data = {
             .identifier = '$',
             .source = "You can make a ${adjective/.{2}$/y/^/(/$/) }${recipe} with ${fruit}${addition/\\}//^/ and }.",
@@ -905,7 +905,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/escaping/backslash",
+        .testpath = "/nkutils/format-string/replace/escaping/backslash",
         .data = {
             .identifier = '$',
             .source = "You can make a ${adjective/^/(/$/) /\\\\}${recipe} with ${fruit}${addition/^/ and }.",
@@ -920,7 +920,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/escaping/forwardslash/1",
+        .testpath = "/nkutils/format-string/replace/escaping/forwardslash/1",
         .data = {
             .identifier = '$',
             .source = "${data/\\/}",
@@ -932,7 +932,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/escaping/forwardslash/2",
+        .testpath = "/nkutils/format-string/replace/escaping/forwardslash/2",
         .data = {
             .identifier = '$',
             .source = "${data/a/\\/}",
@@ -944,7 +944,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/escaping/forwardslash/3",
+        .testpath = "/nkutils/format-string/replace/escaping/forwardslash/3",
         .data = {
             .identifier = '$',
             .source = "${data/a/\\//b/x}",
@@ -956,7 +956,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/escaping/right-curly-bracket/2",
+        .testpath = "/nkutils/format-string/replace/escaping/right-curly-bracket/2",
         .data = {
             .identifier = '$',
             .source = "${data/a/\\}}",
@@ -968,7 +968,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/replace/recurse/with",
+        .testpath = "/nkutils/format-string/replace/recurse/with",
         .data = {
             .identifier = '$',
             .source = "I want to eat ${recipe/an apple/${fruit}}.",
@@ -981,7 +981,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/old/before-after",
+        .testpath = "/nkutils/format-string/old/before-after",
         .data = {
             .identifier = '$',
             .source = "You can make a ${(<adjective>) }${recipe} with ${fruit}${ and <addition}.",
@@ -994,7 +994,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/identifier/double-escape",
+        .testpath = "/nkutils/format-string/identifier/double-escape",
         .data = {
             .identifier = '$',
             .source = "echo $${PATH}",
@@ -1005,7 +1005,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/identifier/non-dollar",
+        .testpath = "/nkutils/format-string/identifier/non-dollar",
         .data = {
             .identifier = '%',
             .source = "Some %{variable}",
@@ -1017,7 +1017,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/identifier/none",
+        .testpath = "/nkutils/format-string/identifier/none",
         .data = {
             .identifier = '\0',
             .source = "Some {variable}",
@@ -1098,7 +1098,7 @@ static const struct {
     NkFormatStringEnumTestData data;
 } _nk_format_string_enum_tests_list[] = {
     {
-        .testpath = "/nkutils/name/enum/basic",
+        .testpath = "/nkutils/format-string/enum/basic",
         .data = {
             .identifier = '$',
             .source = "You can make ${recipe} with ${fruit}.",
@@ -1111,7 +1111,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/enum/nested",
+        .testpath = "/nkutils/format-string/enum/nested",
         .data = {
             .identifier = '$',
             .source = "I want to eat ${recipe:+${fruit} ${recipe}}.",
@@ -1124,7 +1124,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/enum/fallback",
+        .testpath = "/nkutils/format-string/enum/fallback",
         .data = {
             .identifier = '$',
             .source = "I want to eat ${fruit} ${recipe:-pie}.",
@@ -1136,7 +1136,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/enum/substitute",
+        .testpath = "/nkutils/format-string/enum/substitute",
         .data = {
             .identifier = '$',
             .source = "I want to eat ${fruit:+a fruit}.",
@@ -1148,7 +1148,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/enum/anti-substitute",
+        .testpath = "/nkutils/format-string/enum/anti-substitute",
         .data = {
             .identifier = '$',
             .source = "I want to eat${fruit:! a fruit}.",
@@ -1160,7 +1160,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/enum/prettify/float",
+        .testpath = "/nkutils/format-string/enum/prettify/float",
         .data = {
             .identifier = '$',
             .source = "${value(f.2)}",
@@ -1172,7 +1172,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/enum/prettify/prefixes/si",
+        .testpath = "/nkutils/format-string/enum/prettify/prefixes/si",
         .data = {
             .identifier = '$',
             .source = "${value(p)}",
@@ -1184,7 +1184,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/enum/prettify/prefixes/binary",
+        .testpath = "/nkutils/format-string/enum/prettify/prefixes/binary",
         .data = {
             .identifier = '$',
             .source = "${value(b)}",
@@ -1196,7 +1196,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/enum/regex",
+        .testpath = "/nkutils/format-string/enum/regex",
         .data = {
             .identifier = '$',
             .source = "I want to eat ${fruit/an apple/a banana} ${recipe}.",
@@ -1209,7 +1209,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/enum/wrong/regex",
+        .testpath = "/nkutils/format-string/enum/wrong/regex",
         .data = {
             .identifier = '$',
             .source = "You can make a ${recipe/[} with ${fruit}.",
@@ -1217,7 +1217,7 @@ static const struct {
         }
     },
     {
-        .testpath = "/nkutils/name/enum/wrong/name",
+        .testpath = "/nkutils/format-string/enum/wrong/name",
         .data = {
             .identifier = '$',
             .source = "You can make a ${recipe} with ${fruit} and ${addition}.",
