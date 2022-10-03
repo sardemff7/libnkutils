@@ -677,7 +677,11 @@ static const struct {
                 { .name = "timestamp", .content = "1519910048" },
                 { .name = NULL }
             },
+#if GLIB_CHECK_VERSION(2,73,1)
+            .result = "Thu Mar \u20071 13:14:08 2018"
+#else /* ! GLIB_CHECK_VERSION(2,73,1) */
             .result = "Thu Mar  1 13:14:08 2018"
+#endif /* ! GLIB_CHECK_VERSION(2,73,1) */
         }
     },
     {
