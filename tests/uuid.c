@@ -101,8 +101,8 @@ main(int argc, char *argv[])
 
     g_test_set_nonfatal_assertions();
 
-    g_test_add_func("/nkutils/uuui/generation", _nk_uuid_tests_parse_func);
-    g_test_add_data_func("/nkutils/uuui/parse/fail", "z0c246e98-6678-49b1-bf28-82f383012e86", _nk_uuid_tests_fail_func);
+    g_test_add_func("/nkutils/uuid/generation", _nk_uuid_tests_parse_func);
+    g_test_add_data_func("/nkutils/uuid/parse/fail", "z0c246e98-6678-49b1-bf28-82f383012e86", _nk_uuid_tests_fail_func);
 
     gsize i;
     for ( i = 0 ; i < G_N_ELEMENTS(_nk_uuid_tests_list) ; ++i )
