@@ -70,7 +70,7 @@
 /**
  * NK_UUID_INIT:
  *
- * You can use this macro to initialize an #NkUuid structure:
+ * You can use this macro to initialize an #NkUuid structure as the null UUID:
  * |[<!-- language="C" -->
  * NkUuid uuid = NK_UUID_INIT;
  * ]|
