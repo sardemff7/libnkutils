@@ -152,11 +152,18 @@ libnkutils = declare_dependency(link_with: nk_lib, include_directories: nk_inc, 
 
 if uuid
     nk_libuuid = dependency('uuid', required: false)
+    nk_libsystemd = dependency('libsystemd', required: false)
     nk_sources = files(
         'src/uuid.c',
         'src/nkutils-uuid.h',
         'src/uuid-internal.h',
     )
+    if nk_libsystemd.found()
+        nk_sources += files('src/uuid-libsystemd.c')
+        nk_deps += nk_libsystemd
+    else
+        nk_sources += files('src/uuid-nosystemd.c')
+    endif
     if nk_libuuid.found()
         nk_sources += files('src/uuid-libuuid.c')
         nk_deps += nk_libuuid

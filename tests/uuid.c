@@ -83,6 +83,19 @@ _nk_uuid_tests_fail_func(gconstpointer user_data)
 }
 
 static void
+_nk_uuid_tests_app_specific(void)
+{
+    NkUuid app_uuid = NK_UUID_MAKE(37,d0,8f,76,b3,43,45,f8,ab,be,9a,7d,e6,00,58,23), app_uuid2 = NK_UUID_INIT;
+    NkUuid uuid, uuid2;
+
+    nk_uuid_generate(&app_uuid2);
+    nk_uuid_get_machine_app_specific(&uuid, app_uuid);
+    g_assert_cmpstr(uuid.string, !=, uuid2.string);
+    nk_uuid_get_machine_app_specific(&uuid2, app_uuid);
+    g_assert_cmpstr(uuid.string, ==, uuid.string);
+}
+
+static void
 _nk_uuid_tests_ns_func(gconstpointer user_data)
 {
     const NkUuidTestData *data = user_data;
@@ -103,6 +116,7 @@ main(int argc, char *argv[])
 
     g_test_add_func("/nkutils/uuid/generation", _nk_uuid_tests_parse_func);
     g_test_add_data_func("/nkutils/uuid/parse/fail", "z0c246e98-6678-49b1-bf28-82f383012e86", _nk_uuid_tests_fail_func);
+    g_test_add_func("/nkutils/uuid/app-specific", _nk_uuid_tests_app_specific);
 
     gsize i;
     for ( i = 0 ; i < G_N_ELEMENTS(_nk_uuid_tests_list) ; ++i )

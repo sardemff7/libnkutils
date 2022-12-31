@@ -35,10 +35,14 @@ typedef struct {
 } NkUuid;
 
 #define NK_UUID_INIT { .data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, .string = "00000000-0000-0000-0000-000000000000" }
+#define NK_UUID_MAKE(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) { .data = { 0x##a, 0x##b, 0x##c, 0x##d, 0x##e, 0x##f, 0x##g, 0x##h, 0x##i, 0x##j, 0x##k, 0x##l, 0x##m, 0x##n, 0x##o, 0x##p }, .string = #a #b #c #d "-" #e #f "-" #g #h "-" #i #j "-" #k #l #m #n #o #p }
+#define NK_UUID_IS_NULL(uuid) ((uuid)->data[0] == 0 && (uuid)->data[1] == 0 && (uuid)->data[2] == 0 && (uuid)->data[3] == 0 && (uuid)->data[4] == 0 && (uuid)->data[5] == 0 && (uuid)->data[6] == 0 && (uuid)->data[7] == 0 && (uuid)->data[8] == 0 && (uuid)->data[9] == 0 && (uuid)->data[10] == 0 && (uuid)->data[11] == 0 && (uuid)->data[12] == 0 && (uuid)->data[13] == 0 && (uuid)->data[14] == 0 && (uuid)->data[15] == 0)
 
 void nk_uuid_generate(NkUuid *uuid);
 gboolean nk_uuid_parse(NkUuid *uuid, const gchar *string);
 
 void nk_uuid_from_name(NkUuid *uuid, const gchar *name, gssize length);
+
+void nk_uuid_get_machine_app_specific(NkUuid *uuid, NkUuid app_uuid);
 
 #endif /* __NK_UTILS_UUID_H__ */

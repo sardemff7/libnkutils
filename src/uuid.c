@@ -77,6 +77,28 @@
  */
 
 /**
+ * NK_UUID_MAKE:
+ *
+ * You can use this macro to initialize an #NkUuid structure with a pre-defined UUID:
+ * |[<!-- language="C" -->
+ * NkUuid uuid = NK_UUID_MAKE(95,7c,a0,a7,10,7c,47,86,95,6c,4e,f1,d1,b8,4d,13);
+ * ]|
+ */
+
+/**
+ * NK_UUID_IS_NULL:
+ *
+ * You can use this macro to test for a null UUID an #NkUuid structure:
+ * |[<!-- language="C" -->
+ * NkUuid uuid = NK_UUID_INIT;
+ * if ( NK_UUID_IS_NULL(&uuid) )
+ * {
+ *     nk_generate_uuid(&uuid);
+ * }
+ * ]|
+ */
+
+/**
  * nk_uuid_generate:
  * @uuid: (out caller-allocates): an #NkUuid
  *
@@ -91,6 +113,15 @@
  * Parses an UUID stirng.
  *
  * Returns: %TRUE if parsing succeeded, %FALSE otherwise
+ */
+
+/**
+ * nk_uuid_get_machine_app_specific:
+ * @uuid: (out caller-allocates): an #NkUuid
+ * @app_uuid: an #NkUuid containing the application UUID
+ *
+ * Generates a machine and app-stable UUID if possible.
+ * The UUID is not machine-stable if libsystemd support was not built into libnkutils.
  */
 
 #define SHA1_SIZE 20
