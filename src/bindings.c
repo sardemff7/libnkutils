@@ -922,6 +922,8 @@ _nk_bindings_seat_free(gpointer data)
 
     _nk_bindings_seat_free_on_release(self, NULL, FALSE);
 
+    g_hash_table_unref(self->last_timestamps);
+
     xkb_keymap_unref(self->keymap);
     xkb_state_unref(self->state);
 
