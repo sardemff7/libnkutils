@@ -1,8 +1,8 @@
 AC_PREREQ([2.65])
 AC_INIT([nkutils],[0])
 
-AC_CONFIG_HEADERS([src/config.h])
-AC_CONFIG_SRCDIR([src/token.c])
+AC_CONFIG_HEADERS([core/include/config.h])
+AC_CONFIG_SRCDIR([core/src/format-string.c])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([.aux])
 

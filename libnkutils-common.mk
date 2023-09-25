@@ -32,17 +32,19 @@ TESTS += \
 	$(_libnkutils_tests)
 
 EXTRA_DIST += \
-	%D%/src/git-version.c \
-	%D%/man/libnkutils-man.xml \
-	%D%/tests/gtk-3.0/settings.ini \
-	%D%/tests/gtk-4.0/settings.ini \
-	%D%/tests/icons/recursive-theme-test/index.theme \
-	%D%/tests/icons/recursive-theme-test/test-dir/test-icon.svg \
+	%D%/core/src/git-version.c \
+	%D%/doc/libnkutils-man.xml \
+	%D%/core/tests/gtk-3.0/settings.ini \
+	%D%/core/tests/gtk-4.0/settings.ini \
+	%D%/core/tests/icons/recursive-theme-test/index.theme \
+	%D%/core/tests/icons/recursive-theme-test/test-dir/test-icon.svg \
 	$(null)
 
 
 NKUTILS_CFLAGS = \
-	-I$(srcdir)/%D%/src \
+	-I$(srcdir)/%D%/bindings/include \
+	-I$(srcdir)/%D%/core/include \
+	-I$(srcdir)/%D%/uuid/include \
 	$(_NKUTILS_INTERNAL_UUID_CFLAGS) \
 	$(_NKUTILS_INTERNAL_XKBCOMMON_CFLAGS) \
 	$(_NKUTILS_INTERNAL_GIO_CFLAGS) \
@@ -50,7 +52,7 @@ NKUTILS_CFLAGS = \
 	$(_NKUTILS_INTERNAL_GLIB_CFLAGS)
 
 _NKUTILS_INTERNAL_CFLAGS = \
-	-DSRCDIR=\"$(srcdir)/%D%\" \
+	-DSRCDIR=\"$(srcdir)/%D%/core\" \
 	-DSYSCONFDIR=\"$(sysconfdir)\" \
 	-DDATADIR=\"$(datadir)\" \
 	-DNK_EXPORT= \
@@ -77,10 +79,11 @@ _libnkutils_tests =
 
 if NK_ENABLE_UUID_LIBUUID
 _libnkutils_sources += \
-	%D%/src/uuid-libuuid.c \
-	%D%/src/uuid-internal.h \
-	%D%/src/uuid.c \
-	%D%/src/nkutils-uuid.h
+	%D%/uuid/src/uuid-libuuid.c \
+	%D%/uuid/src/uuid-internal.h \
+	%D%/uuid/src/uuid-nosystemd.c \
+	%D%/uuid/src/uuid.c \
+	%D%/uuid/include/nkutils-uuid.h
 
 _NKUTILS_INTERNAL_UUID_CFLAGS = \
 	$(_NKUTILS_INTERNAL_UUID_LIBUUID_CFLAGS)
@@ -89,14 +92,15 @@ _NKUTILS_INTERNAL_UUID_LIBS = \
 	$(_NKUTILS_INTERNAL_UUID_LIBUUID_LIBS)
 
 _libnkutils_tests += \
-	%D%/tests/uuid.test
+	%D%/uuid/tests/uuid.test
 else
 if NK_ENABLE_UUID_APR_UTIL
 _libnkutils_sources += \
-	%D%/src/uuid-apr-util.c \
-	%D%/src/uuid-internal.h \
-	%D%/src/uuid.c \
-	%D%/src/nkutils-uuid.h
+	%D%/uuid/src/uuid-apr-util.c \
+	%D%/uuid/src/uuid-internal.h \
+	%D%/uuid/src/uuid-nosystemd.c \
+	%D%/uuid/src/uuid.c \
+	%D%/uuid/include/nkutils-uuid.h
 
 _NKUTILS_INTERNAL_UUID_CFLAGS = \
 	$(_NKUTILS_INTERNAL_UUID_APR_UTIL_CFLAGS)
@@ -105,77 +109,77 @@ _NKUTILS_INTERNAL_UUID_LIBS = \
 	$(_NKUTILS_INTERNAL_UUID_APR_UTIL_LIBS)
 
 _libnkutils_tests += \
-	%D%/tests/uuid.test
+	%D%/uuid/tests/uuid.test
 endif
 endif
 
 if NK_ENABLE_ENUM
 _libnkutils_sources += \
-	%D%/src/enum.c \
-	%D%/src/nkutils-enum.h
+	%D%/core/src/enum.c \
+	%D%/core/include/nkutils-enum.h
 
 _libnkutils_tests += \
-	%D%/tests/enum.test
+	%D%/core/tests/enum.test
 endif
 
 if NK_ENABLE_FORMAT_STRING
 _libnkutils_sources += \
-	%D%/src/format-string.c \
-	%D%/src/nkutils-format-string.h
+	%D%/core/src/format-string.c \
+	%D%/core/include/nkutils-format-string.h
 
 _libnkutils_examples += \
 	%D%/nk-format-string-replace
 
 _libnkutils_tests += \
-	%D%/tests/format-string.test
+	%D%/core/tests/format-string.test
 endif
 
 if NK_ENABLE_COLOUR
 _libnkutils_sources += \
-	%D%/src/colour.c \
-	%D%/src/nkutils-colour.h
+	%D%/core/src/colour.c \
+	%D%/core/include/nkutils-colour.h
 
 _libnkutils_tests += \
-	%D%/tests/colour.test
+	%D%/core/tests/colour.test
 endif
 
 if NK_ENABLE_GTK_SETTINGS
 _libnkutils_sources += \
-	%D%/src/gtk-settings.c \
-	%D%/src/nkutils-gtk-settings.h
+	%D%/core/src/gtk-settings.c \
+	%D%/core/include/nkutils-gtk-settings.h
 
 _libnkutils_tests += \
-	%D%/tests/gtk-settings.test
+	%D%/core/tests/gtk-settings.test
 endif
 
 if NK_ENABLE_XDG_DE
 _libnkutils_sources += \
-	%D%/src/xdg-de.c \
-	%D%/src/nkutils-xdg-de.h
+	%D%/core/src/xdg-de.c \
+	%D%/core/include/nkutils-xdg-de.h
 
 _libnkutils_tests += \
-	%D%/tests/xdg-de.test
+	%D%/core/tests/xdg-de.test
 endif
 
 if NK_ENABLE_XDG_THEME
 _libnkutils_sources += \
-	%D%/src/xdg-theme.c \
-	%D%/src/nkutils-xdg-theme.h
+	%D%/core/src/xdg-theme.c \
+	%D%/core/include/nkutils-xdg-theme.h
 
 _libnkutils_examples += \
 	%D%/nk-xdg-theme-lookup
 
 _libnkutils_tests += \
-	%D%/tests/xdg-theme.test
+	%D%/core/tests/xdg-theme.test
 endif
 
 if NK_ENABLE_BINDINGS
 _libnkutils_sources += \
-	%D%/src/bindings.c \
-	%D%/src/nkutils-bindings.h
+	%D%/bindings/src/bindings.c \
+	%D%/bindings/include/nkutils-bindings.h
 
 _libnkutils_tests += \
-	%D%/tests/bindings.test
+	%D%/bindings/tests/bindings.test
 endif
 
 
@@ -185,7 +189,7 @@ endif
 
 # format-string
 %C%_nk_format_string_replace_SOURCES = \
-	%D%/src/format-string-example.c
+	%D%/core/src/format-string-example.c
 
 %C%_nk_format_string_replace_CFLAGS = \
 	$(AM_CFLAGS) \
@@ -197,7 +201,7 @@ endif
 
 # xdg-theme
 %C%_nk_xdg_theme_lookup_SOURCES = \
-	%D%/src/xdg-theme-example.c
+	%D%/core/src/xdg-theme-example.c
 
 %C%_nk_xdg_theme_lookup_CFLAGS = \
 	$(AM_CFLAGS) \
@@ -213,105 +217,105 @@ endif
 #
 
 # enum
-%C%_tests_enum_test_SOURCES = \
-	%D%/tests/enum.c
+%C%_core_tests_enum_test_SOURCES = \
+	%D%/core/tests/enum.c
 
-%C%_tests_enum_test_CFLAGS = \
+%C%_core_tests_enum_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
 	$(_NKUTILS_INTERNAL_CFLAGS)
 
-%C%_tests_enum_test_LDADD = \
+%C%_core_tests_enum_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)
 
 # format-string
-%C%_tests_format_string_test_SOURCES = \
-	%D%/tests/format-string.c
+%C%_core_tests_format_string_test_SOURCES = \
+	%D%/core/tests/format-string.c
 
-%C%_tests_format_string_test_CFLAGS = \
+%C%_core_tests_format_string_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
 	$(_NKUTILS_INTERNAL_CFLAGS)
 
-%C%_tests_format_string_test_LDADD = \
+%C%_core_tests_format_string_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)
 
 # colour
-%C%_tests_colour_test_SOURCES = \
-	%D%/tests/colour.c
+%C%_core_tests_colour_test_SOURCES = \
+	%D%/core/tests/colour.c
 
-%C%_tests_colour_test_CFLAGS = \
+%C%_core_tests_colour_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
 	$(_NKUTILS_INTERNAL_CFLAGS)
 
-%C%_tests_colour_test_LDADD = \
+%C%_core_tests_colour_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)
 
 # uuid
-%C%_tests_uuid_test_SOURCES = \
-	%D%/tests/uuid.c
+%C%_uuid_tests_uuid_test_SOURCES = \
+	%D%/uuid/tests/uuid.c
 
-%C%_tests_uuid_test_CFLAGS = \
+%C%_uuid_tests_uuid_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
 	$(_NKUTILS_INTERNAL_CFLAGS)
 
-%C%_tests_uuid_test_LDADD = \
+%C%_uuid_tests_uuid_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)
 
 # gtk-settings
-%C%_tests_gtk_settings_test_SOURCES = \
-	%D%/tests/gtk-settings.c
+%C%_core_tests_gtk_settings_test_SOURCES = \
+	%D%/core/tests/gtk-settings.c
 
-%C%_tests_gtk_settings_test_CFLAGS = \
+%C%_core_tests_gtk_settings_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
 	$(_NKUTILS_INTERNAL_CFLAGS)
 
-%C%_tests_gtk_settings_test_LDADD = \
+%C%_core_tests_gtk_settings_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)
 
 # xdg-de
-%C%_tests_xdg_de_test_SOURCES = \
-	%D%/tests/xdg-de.c
+%C%_core_tests_xdg_de_test_SOURCES = \
+	%D%/core/tests/xdg-de.c
 
-%C%_tests_xdg_de_test_CFLAGS = \
+%C%_core_tests_xdg_de_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
 	$(_NKUTILS_INTERNAL_CFLAGS)
 
-%C%_tests_xdg_de_test_LDADD = \
+%C%_core_tests_xdg_de_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)
 
 # xdg-theme
-%C%_tests_xdg_theme_test_SOURCES = \
-	%D%/tests/xdg-theme.c
+%C%_core_tests_xdg_theme_test_SOURCES = \
+	%D%/core/tests/xdg-theme.c
 
-%C%_tests_xdg_theme_test_CFLAGS = \
+%C%_core_tests_xdg_theme_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
 	$(_NKUTILS_INTERNAL_CFLAGS)
 
-%C%_tests_xdg_theme_test_LDADD = \
+%C%_core_tests_xdg_theme_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)
 
 # bindings
-%C%_tests_bindings_test_SOURCES = \
-	%D%/tests/bindings.c
+%C%_bindings_tests_bindings_test_SOURCES = \
+	%D%/bindings/tests/bindings.c
 
-%C%_tests_bindings_test_CFLAGS = \
+%C%_bindings_tests_bindings_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NKUTILS_CFLAGS) \
 	$(_NKUTILS_INTERNAL_CFLAGS)
 
-%C%_tests_bindings_test_LDADD = \
+%C%_bindings_tests_bindings_test_LDADD = \
 	$(NKUTILS_LIBS) \
 	$(_NKUTILS_INTERNAL_TEST_LIBS)
