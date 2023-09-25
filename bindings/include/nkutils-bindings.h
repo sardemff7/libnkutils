@@ -32,6 +32,11 @@ typedef struct _NkBindings NkBindings;
 typedef struct _NkBindingsSeat NkBindingsSeat;
 
 typedef enum {
+    NK_BINDINGS_ADD_FLAG_NONE           = 0,
+    NK_BINDINGS_ADD_FLAG_ALLOW_OVERRIDE = (1 << 1),
+} NkBindingsAddFlags;
+
+typedef enum {
     NK_BINDINGS_KEY_STATE_PRESS,
     NK_BINDINGS_KEY_STATE_PRESSED,
     NK_BINDINGS_KEY_STATE_RELEASE,
@@ -72,7 +77,7 @@ void nk_bindings_free(NkBindings *bindings);
 #define NK_BINDINGS_BINDING_NOT_TRIGGERED FALSE
 typedef gboolean (*NkBindingsCheckCallback)(guint64 scope, gpointer target, gpointer user_data);
 typedef void (*NkBindingsTriggerCallback)(guint64 scope, gpointer target, gpointer user_data);
-gboolean nk_bindings_add_binding(NkBindings *bindings, guint64 scope, const gchar *string, NkBindingsCheckCallback check_callback, NkBindingsTriggerCallback trigger_callback, gpointer user_data, GDestroyNotify notify, GError **error);
+gboolean nk_bindings_add_binding(NkBindings *bindings, guint64 scope, const gchar *string, NkBindingsCheckCallback check_callback, NkBindingsTriggerCallback trigger_callback, gpointer user_data, GDestroyNotify notify, NkBindingsAddFlags flags, GError **error);
 void nk_bindings_reset_bindings(NkBindings *bindings);
 
 NkBindingsSeat *nk_bindings_seat_new(NkBindings *bindings, enum xkb_context_flags flags);

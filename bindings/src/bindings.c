@@ -66,6 +66,14 @@
  */
 
 /**
+ * NkBindingsAddFlags:
+ * @NK_BINDINGS_ADD_FLAG_NONE: No flags
+ * @NK_BINDINGS_ADD_FLAG_ALLOW_OVERRIDE: Allow for overriding
+ *
+ * Flags which modify bindings addition.
+ */
+
+/**
  * NkBindingsKeyState:
  * @NK_BINDINGS_KEY_STATE_PRESS: the key is being pressed
  * @NK_BINDINGS_KEY_STATE_PRESSED: the key was already pressed
@@ -486,6 +494,7 @@ _nk_bindings_parse_modifier(const gchar *string, xkb_mod_mask_t *mask)
  * @trigger_callback: the callback to call when the binding is triggered
  * @user_data: user_data for @callback
  * @notify: (nullable): function to call to free @user_data when freeing the binding
+ * @flags: #NkBindingsAddFlags to modify addition behaviour
  * @error: return location for a #GError, or %NULL
  *
  * Adds a binding to the @bindings context.
@@ -497,7 +506,7 @@ _nk_bindings_parse_modifier(const gchar *string, xkb_mod_mask_t *mask)
  * Returns: %TRUE on success, %FALSE on error
  */
 NK_EXPORT gboolean
-nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string, NkBindingsCheckCallback check_callback, NkBindingsTriggerCallback trigger_callback, gpointer user_data, GDestroyNotify notify, GError **error)
+nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string, NkBindingsCheckCallback check_callback, NkBindingsTriggerCallback trigger_callback, gpointer user_data, GDestroyNotify notify, NkBindingsAddFlags flags, GError **error)
 {
     g_return_val_if_fail(self != NULL, FALSE);
     g_return_val_if_fail(string != NULL, FALSE);
@@ -761,7 +770,7 @@ nk_bindings_add_binding(NkBindings *self, guint64 scope_id, const gchar *string,
 
     NkBindingsBindingBase *base = on_release ? &binding->release.base : &binding->press.base;
 
-    if ( base->trigger_callback != NULL )
+    if( ( base->trigger_callback != NULL ) && ( !( flags & NK_BINDINGS_ADD_FLAG_ALLOW_OVERRIDE ) ) )
     {
         g_set_error(error, NK_BINDINGS_ERROR, NK_BINDINGS_ERROR_ALREADY_REGISTERED, "There is already a binding matching '%s'", string);
         return FALSE;

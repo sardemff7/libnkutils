@@ -49,6 +49,7 @@ typedef struct {
     guint64 scope;
     const gchar *binding;
     guint64 trigger;
+    NkBindingsAddFlags flags;
 } NkBindingsTestBinding;
 
 typedef struct {
@@ -119,6 +120,25 @@ static const struct {
                 { .key = KEYCODE_A, .text = "a" },
                 { .key = KEYCODE_A, .state = NK_BINDINGS_KEY_STATE_RELEASE },
                 { .key = KEYCODE_S, .triggered = 1 },
+                { .key = KEYCODE_S, .state = NK_BINDINGS_KEY_STATE_RELEASE },
+                { .key = KEYCODE_D, .text = "d" },
+                { .key = KEYCODE_D, .state = NK_BINDINGS_KEY_STATE_RELEASE },
+                { .key = KEYCODE_NONE }
+            },
+        }
+    },
+    {
+        .testpath = "/nkutils/bindings/press/key/overridden",
+        .data = {
+            .bindings = {
+                { .binding = "s", .trigger = 1 },
+                { .binding = "s", .trigger = 2, .flags = NK_BINDINGS_ADD_FLAG_ALLOW_OVERRIDE },
+                { .binding = NULL }
+            },
+            .keys = {
+                { .key = KEYCODE_A, .text = "a" },
+                { .key = KEYCODE_A, .state = NK_BINDINGS_KEY_STATE_RELEASE },
+                { .key = KEYCODE_S, .triggered = 2 },
                 { .key = KEYCODE_S, .state = NK_BINDINGS_KEY_STATE_RELEASE },
                 { .key = KEYCODE_D, .text = "d" },
                 { .key = KEYCODE_D, .state = NK_BINDINGS_KEY_STATE_RELEASE },
@@ -516,7 +536,7 @@ _nk_bindings_tests_func(NkBindingsTestFixture *fixture, gconstpointer user_data)
         slice->fixture = fixture;
         slice->scope = binding->scope;
         slice->trigger = binding->trigger;
-        ret = nk_bindings_add_binding(fixture->bindings, binding->scope, binding->binding, _nk_bindings_tests_check_callback, _nk_bindings_tests_trigger_callback, slice++, NULL, &error);
+        ret = nk_bindings_add_binding(fixture->bindings, binding->scope, binding->binding, _nk_bindings_tests_check_callback, _nk_bindings_tests_trigger_callback, slice++, NULL, binding->flags, &error);
 
         g_assert_true(ret);
         g_assert_no_error(error);
