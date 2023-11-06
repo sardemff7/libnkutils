@@ -14,16 +14,20 @@ if not meson.is_subproject()
     )
 endif
 
-nk_inc_bindings = [ nk_inc, include_directories('include') ]
-nk_deps_bindings = [ nk_xkbcommon, libnkutils ]
-nk_lib = static_library('nkutils-bindings-@0@'.format(major_version), files('src/bindings.c'),
-    c_args: nk_args,
-    objects: libnkutils_gtk_settings,
-    include_directories: nk_inc_bindings,
-    dependencies: nk_deps_bindings,
-    install: not meson.is_subproject(),
-)
-libnkutils_bindings = declare_dependency(link_with: nk_lib, include_directories: nk_inc_bindings, dependencies: nk_deps_bindings)
+if not nk_xkbcommon.found()
+    libnkutils_bindings = disabler()
+else
+    nk_inc_bindings = [ nk_inc, include_directories('include') ]
+    nk_deps_bindings = [ nk_xkbcommon, libnkutils ]
+    nk_lib = static_library('nkutils-bindings-@0@'.format(major_version), files('src/bindings.c'),
+        c_args: nk_args,
+        objects: libnkutils_gtk_settings,
+        include_directories: nk_inc_bindings,
+        dependencies: nk_deps_bindings,
+        install: not meson.is_subproject(),
+    )
+    libnkutils_bindings = declare_dependency(link_with: nk_lib, include_directories: nk_inc_bindings, dependencies: nk_deps_bindings)
+endif
 
 nk_xkeyboard_config = dependency('xkeyboard-config', required: false)
 if nk_xkeyboard_config.found()
