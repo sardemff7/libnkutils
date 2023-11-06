@@ -93,6 +93,6 @@ endif
 # Bindings module
 if get_option('bindings')
     nk_options += [ 'bindings=true' ]
-    nk_xkbcommon = dependency('xkbcommon', version: '>= 0.4.1', required: get_option('bindings'))
+    nk_xkbcommon = dependency('xkbcommon', version: '>= 0.4.1', required: false)
     subdir('bindings')
 endif
