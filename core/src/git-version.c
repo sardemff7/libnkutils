@@ -288,6 +288,8 @@ main(int argc, char *argv[])
     ret = 0;
 
 fail:
+    for ( gsize i = 0 ; i < NK_GIT_VERSION_NUM_TOKENS ; ++i )
+        g_free(data.data[i]);
     g_clear_error(&error);
     g_free(old_contents);
     g_free(new_contents);
